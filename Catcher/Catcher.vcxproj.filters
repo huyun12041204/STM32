@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="User">
+      <UniqueIdentifier>{43c457c0-857e-4851-a5e0-fa56f45b40ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pubuic">
+      <UniqueIdentifier>{71260337-44b8-4c70-8758-b559f0e44583}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{1c4d93fe-d824-4028-b4c5-1acb5640476f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FwLib">
+      <UniqueIdentifier>{be397004-6d98-48e0-b309-0c8b8d85de25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{4cb8d8b2-156b-4667-9de2-05f7b8adc72c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="user\main.c">
+      <Filter>User</Filter>
+    </ClCompile>
+    <ClCompile Include="user\stm32f10x_it.c">
+      <Filter>User</Filter>
+    </ClCompile>
+    <ClCompile Include="user\system_stm32f10x.c">
+      <Filter>User</Filter>
+    </ClCompile>
+    <ClCompile Include="Public\system.c">
+      <Filter>Pubuic</Filter>
+    </ClCompile>
+    <ClCompile Include="Public\SysTick.c">
+      <Filter>Pubuic</Filter>
+    </ClCompile>
+    <ClCompile Include="Public\usart.c">
+      <Filter>Pubuic</Filter>
+    </ClCompile>
+    <ClCompile Include="core\core_cm3.c">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\misc.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_adc.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_bkp.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_can.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_cec.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_crc.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_dac.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_dbgmcu.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_dma.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_exti.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_flash.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_fsmc.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_gpio.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_i2c.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_iwdg.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_pwr.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_rcc.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_rtc.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_sdio.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_spi.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_tim.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_usart.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="stm32f10x_fwlib\src\stm32f10x_wwdg.c">
+      <Filter>FwLib</Filter>
+    </ClCompile>
+    <ClCompile Include="app\led\led.c">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="app\gui\gui.c">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="app\button\button.c">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="app\tftlcd\tftlcd.c">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="app\tim\tim.c">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="app\adc\adc.c">
+      <Filter>App</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="core\startup_stm32f10x_hd.s">
+      <Filter>Core</Filter>
+    </None>
+  </ItemGroup>
+</Project>

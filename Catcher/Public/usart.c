@@ -70,7 +70,7 @@ void USART1_IRQHandler(void)                	//串口1中断服务程序
 	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //接收中断
 	{
 		r =USART_ReceiveData(USART1);//(USART1->DR);	//读取接收到的数据
-		USART_SendData(USART1,r);
+		USART_SendData(USART1,r+1);
 		while(USART_GetFlagStatus(USART1,USART_FLAG_TC) != SET);
 	} 
 	USART_ClearFlag(USART1,USART_FLAG_TC);

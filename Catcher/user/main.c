@@ -15,10 +15,57 @@
 #include "tim.h"
 #include "stm32f10x_it.h"
 #include "adc.h"
+#include "String.h"
 
-u16 j = 0;
-float temp;
-float temp1;
+u8 u8Digit2Ascii(u8 u8Digit,u8* u8Ascii)
+{
+
+	u8 u8temp[3];
+	u8 u8TDigit = u8Digit;
+	u8 i;
+
+	for ( i = 3; i > 0; i--)
+	{
+		u8temp[i-1]= u8TDigit % 10 + 0x30;
+		u8TDigit = u8TDigit / 10;
+	}
+
+	for (i = 0; i < 2; i++)
+	{
+		if (u8temp[i] != 0x30)
+			break;
+	}
+
+	memcpy(u8Ascii, u8temp+i, 3 - i);
+
+	return 3 - i;
+
+}
+
+u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
+{
+
+	u8 u8temp[5];
+	u16 TDigit = u16Digit;
+	u8 i;
+
+	for (i = 5; i > 0; i--)
+	{
+		u8temp[i - 1] = TDigit % 10 + 0x30;
+		TDigit = TDigit / 10;
+	}
+
+	for (i = 0; i < 5; i++)
+	{
+		if (u8temp[i] != 0x30)
+			break;
+	}
+
+	memcpy(u8Ascii, u8temp + i, 5 - i);
+
+	return 5 - i;
+
+}
 
 
 void clear_point(u16 hang)
@@ -156,39 +203,41 @@ int main(void)
 	time_enable();			//同步开始计数
 	ADC_Get_Value();
 	vpp = ADC_Get_Vpp();
-	while(1)
-	{	
-		for(j=index;j<index+250;j++)
-		{
-            temp = a[j] * 3300 / 4096  *  25 /vcc_div;
-			temp1 = a[j + 1] * 3300 / 4096 * 25 / vcc_div;
-			clear_point(j-index);	
-			if(temp>200)
-			{
-				temp=200;	
-			}
-			if(temp<0)
-			{
-				temp=0;	
-			}
-			if(temp1>200)
-			{
-				temp1=200;	
-			}
-			if(temp1<0)
-			{
-				temp1=0;	
-			}
-			lcd_huadian(j-index,temp,FRONT_COLOR);				
-			lcd_huaxian(j-index,temp,j-index+1,temp1,FRONT_COLOR);		
-			hua_wang();		 
-		}
-		vpp_buf[0]=vpp/10000+0x30;
-		vpp_buf[1]=vpp%10000/1000+0x30;		
-		vpp_buf[2]=vpp%10000%1000/100+0x30;
-		vpp_buf[3]=vpp%10000%1000%100/10+0x30;
-		vpp_buf[4]=vpp%10000%1000%100%10+0x30;
-		vpp_buf[5]='\0';
+	while (1)
+	{
+		//		for(j=index;j<index+250;j++)
+		//		{
+		//            temp = a[j] * 3300 / 4096  *  25 /vcc_div;
+		//			temp1 = a[j + 1] * 3300 / 4096 * 25 / vcc_div;
+		//			clear_point(j-index);	
+		//			if(temp>200)
+		//			{
+		//				temp=200;	
+		//			}
+		//			if(temp<0)
+		//			{
+		//				temp=0;	
+		//			}
+		//			if(temp1>200)
+		//			{
+		//				temp1=200;	
+		//			}
+		//			if(temp1<0)
+		//			{
+		//				temp1=0;	
+		//			}
+		//	//		lcd_huadian(j-index,temp,FRONT_COLOR);				
+		//	//		lcd_huaxian(j-index,temp,j-index+1,temp1,FRONT_COLOR);		
+		//	//		hua_wang();		 
+		//		}
+
+		vpp_buf[u16Digit2Ascii(vpp, vpp_buf)] = '\0';;
+		//vpp_buf[0]=vpp/10000+0x30;
+		//vpp_buf[1]=vpp%10000/1000+0x30;		
+		//vpp_buf[2]=vpp%10000%1000/100+0x30;
+		//vpp_buf[3]=vpp%10000%1000%100/10+0x30;
+		//vpp_buf[4]=vpp%10000%1000%100%10+0x30;
+		//vpp_buf[5]='\0';
 		GUI_Show12ASCII(164,224,vpp_buf,FRONT_COLOR,WHITE);		
 		ADC_Get_Value();
 		vpp = ADC_Get_Vpp();	

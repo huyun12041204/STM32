@@ -20,11 +20,13 @@ u16 vpp;
 uint64_t uTempCounter;
 
 
-uint16_t      uTimes[3][0x1000];
-uint8_t      bBit[0x1000];
-
-uint64_t  uCounter;
-
+int64_t      uTimes1[0x1000];
+uint8_t      bBit1[0x1000];
+uint16_t     uTimes2[0x1000];
+uint8_t      bBit2[0x1000];
+uint8_t  uCounter1;
+uint8_t  uCounter2;
+uint8_t   b1;
 				
 void set_io0(void)					  										
 {
@@ -33,6 +35,7 @@ void set_io0(void)
 	GPIO_ResetBits(GPIOA,GPIO_Pin_5);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_6);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_7);
+	
 
 }
 
@@ -453,30 +456,50 @@ void TIM3_IRQHandler(void)
 
 void EXTI0_IRQHandler(void)
 {
-	uTimes[2][uCounter]= TIM_GetCounter(TIM3);
-	uTimes[1][uCounter]= count%0x10000;
-	uTimes[0][uCounter]= count/0x10000;
-	bBit[uCounter] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+	if(EXTI_GetITStatus(EXTI_Line0)!=RESET)
+	{
+		if (b1 == 1)
+		{
+
+			uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM3);
+			bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOA, GPIO_PinSource0);
+			uCounter1++;
+		}
+		else
+		{
+			uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM3);
+			bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOA, GPIO_PinSource0);
+			uCounter2++;
+		}
+		EXTI_ClearITPendingBit(EXTI_Line0);
+	}
 
 
-	printf("%02x", bBit[uCounter]);
-	printf("%04x", uTimes[0][uCounter]);
-	printf("%04x", uTimes[1][uCounter]);
-	printf("%04x", uTimes[2][uCounter]);
-	
-	uCounter++;
 }
 void IO_Init(void)
 {
-
+	
+	
+	
+	GPIO_InitTypeDef GPIO_InitTypeStruct;
 	EXTI_InitTypeDef   EXTI_InitTypeStruct;
+	
+	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 	
+	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+	GPIO_SetBits(GPIOA, GPIO_Pin_0);
+	b1 = 1;
 
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);	 
 	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line0;
 	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Falling;
 	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitTypeStruct);
+	
+	
+	
 
 	//GPIO_ResetBits(GPIOA, GPIO_Pin_0);
 

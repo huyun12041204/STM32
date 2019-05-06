@@ -221,13 +221,18 @@ void gpio_init(void)
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_8;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 	
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPD;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+
 }
 int main(void)
 {	
+	extern uint16_t     uTimes1[0x1000];
+	extern uint8_t      bBit1[0x1000];
+	extern uint16_t     uTimes2[0x1000];
+	extern uint8_t      bBit2[0x1000];
+	extern uint8_t  uCounter1;
+	extern uint8_t  uCounter2;
+	extern uint8_t   b1;
+	uint16_t uTemp;
 	u8 clk_buf[6];
 	u8 vpp_buf[6];
 	u16 u16CLK = 0;
@@ -236,16 +241,19 @@ int main(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
 	USART1_Init(9600);		//初始化串口波特率为115200 
 	rcc_init();			   //外设时钟配置	
-	led_init();				
+//	led_init();				
 	TFTLCD_Init();
 	LCD_Clear(DARKBLUE);
 	nvic_init();		   // 中断优先级配置
 	gpio_init();		   	//外设io口配置
-	set_io0();
+//	set_io0();
 	//key_init();
 	//ADC1_Init();	//adc配置
-	IO_Init();
-	ADCx_Init();
+	b1 = 1;
+	uCounter1 =0 ;
+	uCounter2 = 0;
+
+	//ADCx_Init();
 	set_background();	 	 //初始化背景
 	 
 	time_init();			//定时器配置，测频率用的二个定时器
@@ -253,6 +261,9 @@ int main(void)
 	//ADC_Get_Value();
 	//vpp = ADC_Get_Vpp();
 
+	IO_Init();	
+	printf("Counter1:%08x  \n", uCounter1);
+	printf("Counter2:%08x  \n", uCounter2);
 	while(1)
 	{	
 		u16CLK = frequency/1000;
@@ -262,16 +273,42 @@ int main(void)
 
 		GUI_Show12ASCII(100, 20, "kHz", FRONT_COLOR, WHITE);
 
-		memset(vpp_buf, '\0', 6);
+//		memset(vpp_buf, '\0', 6);
+//	
+//		u16VPP = Get_ADCx_Value(ADC_Channel_2,100);
+//		vpp_buf[0] = u16VPP/1000 + 0x30;
+//		vpp_buf[1] = '.';
+//		vpp_buf[2] = u16VPP%1000/100+ 0x30;
+//		vpp_buf[3] = u16VPP%100/10+ 0x30;
+//		
+//		GUI_Show12ASCII(60,40,vpp_buf,FRONT_COLOR,WHITE);	
+//		GUI_Show12ASCII(100, 40, "v", FRONT_COLOR, WHITE);
+
 	
-		u16VPP = Get_ADCx_Value(ADC_Channel_2,100);
-		vpp_buf[0] = u16VPP/1000 + 0x30;
-		vpp_buf[1] = '.';
-		vpp_buf[2] = u16VPP%1000/100+ 0x30;
-		vpp_buf[3] = u16VPP%100/10+ 0x30;
-		
-		GUI_Show12ASCII(60,40,vpp_buf,FRONT_COLOR,WHITE);	
-		GUI_Show12ASCII(100, 40, "v", FRONT_COLOR, WHITE);
+		if (b1 == 1)
+		{
+			b1 = 0;
+
+			printf("Counter:%08x \n", uCounter1);
+			for (uTemp = 0 ; uTemp < uCounter1; uTemp++)
+			{
+				printf("clk:%08x,", uTimes1[uTemp]);
+				printf("bit:%02x;\n", bBit1[uTemp]);
+			}
+
+			uCounter1 = 0;
+		}
+		else
+		{
+			b1 = 1;
+			printf("Counter:%08x \n", uCounter2);
+			for (uTemp = 0; uTemp < uCounter2; uTemp++)
+			{
+				printf("clk:%08x,", uTimes2[uTemp]);
+				printf("bit:%02x\n", bBit2[uTemp]);
+			}
+			uCounter2 = 0;
+		}
 		
 	
 	}

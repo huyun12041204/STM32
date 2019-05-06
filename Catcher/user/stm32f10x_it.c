@@ -6,6 +6,7 @@
 #include "adc.h"
 #include "button.h"
 #include "led.h"
+#include "stdio.h" 
 u8 frequency_flag = 0;
 long int shao_miao_shu_du = 0;
 u8 num_shao_miao = 8;
@@ -15,6 +16,15 @@ u8 ad_flag = 1;
 float gao_pin_palus = 0;
 u16 vcc_div = 0;
 u16 vpp;
+
+uint64_t uTempCounter;
+
+
+uint16_t      uTimes[3][0x1000];
+uint8_t      bBit[0x1000];
+
+uint64_t  uCounter;
+
 				
 void set_io0(void)					  										
 {
@@ -23,6 +33,7 @@ void set_io0(void)
 	GPIO_ResetBits(GPIOA,GPIO_Pin_5);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_6);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_7);
+
 }
 
 void set_io1(void)					  										
@@ -181,21 +192,26 @@ void set_background(void)
 {
 	FRONT_COLOR = YELLOW;
     LCD_Clear(DARKBLUE);
-	
-//	LCD_DrawRectangleex(0,9,250,210,FRONT_COLOR);
-//	GUI_Line(0,110,250,110,FRONT_COLOR);
-//	GUI_Line(125,9,125,210,FRONT_COLOR);
-	FRONT_COLOR=RED;
+	FRONT_COLOR = RED;
+	GUI_Show12ASCII(20, 20, "Fre:", FRONT_COLOR, YELLOW);
+
+	GUI_Show12ASCII(20, 40, "VCC:", FRONT_COLOR, YELLOW);
+
+	//
+	//LCD_DrawRectangleex(0,9,250,210,FRONT_COLOR);
+	//GUI_Line(0,110,250,110,FRONT_COLOR);
+	//GUI_Line(125,9,125,210,FRONT_COLOR);
+	//FRONT_COLOR=RED;
 	//GUI_Box(260,10,260+57,210,YELLOW);
-//	LCD_DrawRectangleex(259,9,260+58,211,GREEN);
-	GUI_Show12ASCII(0,224,"www.prechin.com",FRONT_COLOR,WHITE);
-	GUI_Show12ASCII(204,224,"mv",FRONT_COLOR,WHITE);	
-	GUI_Show12ASCII(132,224,"vpp=",FRONT_COLOR,WHITE);
+	//LCD_DrawRectangleex(259,9,260+58,211,GREEN);
+	//GUI_Show12ASCII(0,224,"www.prechin.com",FRONT_COLOR,WHITE);
+	//GUI_Show12ASCII(204,224,"mv",FRONT_COLOR,WHITE);	
+	//GUI_Show12ASCII(132,224,"vpp=",FRONT_COLOR,WHITE);
 	//GUI_Show12ASCII(260,10,"us/div:",FRONT_COLOR,WHITE);
-//	GUI_Show12ASCII(260,90,"mv/div:",FRONT_COLOR,WHITE);
-	
-	GUI_Show12ASCII(260,140,"PA2:",FRONT_COLOR,YELLOW);	
-	GUI_Show12ASCII(260,160,"ADC1_In",FRONT_COLOR,YELLOW);
+	//GUI_Show12ASCII(260,90,"mv/div:",FRONT_COLOR,WHITE);
+	//
+	//GUI_Show12ASCII(260,140,"PA2:",FRONT_COLOR,YELLOW);	
+	//GUI_Show12ASCII(260,160,"ADC1_In",FRONT_COLOR,YELLOW);
 }
 
 void key_init(void)
@@ -223,8 +239,7 @@ void key_init(void)
 	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitTypeStruct);
 }
-
-void EXTI0_IRQHandler(void)
+/*void EXTI0_IRQHandler(void)
 {
 	u16 yan_se1;
 	delay_ms(10);
@@ -243,7 +258,7 @@ void EXTI0_IRQHandler(void)
 	}
 	EXTI_ClearITPendingBit(EXTI_Line0);
 	FRONT_COLOR = yan_se1;
-}	   
+}*/
 
 void EXTI3_IRQHandler(void)
 {
@@ -288,111 +303,142 @@ void EXTI4_IRQHandler(void)
 
 void TIM2_IRQHandler(void)
 {
-	u16 temple;
-	u16 yan_se;
-	u8 shao_miao_shu_du_buf[8],vcc_div_buf[8];
-	if(TIM_GetITStatus(TIM2, TIM_IT_Update))
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
 	{
-		TIM_Cmd(TIM3,DISABLE);
-		TIM_Cmd(TIM2,DISABLE);
-
-   	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-		temple = TIM_GetCounter(TIM3);
-		frequency = 65536*count+ temple;
-		frequency = frequency - frequency*(130.10/1000000);
-
-//		switch(num_shao_miao)
-//		{
-//			case 1:shao_miao_shu_du = 347;gao_pin_palus = 1;break;
-//			case 2:shao_miao_shu_du = 694;gao_pin_palus = 2;break;
-//			case 3:shao_miao_shu_du = 1736;gao_pin_palus = 5;break;
-//			case 4:shao_miao_shu_du = 3472;gao_pin_palus = 10;break;
-//			case 5:shao_miao_shu_du = 6944;gao_pin_palus = 20;break;
-//			case 6:shao_miao_shu_du = 17361;gao_pin_palus = 50;break;
-//			case 7:shao_miao_shu_du = 34722;gao_pin_palus = 100;break;	  
-//			case 8:shao_miao_shu_du = 50;break;		  //分界点，
-//			case 9:shao_miao_shu_du = 100;break;
-//			case 10:shao_miao_shu_du = 200;break;
-//			case 11:shao_miao_shu_du = 500;break;
-//			case 12:shao_miao_shu_du = 1000;break;
-//			case 13:shao_miao_shu_du = 2000;break;
-//			case 14:shao_miao_shu_du = 5000;break;
-//			case 15:shao_miao_shu_du = 10000;break;
-//			case 16:shao_miao_shu_du = 20000;break;
-//			case 17:shao_miao_shu_du = 50000;break;
-//			case 18:shao_miao_shu_du = 100000;break;
-//			case 19:shao_miao_shu_du = 200000;break;
-//			case 20:shao_miao_shu_du = 500000;break;
-//			case 21:shao_miao_shu_du = 1000000;break;
-
-
-//			default :break;
-//		}
-//		switch(num_fu_du)
-//		{
-//			case 1:vcc_div=1000;set_io1();break;
-//			case 2:vcc_div=950;set_io2();break;
-//			case 3:vcc_div=900;set_io3();break;
-//			case 4:vcc_div=800;set_io4();break;
-//			case 5:vcc_div=700;set_io5();break;
-//			case 6:vcc_div=600;set_io6();break;
-//			case 7:vcc_div=500;set_io7();break;
-//			case 8:vcc_div=400;set_io8();break;
-//			case 9:vcc_div=300;set_io9();break;
-//			case 10:vcc_div=200;set_io10();break;
-//			case 11:vcc_div=100;set_io11();break;
-//			default :break;
-//		}
-
-//		shao_miao_shu_du_buf[0]=shao_miao_shu_du/1000000+0x30;
-//		shao_miao_shu_du_buf[1]=shao_miao_shu_du%1000000/100000+0x30;
-//		shao_miao_shu_du_buf[2]=shao_miao_shu_du%1000000%100000/10000+0x30;
-//		shao_miao_shu_du_buf[3]=shao_miao_shu_du%1000000%100000%10000/1000+0x30;
-//		shao_miao_shu_du_buf[4]=shao_miao_shu_du%1000000%100000%10000%1000/100+0x30;
-//		shao_miao_shu_du_buf[5]=shao_miao_shu_du%1000000%100000%10000%1000%100/10+0x30;
-//		shao_miao_shu_du_buf[6]=shao_miao_shu_du%1000000%100000%10000%1000%100%10+0x30;
-//		shao_miao_shu_du_buf[7]='\0';
-
-//		vcc_div_buf[0]=vcc_div/1000000+0x30;
-//		vcc_div_buf[1]=vcc_div%1000000/100000+0x30;
-//		vcc_div_buf[2]=vcc_div%1000000%100000/10000+0x30;
-//		vcc_div_buf[3]=vcc_div%1000000%100000%10000/1000+0x30;
-//		vcc_div_buf[4]=vcc_div%1000000%100000%10000%1000/100+0x30;
-//		vcc_div_buf[5]=vcc_div%1000000%100000%10000%1000%100/10+0x30;
-//		vcc_div_buf[6]=vcc_div%1000000%100000%10000%1000%100%10+0x30;
-//		vcc_div_buf[7]='\0';
-//		yan_se = FRONT_COLOR;
-//		FRONT_COLOR=RED;
-//		if(frequency>20000)
-//		{
-//			frequency_flag = 1;	
-//		}
-//		else
-//		{
-//			frequency_flag = 0;			
-//		}
-
-		if(num_shao_miao>7)
+		//暂停中断
+	//	TIM_Cmd(TIM3, DISABLE);
+		TIM_Cmd(TIM2, DISABLE);
+		//清除TIM状态
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		//获取TIM3计数
+		if (uTempCounter != 0)
 		{
-			GUI_Show12ASCII(260,10,"us/div:",FRONT_COLOR,WHITE);
-		//	GUI_Show12ASCII(260,26,shao_miao_shu_du_buf,FRONT_COLOR,WHITE);
+			frequency = 65536 * count + TIM_GetCounter(TIM3) - uTempCounter;
 		}
-		else
-		{
-			GUI_Show12ASCII(260,10,"ns/div:",FRONT_COLOR,WHITE);
-		//	GUI_Show12ASCII(260,26,shao_miao_shu_du_buf,FRONT_COLOR,WHITE);
-		}
-	//	GUI_Show12ASCII(260,106,vcc_div_buf,FRONT_COLOR,WHITE);				
-		FRONT_COLOR=yan_se;
+		//else if (uTempCounter > INT64_MAX)
+		//{
+		//	uTempCounter =
 
-		count = 0;
-		TIM_SetCounter(TIM2,0);
-		TIM_SetCounter(TIM3,0);
 
-		TIM_Cmd(TIM2,ENABLE);
-     	TIM_Cmd(TIM3,ENABLE);
-		led0=!led0;	  
+		//}
+
+		//count = 0;
+		//TIM_SetCounter(TIM3, 0);
+		TIM_SetCounter(TIM2, 0);
+	
+		uTempCounter = 65536 * count + TIM_GetCounter(TIM3);
+		TIM_Cmd(TIM2, ENABLE);
+		//TIM_Cmd(TIM3, ENABLE);
+	
 	}
+
+
+
+	//u16 yan_se;
+	//u8 shao_miao_shu_du_buf[8],vcc_div_buf[8];
+	//if(TIM_GetITStatus(TIM2, TIM_IT_Update))
+	//{
+	//	TIM_Cmd(TIM3,DISABLE);
+	//	TIM_Cmd(TIM2,DISABLE);
+
+ //  		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+	//	temple = TIM_GetCounter(TIM3);
+	//	frequency = 65536*count+ temple;
+
+	//	frequency = frequency - frequency*(130.10/1000000);
+
+		//switch(num_shao_miao)
+		//{
+		//	case 1:shao_miao_shu_du = 347;gao_pin_palus = 1;break;
+		//	case 2:shao_miao_shu_du = 694;gao_pin_palus = 2;break;
+		//	case 3:shao_miao_shu_du = 1736;gao_pin_palus = 5;break;
+		//	case 4:shao_miao_shu_du = 3472;gao_pin_palus = 10;break;
+		//	case 5:shao_miao_shu_du = 6944;gao_pin_palus = 20;break;
+		//	case 6:shao_miao_shu_du = 17361;gao_pin_palus = 50;break;
+		//	case 7:shao_miao_shu_du = 34722;gao_pin_palus = 100;break;	  
+		//	case 8:shao_miao_shu_du = 50;break;		  //分界点，
+		//	case 9:shao_miao_shu_du = 100;break;
+		//	case 10:shao_miao_shu_du = 200;break;
+		//	case 11:shao_miao_shu_du = 500;break;
+		//	case 12:shao_miao_shu_du = 1000;break;
+		//	case 13:shao_miao_shu_du = 2000;break;
+		//	case 14:shao_miao_shu_du = 5000;break;
+		//	case 15:shao_miao_shu_du = 10000;break;
+		//	case 16:shao_miao_shu_du = 20000;break;
+		//	case 17:shao_miao_shu_du = 50000;break;
+		//	case 18:shao_miao_shu_du = 100000;break;
+		//	case 19:shao_miao_shu_du = 200000;break;
+		//	case 20:shao_miao_shu_du = 500000;break;
+		//	case 21:shao_miao_shu_du = 1000000;break;
+
+
+		//	default :break;
+		//}
+		//switch(num_fu_du)
+		//{
+		//	case 1:vcc_div=1000;set_io1();break;
+		//	case 2:vcc_div=950;set_io2();break;
+		//	case 3:vcc_div=900;set_io3();break;
+		//	case 4:vcc_div=800;set_io4();break;
+		//	case 5:vcc_div=700;set_io5();break;
+		//	case 6:vcc_div=600;set_io6();break;
+		//	case 7:vcc_div=500;set_io7();break;
+		//	case 8:vcc_div=400;set_io8();break;
+		//	case 9:vcc_div=300;set_io9();break;
+		//	case 10:vcc_div=200;set_io10();break;
+		//	case 11:vcc_div=100;set_io11();break;
+		//	default :break;
+		//}
+
+		//shao_miao_shu_du_buf[0]=shao_miao_shu_du/1000000+0x30;
+		//shao_miao_shu_du_buf[1]=shao_miao_shu_du%1000000/100000+0x30;
+		//shao_miao_shu_du_buf[2]=shao_miao_shu_du%1000000%100000/10000+0x30;
+		//shao_miao_shu_du_buf[3]=shao_miao_shu_du%1000000%100000%10000/1000+0x30;
+		//shao_miao_shu_du_buf[4]=shao_miao_shu_du%1000000%100000%10000%1000/100+0x30;
+		//shao_miao_shu_du_buf[5]=shao_miao_shu_du%1000000%100000%10000%1000%100/10+0x30;
+		//shao_miao_shu_du_buf[6]=shao_miao_shu_du%1000000%100000%10000%1000%100%10+0x30;
+		//shao_miao_shu_du_buf[7]='\0';
+
+		//vcc_div_buf[0]=vcc_div/1000000+0x30;
+		//vcc_div_buf[1]=vcc_div%1000000/100000+0x30;
+		//vcc_div_buf[2]=vcc_div%1000000%100000/10000+0x30;
+		//vcc_div_buf[3]=vcc_div%1000000%100000%10000/1000+0x30;
+		//vcc_div_buf[4]=vcc_div%1000000%100000%10000%1000/100+0x30;
+		//vcc_div_buf[5]=vcc_div%1000000%100000%10000%1000%100/10+0x30;
+		//vcc_div_buf[6]=vcc_div%1000000%100000%10000%1000%100%10+0x30;
+		//vcc_div_buf[7]='\0';
+		//yan_se = FRONT_COLOR;
+		//FRONT_COLOR=RED;
+		//if(frequency>20000)
+		//{
+		//	frequency_flag = 1;	
+		//}
+		//else
+		//{
+		//	frequency_flag = 0;			
+		//}
+
+		//if(num_shao_miao>7)
+		//{
+		////	GUI_Show12ASCII(260,10,"us/div:",FRONT_COLOR,WHITE);
+		//	//GUI_Show12ASCII(260,26,shao_miao_shu_du_buf,FRONT_COLOR,WHITE);
+		//}
+		//else
+		//{
+		//	GUI_Show12ASCII(260,10,"ns/div:",FRONT_COLOR,WHITE);
+		//	GUI_Show12ASCII(260,26,shao_miao_shu_du_buf,FRONT_COLOR,WHITE);
+		//}
+		//GUI_Show12ASCII(260,106,vcc_div_buf,FRONT_COLOR,WHITE);				
+		//FRONT_COLOR=yan_se;
+
+		//count = 0;
+		//TIM_SetCounter(TIM2,0);
+		//TIM_SetCounter(TIM3,0);
+
+		//TIM_Cmd(TIM2,ENABLE);
+  //   	TIM_Cmd(TIM3,ENABLE);
+		//led0=!led0;	  
+//	}
 }
 
 void TIM3_IRQHandler(void)
@@ -404,3 +450,36 @@ void TIM3_IRQHandler(void)
 		
 	}
 }
+
+void EXTI0_IRQHandler(void)
+{
+	uTimes[2][uCounter]= TIM_GetCounter(TIM3);
+	uTimes[1][uCounter]= count%0x10000;
+	uTimes[0][uCounter]= count/0x10000;
+	bBit[uCounter] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+
+
+	printf("%02x", bBit[uCounter]);
+	printf("%04x", uTimes[0][uCounter]);
+	printf("%04x", uTimes[1][uCounter]);
+	printf("%04x", uTimes[2][uCounter]);
+	
+	uCounter++;
+}
+void IO_Init(void)
+{
+
+	EXTI_InitTypeDef   EXTI_InitTypeStruct;
+
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);	 
+	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line0;
+	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitTypeStruct);
+
+	//GPIO_ResetBits(GPIOA, GPIO_Pin_0);
+
+}
+
+

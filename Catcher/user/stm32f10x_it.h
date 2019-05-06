@@ -25,6 +25,7 @@ void lcd_huaxian(u16 x1,u16 y1,u16 x2,u16 y2,u16 color);
 void hua_wang(void);
 void set_background(void);
 void key_init(void);
+void IO_Init(void);
 void set_io0(void);
 void set_io1(void);
 void set_io2(void);

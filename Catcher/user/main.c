@@ -15,6 +15,7 @@
 #include "tim.h"
 #include "stm32f10x_it.h"
 #include "adc.h"
+
 #include "String.h"
 
 u8 u8Digit2Ascii(u8 u8Digit,u8* u8Ascii)
@@ -67,6 +68,44 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 
 }
 
+//u8 floatDigit2Ascii(u16 fDigit, u8* u8Ascii)
+//{
+
+//	u8 u8temp[6];
+//	u16 TDigit = fDigit;
+//	u8 i;
+
+//	for (i = 6; i > 0; i--)
+//	{
+//		if(i == 4)
+//		{
+//			u8temp[4] = '.';
+//		}
+//		else
+//		{
+//			u8temp[i - 1] = TDigit % 10 + 0x30;
+//			TDigit = TDigit / 10;
+//		}
+//	}
+
+//	for (i = 0; i <3; i++)
+//	{
+//		if (u8temp[i] != 0x30)
+//			break;
+//	}
+
+//	memcpy(u8Ascii, u8temp + i, 6 - i);
+
+//	return 6 - i;
+
+//}
+
+
+
+u16 j = 0;
+float temp;
+float temp1;
+
 
 void clear_point(u16 hang)
 {
@@ -84,23 +123,23 @@ void nvic_init(void)
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
-	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI0_IRQn; 
+	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI0_IRQn;
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);				 
+	NVIC_Init(&NVIC_InitTypeStruct);
 
-	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn; 
+	/*NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 
-	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI4_IRQn; 
+	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI4_IRQn;
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);
+	NVIC_Init(&NVIC_InitTypeStruct);*/
 
 	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	0;
@@ -181,10 +220,18 @@ void gpio_init(void)
 	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc7
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+
+	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 	
+	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 }
 int main(void)
 {	
+	u8 clk_buf[6];
 	u8 vpp_buf[6];
+	u16 u16CLK = 0;
+	u16 u16VPP = 0;
 	SysTick_Init(72);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
 	USART1_Init(9600);		//初始化串口波特率为115200 
@@ -195,52 +242,38 @@ int main(void)
 	nvic_init();		   // 中断优先级配置
 	gpio_init();		   	//外设io口配置
 	set_io0();
-	key_init();
-	ADC1_Init();	//adc配置
+	//key_init();
+	//ADC1_Init();	//adc配置
+	IO_Init();
+	ADCx_Init();
 	set_background();	 	 //初始化背景
 	 
 	time_init();			//定时器配置，测频率用的二个定时器
 	time_enable();			//同步开始计数
-	ADC_Get_Value();
-	vpp = ADC_Get_Vpp();
-	while (1)
-	{
-		//		for(j=index;j<index+250;j++)
-		//		{
-		//            temp = a[j] * 3300 / 4096  *  25 /vcc_div;
-		//			temp1 = a[j + 1] * 3300 / 4096 * 25 / vcc_div;
-		//			clear_point(j-index);	
-		//			if(temp>200)
-		//			{
-		//				temp=200;	
-		//			}
-		//			if(temp<0)
-		//			{
-		//				temp=0;	
-		//			}
-		//			if(temp1>200)
-		//			{
-		//				temp1=200;	
-		//			}
-		//			if(temp1<0)
-		//			{
-		//				temp1=0;	
-		//			}
-		//	//		lcd_huadian(j-index,temp,FRONT_COLOR);				
-		//	//		lcd_huaxian(j-index,temp,j-index+1,temp1,FRONT_COLOR);		
-		//	//		hua_wang();		 
-		//		}
+	//ADC_Get_Value();
+	//vpp = ADC_Get_Vpp();
 
-		vpp_buf[u16Digit2Ascii(vpp, vpp_buf)] = '\0';;
-		//vpp_buf[0]=vpp/10000+0x30;
-		//vpp_buf[1]=vpp%10000/1000+0x30;		
-		//vpp_buf[2]=vpp%10000%1000/100+0x30;
-		//vpp_buf[3]=vpp%10000%1000%100/10+0x30;
-		//vpp_buf[4]=vpp%10000%1000%100%10+0x30;
-		//vpp_buf[5]='\0';
-		GUI_Show12ASCII(164,224,vpp_buf,FRONT_COLOR,WHITE);		
-		ADC_Get_Value();
-		vpp = ADC_Get_Vpp();	
+	while(1)
+	{	
+		u16CLK = frequency/1000;
+		clk_buf[u16Digit2Ascii(u16CLK, clk_buf)] = '\0';
+
+		GUI_Show12ASCII(60, 20, clk_buf, FRONT_COLOR, WHITE);
+
+		GUI_Show12ASCII(100, 20, "kHz", FRONT_COLOR, WHITE);
+
+		memset(vpp_buf, '\0', 6);
+	
+		u16VPP = Get_ADCx_Value(ADC_Channel_2,100);
+		vpp_buf[0] = u16VPP/1000 + 0x30;
+		vpp_buf[1] = '.';
+		vpp_buf[2] = u16VPP%1000/100+ 0x30;
+		vpp_buf[3] = u16VPP%100/10+ 0x30;
+		
+		GUI_Show12ASCII(60,40,vpp_buf,FRONT_COLOR,WHITE);	
+		GUI_Show12ASCII(100, 40, "v", FRONT_COLOR, WHITE);
+		
+	
 	}
 }
 

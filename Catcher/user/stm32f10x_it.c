@@ -26,7 +26,7 @@ uint16_t     uTimes2[0x1000];
 uint8_t      bBit2[0x1000];
 uint8_t  uCounter1;
 uint8_t  uCounter2;
-uint8_t   b1;
+uint8_t   u8Channel;
 				
 void set_io0(void)					  										
 {
@@ -265,7 +265,7 @@ void key_init(void)
 
 void EXTI3_IRQHandler(void)
 {
-	delay_ms(10);
+	/*delay_ms(10);
 	led1=0;
 	if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_3)==0)
 	{
@@ -274,11 +274,25 @@ void EXTI3_IRQHandler(void)
 			num_shao_miao++;
 			if(num_shao_miao == 22)num_shao_miao = 1;
 		}
-		else 
-		{	
+		else
+		{
 			num_fu_du++;
 			if(num_fu_du==12)num_fu_du=1;
 		}
+	}*/
+
+	if (u8Channel == 1)
+	{
+
+		uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM3);
+		bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3);
+		uCounter1++;
+	}
+	else
+	{
+		uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM3);
+		bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3);
+		uCounter2++;
 	}
 	EXTI_ClearITPendingBit(EXTI_Line3);
 }
@@ -456,40 +470,44 @@ void TIM3_IRQHandler(void)
 
 void EXTI0_IRQHandler(void)
 {
-	if(EXTI_GetITStatus(EXTI_Line0)!=RESET)
+	if((EXTI_GetITStatus(EXTI_Line0)!=RESET)&& 
+	   (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0)==0));
 	{
-		if (b1 == 1)
+
+		if (u8Channel == 1)
 		{
 
 			uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM3);
-			bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOA, GPIO_PinSource0);
+			bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
 			uCounter1++;
 		}
 		else
 		{
 			uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM3);
-			bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOA, GPIO_PinSource0);
+			bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
 			uCounter2++;
 		}
-		EXTI_ClearITPendingBit(EXTI_Line0);
+		
 	}
-
+	EXTI_ClearITPendingBit(EXTI_Line0);
 
 }
 void IO_Init(void)
 {
-	
+
 	
 	
 	GPIO_InitTypeDef GPIO_InitTypeStruct;
 	EXTI_InitTypeDef   EXTI_InitTypeStruct;
+
+	u8Channel = 1;
 	
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
 	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 	
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-	GPIO_SetBits(GPIOA, GPIO_Pin_0);
-	b1 = 1;
+	GPIO_ResetBits(GPIOA, GPIO_Pin_0);
+	
 
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);	 
 	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line0;
@@ -506,3 +524,41 @@ void IO_Init(void)
 }
 
 
+void IO3_Init(void)
+{
+
+
+
+	GPIO_InitTypeDef GPIO_InitTypeStruct;
+	EXTI_InitTypeDef   EXTI_InitTypeStruct;
+
+
+	u8Channel = 1;
+
+
+	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3  ;
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //外部中断的io配置
+	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
+
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource3);	
+	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line3;
+	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitTypeStruct);
+
+
+	//GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);
+	//EXTI_InitTypeStruct.EXTI_Line = EXTI_Line0;
+	//EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	//EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	//EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
+	//EXTI_Init(&EXTI_InitTypeStruct);
+
+
+
+
+	//GPIO_ResetBits(GPIOA, GPIO_Pin_0);
+
+}

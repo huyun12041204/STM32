@@ -231,12 +231,12 @@ int main(void)
 	extern uint8_t      bBit2[0x1000];
 	extern uint8_t  uCounter1;
 	extern uint8_t  uCounter2;
-	extern uint8_t   b1;
+	extern uint8_t   u8Channel;
 	uint16_t uTemp;
 	u8 clk_buf[6];
-	u8 vpp_buf[6];
+	//u8 vpp_buf[6];
 	u16 u16CLK = 0;
-	u16 u16VPP = 0;
+	//u16 u16VPP = 0;
 	SysTick_Init(72);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
 	USART1_Init(9600);		//初始化串口波特率为115200 
@@ -249,7 +249,7 @@ int main(void)
 //	set_io0();
 	//key_init();
 	//ADC1_Init();	//adc配置
-	b1 = 1;
+	u8Channel = 1;
 	uCounter1 =0 ;
 	uCounter2 = 0;
 
@@ -260,7 +260,7 @@ int main(void)
 	time_enable();			//同步开始计数
 	//ADC_Get_Value();
 	//vpp = ADC_Get_Vpp();
-
+	//IO3_Init();
 	IO_Init();	
 	printf("Counter1:%08x  \n", uCounter1);
 	printf("Counter2:%08x  \n", uCounter2);
@@ -273,23 +273,12 @@ int main(void)
 
 		GUI_Show12ASCII(100, 20, "kHz", FRONT_COLOR, WHITE);
 
-//		memset(vpp_buf, '\0', 6);
-//	
-//		u16VPP = Get_ADCx_Value(ADC_Channel_2,100);
-//		vpp_buf[0] = u16VPP/1000 + 0x30;
-//		vpp_buf[1] = '.';
-//		vpp_buf[2] = u16VPP%1000/100+ 0x30;
-//		vpp_buf[3] = u16VPP%100/10+ 0x30;
-//		
-//		GUI_Show12ASCII(60,40,vpp_buf,FRONT_COLOR,WHITE);	
-//		GUI_Show12ASCII(100, 40, "v", FRONT_COLOR, WHITE);
-
 	
-		if (b1 == 1)
+		if (u8Channel == 1)
 		{
-			b1 = 0;
+			u8Channel = 2;
 
-			printf("Counter:%08x \n", uCounter1);
+			//printf("Counter:%08x \n", uCounter1);
 			for (uTemp = 0 ; uTemp < uCounter1; uTemp++)
 			{
 				printf("clk:%08x,", uTimes1[uTemp]);
@@ -300,8 +289,8 @@ int main(void)
 		}
 		else
 		{
-			b1 = 1;
-			printf("Counter:%08x \n", uCounter2);
+			u8Channel = 1;
+			//printf("Counter:%08x \n", uCounter2);
 			for (uTemp = 0; uTemp < uCounter2; uTemp++)
 			{
 				printf("clk:%08x,", uTimes2[uTemp]);

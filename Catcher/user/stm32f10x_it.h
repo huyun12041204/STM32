@@ -26,6 +26,7 @@ void hua_wang(void);
 void set_background(void);
 void key_init(void);
 void IO_Init(void);
+void IO3_Init(void);
 void set_io0(void);
 void set_io1(void);
 void set_io2(void);

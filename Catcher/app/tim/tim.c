@@ -68,3 +68,57 @@ void time_enable(void)
 }
 
 
+//TIM3:PA0 TIM2 ETR
+void Tim2_Init()
+{
+	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
+	//配置 TIMx 外部时钟模式 2
+	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
+
+	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
+	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInitTypeStruct.TIM_Period = 0;
+	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitTypeStruct);
+
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+	TIM_Cmd(TIM2, DISABLE);	  //失能
+
+}
+
+//TIM3:PD2 TIM3 ETR
+void Tim3_Init()
+{
+	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
+	//配置 TIMx 外部时钟模式 2
+	TIM_ETRClockMode2Config(TIM3, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
+
+	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
+	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInitTypeStruct.TIM_Period = 65535;
+	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitTypeStruct);
+
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+	TIM_Cmd(TIM3, DISABLE);	  //失能
+
+
+}
+
+//TIM4：1S计时
+void Tim4_Init()
+{
+
+	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
+
+	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 7199;  //tim2  72000000 10us
+	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;//增计数
+	TIM_TimeBaseInitTypeStruct.TIM_Period = 9999 + 1;		//10000  100ms					  
+	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitTypeStruct);
+
+	TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
+	TIM_Cmd(TIM4, DISABLE);
+
+
+}

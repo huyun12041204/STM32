@@ -8,8 +8,9 @@ extern u32 frequency;
 
 void time_init(void);
 void time_enable(void);
+
 void time1_init(void);
 
 
-
+void Tim4_Init();
 #endif

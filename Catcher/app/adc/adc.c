@@ -66,7 +66,7 @@ void ADC1_Init(void)									 //adc初始化
 void ADC_Get_Value(void)								 //得到数据，
 {
 	
-	float gao_pin_period = 0;
+	//float gao_pin_period = 0;
 
 	//此处已经初始化了,为什么还要初始化?
 	//DMA1_Init();	                  

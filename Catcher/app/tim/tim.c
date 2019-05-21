@@ -55,17 +55,43 @@ void time1_init(void)
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);				  //这个是必须有的
 }
 
-void time_init(void)
-{
-	time2_init();  
-	time3_init();
-	time1_init();
-}
-void time_enable(void)
-{
-	TIM_Cmd(TIM2,ENABLE);
-	TIM_Cmd(TIM3,ENABLE);	
-}
+
+////TIM3:PA0 TIM2 ETR
+//void Tim2_Init()
+//{
+//	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
+//	//配置 TIMx 外部时钟模式 2
+//	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
+//
+//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
+//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Down;
+//	TIM_TimeBaseInitTypeStruct.TIM_Period = 0;
+//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+//	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitTypeStruct);
+//
+//	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+//	TIM_Cmd(TIM2, DISABLE);	  //失能
+//
+//}
+//
+////TIM3:PD2 TIM3 ETR
+//void Tim3_Init()
+//{
+//	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
+//	//配置 TIMx 外部时钟模式 2
+//	TIM_ETRClockMode2Config(TIM3, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
+//
+//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
+//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
+//	TIM_TimeBaseInitTypeStruct.TIM_Period = 65535;
+//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+//	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitTypeStruct);
+//
+//	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+//	TIM_Cmd(TIM3, DISABLE);	  //失能
+//
+//
+//}
 
 
 //TIM3:PA0 TIM2 ETR
@@ -75,9 +101,14 @@ void Tim2_Init()
 	//配置 TIMx 外部时钟模式 2
 	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 
+	//TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
+	//TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Down;
+	//TIM_TimeBaseInitTypeStruct.TIM_Period = 0;
+	//TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+
 	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
 	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInitTypeStruct.TIM_Period = 0;
+	TIM_TimeBaseInitTypeStruct.TIM_Period = 65535;
 	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitTypeStruct);
 
@@ -93,9 +124,15 @@ void Tim3_Init()
 	//配置 TIMx 外部时钟模式 2
 	TIM_ETRClockMode2Config(TIM3, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 
+	//TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
+	//TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
+	//TIM_TimeBaseInitTypeStruct.TIM_Period = 65535;
+	//TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+
+
 	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
-	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInitTypeStruct.TIM_Period = 65535;
+	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Down;
+	TIM_TimeBaseInitTypeStruct.TIM_Period = 1;
 	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitTypeStruct);
 
@@ -122,3 +159,23 @@ void Tim4_Init()
 
 
 }
+
+
+void Tim_Init(void)
+{
+
+	Tim2_Init();
+	Tim3_Init();
+	Tim4_Init();
+}
+void Tim_Enable(void)
+{
+	TIM_Cmd(TIM2,ENABLE);
+	TIM_Cmd(TIM3,ENABLE);	
+	TIM_Cmd(TIM4, ENABLE);
+//	TIM_Cmd(TIM3, ENABLE);
+}
+
+
+
+

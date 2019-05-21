@@ -68,44 +68,6 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 
 }
 
-//u8 floatDigit2Ascii(u16 fDigit, u8* u8Ascii)
-//{
-
-//	u8 u8temp[6];
-//	u16 TDigit = fDigit;
-//	u8 i;
-
-//	for (i = 6; i > 0; i--)
-//	{
-//		if(i == 4)
-//		{
-//			u8temp[4] = '.';
-//		}
-//		else
-//		{
-//			u8temp[i - 1] = TDigit % 10 + 0x30;
-//			TDigit = TDigit / 10;
-//		}
-//	}
-
-//	for (i = 0; i <3; i++)
-//	{
-//		if (u8temp[i] != 0x30)
-//			break;
-//	}
-
-//	memcpy(u8Ascii, u8temp + i, 6 - i);
-
-//	return 6 - i;
-
-//}
-
-
-
-u16 j = 0;
-float temp;
-float temp1;
-
 
 void clear_point(u16 hang)
 {
@@ -113,7 +75,7 @@ void clear_point(u16 hang)
 	FRONT_COLOR = DARKBLUE;
 	for(index_clear_lie = 0;index_clear_lie <201;index_clear_lie++)
 	{		
-		lcd_huadian(hang,index_clear_lie,FRONT_COLOR);
+	//	lcd_huadian(hang,index_clear_lie,FRONT_COLOR);
 	}	
 	FRONT_COLOR=RED;	
 }
@@ -152,14 +114,22 @@ void nvic_init(void)
 	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 3;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
+
+	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM4_IRQn;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 3;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitTypeStruct);
 }
 
 void rcc_init(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOE|RCC_APB2Periph_AFIO, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
@@ -188,7 +158,7 @@ void gpio_init(void)
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
 	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部中断的io配置
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_8;					 //定时器1触发ad转换的输出的那个口
@@ -234,34 +204,27 @@ int main(void)
 	extern uint8_t   u8Channel;
 	uint16_t uTemp;
 	u8 clk_buf[6];
-	//u8 vpp_buf[6];
 	u16 u16CLK = 0;
-	//u16 u16VPP = 0;
 	SysTick_Init(72);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
 	USART1_Init(9600);		//初始化串口波特率为115200 
 	rcc_init();			   //外设时钟配置	
-//	led_init();				
+			
 	TFTLCD_Init();
 	LCD_Clear(DARKBLUE);
 	nvic_init();		   // 中断优先级配置
 	gpio_init();		   	//外设io口配置
-//	set_io0();
-	//key_init();
-	//ADC1_Init();	//adc配置
+
 	u8Channel = 1;
 	uCounter1 =0 ;
 	uCounter2 = 0;
 
-	//ADCx_Init();
+
 	set_background();	 	 //初始化背景
 	 
-	time_init();			//定时器配置，测频率用的二个定时器
-	time_enable();			//同步开始计数
-	//ADC_Get_Value();
-	//vpp = ADC_Get_Vpp();
-	//IO3_Init();
-	IO_Init();	
+	Tim_Init();			//定时器配置，测频率用的二个定时器
+	Tim_Enable();			//同步开始计数
+	
 	printf("Counter1:%08x  \n", uCounter1);
 	printf("Counter2:%08x  \n", uCounter2);
 	while(1)

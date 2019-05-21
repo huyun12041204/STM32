@@ -149,48 +149,6 @@ void set_io11(void)
 	GPIO_SetBits(GPIOA,GPIO_Pin_6);     	   //GPIO_ResetBits
 }
 
-
-
-void lcd_huadian(u16 a,u16 b,u16 color)
-{							    
-	GUI_Dot(a,210-b,color);
-}
-
-void lcd_huaxian(u16 x1,u16 y1,u16 x2,u16 y2,u16 color)
-{
-	GUI_Line(x1,210-y1,x2,210-y2,color);	
-}
-
-void hua_wang(void)
-{
-	u8 index_y = 0;
-	u8 index_hang = 0;	
-
-    FRONT_COLOR = YELLOW;
-	LCD_DrawRectangleex(0,9,250,210,FRONT_COLOR);
-	GUI_Line(0,110,250,110,FRONT_COLOR);
-	GUI_Line(125,9,125,210,FRONT_COLOR);
-
-	FRONT_COLOR = GRAY;		
-	for(index_hang = 0;index_hang<250;index_hang = index_hang + 25)
-	{
-		for(index_y = 0;index_y<200;index_y = index_y +5)
-		{
-			lcd_huadian(index_hang,index_y,FRONT_COLOR);	
-		}
-	}
-	
-	for(index_hang = 0;index_hang<200;index_hang = index_hang + 25)
-	{
-		for(index_y = 0;index_y<250;index_y = index_y +5)
-		{
-			lcd_huadian(index_y,index_hang,FRONT_COLOR);	
-		}
-	}
-
-	FRONT_COLOR=RED;
-}
-
 void set_background(void)
 {
 	FRONT_COLOR = YELLOW;
@@ -217,348 +175,93 @@ void set_background(void)
 	//GUI_Show12ASCII(260,160,"ADC1_In",FRONT_COLOR,YELLOW);
 }
 
-void key_init(void)
-{
-	EXTI_InitTypeDef   EXTI_InitTypeStruct;
 
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);	 //K_UP
-	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line0;
-	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitTypeStruct);
-
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource3);	   //K_DOWN
-	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line3;
-	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Falling;
-	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitTypeStruct);
-
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource4);	  //K_RIGHT
-	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line4;
-	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Falling;
-	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitTypeStruct);
-}
-/*void EXTI0_IRQHandler(void)
-{
-	u16 yan_se1;
-	delay_ms(10);
-	yan_se1 = FRONT_COLOR;
-	FRONT_COLOR=RED;
-	if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0))
-	{
-		mode++;
-		led0=0;
-		if(mode == 2)mode = 0;
-		if(mode == 0)
-		{
-			GUI_Show12ASCII(260,224,"f",FRONT_COLOR,WHITE);
-		}
-		else GUI_Show12ASCII(260,224,"v",FRONT_COLOR,WHITE);
-	}
-	EXTI_ClearITPendingBit(EXTI_Line0);
-	FRONT_COLOR = yan_se1;
-}*/
-
-void EXTI3_IRQHandler(void)
-{
-	/*delay_ms(10);
-	led1=0;
-	if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_3)==0)
-	{
-		if(mode == 0)
-		{
-			num_shao_miao++;
-			if(num_shao_miao == 22)num_shao_miao = 1;
-		}
-		else
-		{
-			num_fu_du++;
-			if(num_fu_du==12)num_fu_du=1;
-		}
-	}*/
-
-	if (u8Channel == 1)
-	{
-
-		uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM3);
-		bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3);
-		uCounter1++;
-	}
-	else
-	{
-		uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM3);
-		bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3);
-		uCounter2++;
-	}
-	EXTI_ClearITPendingBit(EXTI_Line3);
-}
-
-void EXTI4_IRQHandler(void)
-{
-	delay_ms(10);
-	led2=0;
-	if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_4)==0)
-	{
-		if(mode == 0)
-		{
-			num_shao_miao--;
-			if(num_shao_miao == 0)num_shao_miao = 21;
-		}
-		else 
-		{
-					
-			num_fu_du--;
-			if(num_fu_du==0)num_fu_du=11;
-		}
-	}
-	EXTI_ClearITPendingBit(EXTI_Line4);
-}
 
 void TIM2_IRQHandler(void)
 {
+	
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
 	{
-		//暂停中断
-	//	TIM_Cmd(TIM3, DISABLE);
-		TIM_Cmd(TIM2, DISABLE);
-		//清除TIM状态
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-		//获取TIM3计数
-		if (uTempCounter != 0)
-		{
-			frequency = 65536 * count + TIM_GetCounter(TIM3) - uTempCounter;
-		}
-		//else if (uTempCounter > INT64_MAX)
-		//{
-		//	uTempCounter =
+		count++;
 
-
-		//}
-
-		//count = 0;
-		//TIM_SetCounter(TIM3, 0);
-		TIM_SetCounter(TIM2, 0);
-	
-		uTempCounter = 65536 * count + TIM_GetCounter(TIM3);
-		TIM_Cmd(TIM2, ENABLE);
-		//TIM_Cmd(TIM3, ENABLE);
-	
 	}
-
-
-
-	//u16 yan_se;
-	//u8 shao_miao_shu_du_buf[8],vcc_div_buf[8];
-	//if(TIM_GetITStatus(TIM2, TIM_IT_Update))
+	//if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
 	//{
-	//	TIM_Cmd(TIM3,DISABLE);
-	//	TIM_Cmd(TIM2,DISABLE);
 
- //  		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-	//	temple = TIM_GetCounter(TIM3);
-	//	frequency = 65536*count+ temple;
+	//	if (u8Channel == 1)
+	//	{
 
-	//	frequency = frequency - frequency*(130.10/1000000);
+	//		uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM3);
+	//		bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+	//		uCounter1++;
+	//	}
+	//	else
+	//	{
+	//		uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM3);
+	//		bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+	//		uCounter2++;
+	//	}
 
-		//switch(num_shao_miao)
-		//{
-		//	case 1:shao_miao_shu_du = 347;gao_pin_palus = 1;break;
-		//	case 2:shao_miao_shu_du = 694;gao_pin_palus = 2;break;
-		//	case 3:shao_miao_shu_du = 1736;gao_pin_palus = 5;break;
-		//	case 4:shao_miao_shu_du = 3472;gao_pin_palus = 10;break;
-		//	case 5:shao_miao_shu_du = 6944;gao_pin_palus = 20;break;
-		//	case 6:shao_miao_shu_du = 17361;gao_pin_palus = 50;break;
-		//	case 7:shao_miao_shu_du = 34722;gao_pin_palus = 100;break;	  
-		//	case 8:shao_miao_shu_du = 50;break;		  //分界点，
-		//	case 9:shao_miao_shu_du = 100;break;
-		//	case 10:shao_miao_shu_du = 200;break;
-		//	case 11:shao_miao_shu_du = 500;break;
-		//	case 12:shao_miao_shu_du = 1000;break;
-		//	case 13:shao_miao_shu_du = 2000;break;
-		//	case 14:shao_miao_shu_du = 5000;break;
-		//	case 15:shao_miao_shu_du = 10000;break;
-		//	case 16:shao_miao_shu_du = 20000;break;
-		//	case 17:shao_miao_shu_du = 50000;break;
-		//	case 18:shao_miao_shu_du = 100000;break;
-		//	case 19:shao_miao_shu_du = 200000;break;
-		//	case 20:shao_miao_shu_du = 500000;break;
-		//	case 21:shao_miao_shu_du = 1000000;break;
+	//}
 
-
-		//	default :break;
-		//}
-		//switch(num_fu_du)
-		//{
-		//	case 1:vcc_div=1000;set_io1();break;
-		//	case 2:vcc_div=950;set_io2();break;
-		//	case 3:vcc_div=900;set_io3();break;
-		//	case 4:vcc_div=800;set_io4();break;
-		//	case 5:vcc_div=700;set_io5();break;
-		//	case 6:vcc_div=600;set_io6();break;
-		//	case 7:vcc_div=500;set_io7();break;
-		//	case 8:vcc_div=400;set_io8();break;
-		//	case 9:vcc_div=300;set_io9();break;
-		//	case 10:vcc_div=200;set_io10();break;
-		//	case 11:vcc_div=100;set_io11();break;
-		//	default :break;
-		//}
-
-		//shao_miao_shu_du_buf[0]=shao_miao_shu_du/1000000+0x30;
-		//shao_miao_shu_du_buf[1]=shao_miao_shu_du%1000000/100000+0x30;
-		//shao_miao_shu_du_buf[2]=shao_miao_shu_du%1000000%100000/10000+0x30;
-		//shao_miao_shu_du_buf[3]=shao_miao_shu_du%1000000%100000%10000/1000+0x30;
-		//shao_miao_shu_du_buf[4]=shao_miao_shu_du%1000000%100000%10000%1000/100+0x30;
-		//shao_miao_shu_du_buf[5]=shao_miao_shu_du%1000000%100000%10000%1000%100/10+0x30;
-		//shao_miao_shu_du_buf[6]=shao_miao_shu_du%1000000%100000%10000%1000%100%10+0x30;
-		//shao_miao_shu_du_buf[7]='\0';
-
-		//vcc_div_buf[0]=vcc_div/1000000+0x30;
-		//vcc_div_buf[1]=vcc_div%1000000/100000+0x30;
-		//vcc_div_buf[2]=vcc_div%1000000%100000/10000+0x30;
-		//vcc_div_buf[3]=vcc_div%1000000%100000%10000/1000+0x30;
-		//vcc_div_buf[4]=vcc_div%1000000%100000%10000%1000/100+0x30;
-		//vcc_div_buf[5]=vcc_div%1000000%100000%10000%1000%100/10+0x30;
-		//vcc_div_buf[6]=vcc_div%1000000%100000%10000%1000%100%10+0x30;
-		//vcc_div_buf[7]='\0';
-		//yan_se = FRONT_COLOR;
-		//FRONT_COLOR=RED;
-		//if(frequency>20000)
-		//{
-		//	frequency_flag = 1;	
-		//}
-		//else
-		//{
-		//	frequency_flag = 0;			
-		//}
-
-		//if(num_shao_miao>7)
-		//{
-		////	GUI_Show12ASCII(260,10,"us/div:",FRONT_COLOR,WHITE);
-		//	//GUI_Show12ASCII(260,26,shao_miao_shu_du_buf,FRONT_COLOR,WHITE);
-		//}
-		//else
-		//{
-		//	GUI_Show12ASCII(260,10,"ns/div:",FRONT_COLOR,WHITE);
-		//	GUI_Show12ASCII(260,26,shao_miao_shu_du_buf,FRONT_COLOR,WHITE);
-		//}
-		//GUI_Show12ASCII(260,106,vcc_div_buf,FRONT_COLOR,WHITE);				
-		//FRONT_COLOR=yan_se;
-
-		//count = 0;
-		//TIM_SetCounter(TIM2,0);
-		//TIM_SetCounter(TIM3,0);
-
-		//TIM_Cmd(TIM2,ENABLE);
-  //   	TIM_Cmd(TIM3,ENABLE);
-		//led0=!led0;	  
-//	}
+	//TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 }
 
 void TIM3_IRQHandler(void)
 {
-	if(TIM_GetITStatus(TIM3, TIM_IT_Update))
-	{
-   		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-		count++;
-		
-	}
-}
+	//if(TIM_GetITStatus(TIM3, TIM_IT_Update))
+	//{
+ //  		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	//	count++;
+	//	
+	//}
 
-void EXTI0_IRQHandler(void)
-{
-	if((EXTI_GetITStatus(EXTI_Line0)!=RESET)&& 
-	   (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0)==0));
+
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
 	{
 
 		if (u8Channel == 1)
 		{
-
-			uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM3);
+			
+			uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM2);
 			bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
+
+		//	printf("clk:%08x,", uTimes1[uCounter1]);
 			uCounter1++;
 		}
 		else
 		{
-			uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM3);
+			uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM2);
 			bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
 			uCounter2++;
 		}
-		
+
 	}
-	EXTI_ClearITPendingBit(EXTI_Line0);
 
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 }
-void IO_Init(void)
+
+void TIM4_IRQHandler(void)
 {
+	if (TIM_GetITStatus(TIM4, TIM_IT_Update))
+	{
 
-	
-	
-	GPIO_InitTypeDef GPIO_InitTypeStruct;
-	EXTI_InitTypeDef   EXTI_InitTypeStruct;
+		TIM_Cmd(TIM4, DISABLE);
+		//清除TIM状态
+		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+		//获取TIM3计数
+		if (uTempCounter != 0)
+		{
+			frequency = 65536 * count + TIM_GetCounter(TIM2) - uTempCounter;
+		}
 
-	u8Channel = 1;
-	
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 	
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-	GPIO_ResetBits(GPIOA, GPIO_Pin_0);
-	
+		TIM_SetCounter(TIM4, 0);
 
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);	 
-	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line0;
-	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Falling;
-	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitTypeStruct);
-	
-	
-	
+		uTempCounter = 65536 * count + TIM_GetCounter(TIM2);
+		TIM_Cmd(TIM4, ENABLE);
 
-	//GPIO_ResetBits(GPIOA, GPIO_Pin_0);
-
+	}
 }
 
 
-void IO3_Init(void)
-{
-
-
-
-	GPIO_InitTypeDef GPIO_InitTypeStruct;
-	EXTI_InitTypeDef   EXTI_InitTypeStruct;
-
-
-	u8Channel = 1;
-
-
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3  ;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //外部中断的io配置
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
-
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource3);	
-	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line3;
-	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Falling;
-	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitTypeStruct);
-
-
-	//GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);
-	//EXTI_InitTypeStruct.EXTI_Line = EXTI_Line0;
-	//EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	//EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-	//EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
-	//EXTI_Init(&EXTI_InitTypeStruct);
-
-
-
-
-	//GPIO_ResetBits(GPIOA, GPIO_Pin_0);
-
-}

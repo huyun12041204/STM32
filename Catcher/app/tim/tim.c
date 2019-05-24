@@ -165,13 +165,13 @@ void Tim_Init(void)
 {
 
 	Tim2_Init();
-	Tim3_Init();
+	//Tim3_Init();
 	Tim4_Init();
 }
 void Tim_Enable(void)
 {
 	TIM_Cmd(TIM2,ENABLE);
-	TIM_Cmd(TIM3,ENABLE);	
+//	TIM_Cmd(TIM3,ENABLE);	
 	TIM_Cmd(TIM4, ENABLE);
 //	TIM_Cmd(TIM3, ENABLE);
 }

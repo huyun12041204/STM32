@@ -18,6 +18,13 @@
 
 #include "String.h"
 
+
+extern uint8_t      u8Channel;
+extern uint64_t      u64CLK[1000][2];
+extern uint8_t      bBit[1000][2];
+extern uint8_t      u8Counter[2];
+extern uint64_t     u64StartCLK;
+
 u8 u8Digit2Ascii(u8 u8Digit,u8* u8Ascii)
 {
 
@@ -105,19 +112,19 @@ void nvic_init(void)
 
 	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 3;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 
 	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM3_IRQn; 
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 3;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 
 	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM4_IRQn;
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 3;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 }
@@ -193,18 +200,61 @@ void gpio_init(void)
 
 
 }
+
+void ShowCLK2TFT(u16 u16CLK)
+{
+	u8 clk_buf[6];
+
+	clk_buf[u16Digit2Ascii(u16CLK, clk_buf)] = '\0';
+
+	GUI_Show12ASCII(60, 20, clk_buf, FRONT_COLOR, WHITE);
+
+	GUI_Show12ASCII(100, 20, "kHz", FRONT_COLOR, WHITE);
+
+}
+
+void InitCLKList()
+{
+	//u8Counter[0] = 0;
+	//u8Counter[1] = 0;
+
+	//设置CLK计数器0
+	memset(u8Counter, 0, 2);
+	//设置通道0
+	u8Channel = 0;
+
+	u64StartCLK = 0;
+
+	memset(u64CLK, 0, 1000);
+	count = 0;
+	//memset(bBit, 0,   sizeof(bBit));
+}
+
+void SendChannelData(uint8_t      _Channel)
+{
+	u8 ii;
+	
+	//if( u8Counter[_Channel] == 0)
+	//	return;
+
+	printf("Channel:%d,", _Channel);
+
+	printf("DataNumber :%d,", u8Counter[_Channel]);
+
+	for (ii = 0; ii < u8Counter[_Channel]; ii++)
+	{
+		printf("clk:%llu,", u64CLK[ii][_Channel]);
+		printf("bit:%x;\n", bBit[ii][_Channel]);
+	}
+
+	u8Counter[_Channel] = 0;
+
+}
+
 int main(void)
 {	
-	extern uint16_t     uTimes1[0x1000];
-	extern uint8_t      bBit1[0x1000];
-	extern uint16_t     uTimes2[0x1000];
-	extern uint8_t      bBit2[0x1000];
-	extern uint8_t  uCounter1;
-	extern uint8_t  uCounter2;
-	extern uint8_t   u8Channel;
-	uint16_t uTemp;
-	u8 clk_buf[6];
-	u16 u16CLK = 0;
+	u8 Start = 0;
+
 	SysTick_Init(72);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
 	USART1_Init(9600);		//初始化串口波特率为115200 
@@ -215,52 +265,50 @@ int main(void)
 	nvic_init();		   // 中断优先级配置
 	gpio_init();		   	//外设io口配置
 
-	u8Channel = 1;
-	uCounter1 =0 ;
-	uCounter2 = 0;
-
 
 	set_background();	 	 //初始化背景
 	 
 	Tim_Init();			//定时器配置，测频率用的二个定时器
+
+	InitCLKList();
+
 	Tim_Enable();			//同步开始计数
 	
-	printf("Counter1:%08x  \n", uCounter1);
-	printf("Counter2:%08x  \n", uCounter2);
+
+
 	while(1)
 	{	
-		u16CLK = frequency/1000;
-		clk_buf[u16Digit2Ascii(u16CLK, clk_buf)] = '\0';
 
-		GUI_Show12ASCII(60, 20, clk_buf, FRONT_COLOR, WHITE);
+		ShowCLK2TFT(frequency/1000);
 
-		GUI_Show12ASCII(100, 20, "kHz", FRONT_COLOR, WHITE);
-
-	
-		if (u8Channel == 1)
+		if ((Start == 0)&& (frequency >1000000))
 		{
-			u8Channel = 2;
-
-			//printf("Counter:%08x \n", uCounter1);
-			for (uTemp = 0 ; uTemp < uCounter1; uTemp++)
-			{
-				printf("clk:%08x,", uTimes1[uTemp]);
-				printf("bit:%02x;\n", bBit1[uTemp]);
-			}
-
-			uCounter1 = 0;
+            Tim3_Init();
+			TIM_Cmd(TIM3,ENABLE);	
 		}
-		else
+
+
+		if (u8Counter[u8Channel]!=0)
 		{
-			u8Channel = 1;
-			//printf("Counter:%08x \n", uCounter2);
-			for (uTemp = 0; uTemp < uCounter2; uTemp++)
+			if (u8Channel == 0)
 			{
-				printf("clk:%08x,", uTimes2[uTemp]);
-				printf("bit:%02x\n", bBit2[uTemp]);
+				u8Channel = 1;
+				SendChannelData(0);
 			}
-			uCounter2 = 0;
+			else
+			{
+				u8Channel = 0;
+				SendChannelData(1);
+
+			}
 		}
+
+
+
+
+		//u8Channel = !u8Channel;
+		//SendChannelData(!u8Channel);
+
 		
 	
 	}

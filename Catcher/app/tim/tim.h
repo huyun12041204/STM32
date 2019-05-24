@@ -11,6 +11,7 @@ extern u32 frequency;
 //
 //void time1_init(void);
 
+void Tim3_Init(void);
 //void Tim4_Init();
 void Tim_Init(void);
 void Tim_Enable(void);

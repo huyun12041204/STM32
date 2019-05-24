@@ -17,16 +17,22 @@ float gao_pin_palus = 0;
 u16 vcc_div = 0;
 u16 vpp;
 
-uint64_t uTempCounter;
+uint64_t u64StartCLK;
 
+uint8_t      u8Channel;
+uint64_t     u64CLK[1000][2];
+uint8_t      bBit[1000][2];
+uint8_t      u8Counter[2];
 
-int64_t      uTimes1[0x1000];
-uint8_t      bBit1[0x1000];
-uint16_t     uTimes2[0x1000];
-uint8_t      bBit2[0x1000];
-uint8_t  uCounter1;
-uint8_t  uCounter2;
-uint8_t   u8Channel;
+//int64_t      uTimes1[0x1000][2];
+//uint8_t      bBit1[0x1000];
+//uint16_t     uTimes2[0x1000];
+//uint8_t      bBit2[0x1000];
+//uint8_t  uCounter1;
+//uint8_t  uCounter2;
+
+uint16_t ETU = 372;
+
 				
 void set_io0(void)					  										
 {
@@ -175,8 +181,75 @@ void set_background(void)
 	//GUI_Show12ASCII(260,160,"ADC1_In",FRONT_COLOR,YELLOW);
 }
 
+int64_t GetCLKNumber()
+{
+	return  count * 0xFFFF + TIM_GetCounter(TIM2);
+}
+
+void SaveCurrentCLK(u8 _Channel)
+{
+	u8 u8bit = 0;
+	uint64_t u64BYTES = 0;
+	uint64_t u64BYTET = 0;
 
 
+	do 
+	{
+		
+		
+	
+		
+		u64BYTET = GetCLKNumber();
+	
+		
+		printf("--:%llu,", u64BYTET);
+		if(u64BYTES == 0)
+			u64BYTES = u64BYTET;
+		
+		if (u64BYTET >= (u64BYTES + u8bit*ETU))
+		{
+			u64CLK[u8Counter[_Channel]][_Channel] = u64BYTET;
+			bBit[u8Counter[_Channel]][_Channel]   = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_2);
+
+			u8Counter[_Channel]++;
+			u8bit++;
+		}
+
+
+
+
+
+	} while (u8bit<11);
+
+
+	//u64CLK[u8Counter[_Channel]][_Channel] = count;
+	//bBit  [u8Counter[_Channel]][_Channel] = GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_2);
+	//u8Counter[_Channel]++;
+}
+
+
+//void GetETUData(u8 WWT)
+//{
+//
+//	u8 __WT;
+//
+//	uint64_t StartCLK = GetCLKNumber();
+//
+//
+//
+//
+//
+//	__WT = 0;
+//
+//
+//	ETU
+//
+//
+//
+//}
+
+
+//TIM2 作为CLK计数器
 void TIM2_IRQHandler(void)
 {
 	
@@ -186,62 +259,23 @@ void TIM2_IRQHandler(void)
 		count++;
 
 	}
-	//if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
-	//{
-
-	//	if (u8Channel == 1)
-	//	{
-
-	//		uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM3);
-	//		bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
-	//		uCounter1++;
-	//	}
-	//	else
-	//	{
-	//		uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM3);
-	//		bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
-	//		uCounter2++;
-	//	}
-
-	//}
-
-	//TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+	
 }
 
 void TIM3_IRQHandler(void)
 {
-	//if(TIM_GetITStatus(TIM3, TIM_IT_Update))
-	//{
- //  		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-	//	count++;
-	//	
-	//}
 
-
-	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update))
 	{
+		TIM_Cmd(TIM3, DISABLE);
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+		SaveCurrentCLK(u8Channel);
 
-		if (u8Channel == 1)
-		{
-			
-			uTimes1[uCounter1] = count * 0xFFFF + TIM_GetCounter(TIM2);
-			bBit1[uCounter1] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
-
-		//	printf("clk:%08x,", uTimes1[uCounter1]);
-			uCounter1++;
-		}
-		else
-		{
-			uTimes2[uCounter2] = count * 0xFFFF + TIM_GetCounter(TIM2);
-			bBit2[uCounter2] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
-			uCounter2++;
-		}
-
+		TIM_Cmd(TIM3, ENABLE);
 	}
-
-	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	
 }
-
+	
 void TIM4_IRQHandler(void)
 {
 	if (TIM_GetITStatus(TIM4, TIM_IT_Update))
@@ -251,14 +285,12 @@ void TIM4_IRQHandler(void)
 		//清除TIM状态
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 		//获取TIM3计数
-		if (uTempCounter != 0)
-		{
-			frequency = 65536 * count + TIM_GetCounter(TIM2) - uTempCounter;
-		}
+
+		frequency = GetCLKNumber() - u64StartCLK;
 
 		TIM_SetCounter(TIM4, 0);
-
-		uTempCounter = 65536 * count + TIM_GetCounter(TIM2);
+		u64StartCLK = GetCLKNumber();
+		//printf("%llu::",u64StartCLK);
 		TIM_Cmd(TIM4, ENABLE);
 
 	}

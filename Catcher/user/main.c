@@ -25,6 +25,10 @@ extern uint8_t      bBit[1000][2];
 extern uint8_t      u8Counter[2];
 extern uint64_t     u64StartCLK;
 
+
+extern u8       u8EXIT_Type ;
+extern uint64_t u64CurCLK   ;
+
 u8 u8Digit2Ascii(u8 u8Digit,u8* u8Ascii)
 {
 
@@ -63,7 +67,8 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 		TDigit = TDigit / 10;
 	}
 
-	for (i = 0; i < 5; i++)
+
+	for (i = 0; i < 4; i++)
 	{
 		if (u8temp[i] != 0x30)
 			break;
@@ -92,11 +97,11 @@ void nvic_init(void)
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
-	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI0_IRQn;
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);
+//	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI0_IRQn;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitTypeStruct);
 
 	/*NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
@@ -116,14 +121,26 @@ void nvic_init(void)
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 
-	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM3_IRQn; 
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM3_IRQn; 
+//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitTypeStruct);
+
+	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM4_IRQn;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
+	
+	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI2_IRQn;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitTypeStruct);
 
-	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM4_IRQn;
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
@@ -131,72 +148,86 @@ void nvic_init(void)
 
 void rcc_init(void)
 {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
+	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOE|RCC_APB2Periph_AFIO, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-	RCC_ADCCLKConfig(RCC_PCLK2_Div6);
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
+	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOE|RCC_APB2Periph_AFIO, ENABLE);
+	////RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+	//RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
 }
 
 void gpio_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitTypeStruct;
 
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;				 //外部时钟的，用来测频率的，
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOD, &GPIO_InitTypeStruct);
-
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //adc输入引脚
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AIN;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //外部中断的io配置
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部中断的io配置
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部时钟的，用来测频率的，
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_8;					 //定时器1触发ad转换的输出的那个口
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc3
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_4;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc4
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
+	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPU; 
+	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
+	
 
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_5;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc5
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
+//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;				 //外部时钟的，用来测频率的，
+//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+//	GPIO_Init(GPIOD, &GPIO_InitTypeStruct);
+//
+//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
+//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //adc输入引脚
+//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AIN;
+//	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4;
+////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //外部中断的io配置
+////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+////	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
+//
+//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
+//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部中断的io配置
+//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+//	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_6;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc6
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_8;					 //定时器1触发ad转换的输出的那个口
+	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;
+	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_7;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc7
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3;
+	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc3
+	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+
+	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_4;
+	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc4
+	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+
+	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_5;
+	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc5
+	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+
+	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_6;
+	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc6
+	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+
+	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_7;
+	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc7
+	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
 
 }
@@ -213,6 +244,8 @@ void ShowCLK2TFT(u16 u16CLK)
 
 }
 
+
+
 void InitCLKList()
 {
 	//u8Counter[0] = 0;
@@ -227,6 +260,11 @@ void InitCLKList()
 
 	memset(u64CLK, 0, 1000);
 	count = 0;
+	
+  u8EXIT_Type =  0;//下沿中断
+  u64CurCLK =  0 ;
+
+	
 	//memset(bBit, 0,   sizeof(bBit));
 }
 
@@ -237,14 +275,14 @@ void SendChannelData(uint8_t      _Channel)
 	//if( u8Counter[_Channel] == 0)
 	//	return;
 
-	printf("Channel:%d,", _Channel);
+//	printf("Channel:%d,", _Channel);
 
-	printf("DataNumber :%d,", u8Counter[_Channel]);
+//	printf("DataNumber :%d,", u8Counter[_Channel]);
 
 	for (ii = 0; ii < u8Counter[_Channel]; ii++)
 	{
-		printf("clk:%llu,", u64CLK[ii][_Channel]);
-		printf("bit:%x;\n", bBit[ii][_Channel]);
+		printf("%llu", u64CLK[ii][_Channel]);
+		printf("%x;", bBit[ii][_Channel]);
 	}
 
 	u8Counter[_Channel] = 0;
@@ -253,8 +291,6 @@ void SendChannelData(uint8_t      _Channel)
 
 int main(void)
 {	
-	u8 Start = 0;
-
 	SysTick_Init(72);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
 	USART1_Init(9600);		//初始化串口波特率为115200 
@@ -263,14 +299,17 @@ int main(void)
 	TFTLCD_Init();
 	LCD_Clear(DARKBLUE);
 	nvic_init();		   // 中断优先级配置
-	gpio_init();		   	//外设io口配置
+	//gpio_init();		   	//外设io口配置
 
 
 	set_background();	 	 //初始化背景
 	 
 	Tim_Init();			//定时器配置，测频率用的二个定时器
-
 	InitCLKList();
+
+	IO_Init();
+	
+	EXIT2_PARAM();
 
 	Tim_Enable();			//同步开始计数
 	
@@ -281,14 +320,8 @@ int main(void)
 
 		ShowCLK2TFT(frequency/1000);
 
-		if ((Start == 0)&& (frequency >1000000))
-		{
-            Tim3_Init();
-			TIM_Cmd(TIM3,ENABLE);	
-		}
 
-
-		if (u8Counter[u8Channel]!=0)
+		if (u8Counter[u8Channel] != 0)
 		{
 			if (u8Channel == 0)
 			{

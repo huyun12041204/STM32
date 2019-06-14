@@ -574,6 +574,11 @@
               <FilePath>..\app\gui\gui.c</FilePath>
             </File>
             <File>
+              <FileName>adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\adc\adc.c</FilePath>
+            </File>
+            <File>
               <FileName>button.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\button\button.c</FilePath>
@@ -582,11 +587,6 @@
               <FileName>tim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\tim\tim.c</FilePath>
-            </File>
-            <File>
-              <FileName>adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\adc\adc.c</FilePath>
             </File>
             <File>
               <FileName>tftlcd.c</FileName>

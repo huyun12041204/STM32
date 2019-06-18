@@ -149,7 +149,7 @@ void nvic_init(void)
 void rcc_init(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
 	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
@@ -268,12 +268,38 @@ void InitCLKList()
 	//memset(bBit, 0,   sizeof(bBit));
 }
 
+
+void Send64Data(uint64_t u64Data)
+{
+	uint64_t temp;
+	u8 ii;
+	char Data[8];
+	//ZeroMemory(Data, sizeof(Data));
+	temp = u64Data;
+
+	for (ii = 8 ; ii > 0 ; ii--)
+	{
+		Data[ii - 1] = temp % 0x100;
+		temp = temp / 0x100;
+	}
+	for (ii = 0; ii < 8; ii++)
+	{
+
+			
+		USART_SendData(USART1,Data[ii]);	
+		while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
+	//	printf((const char*)Data);
+	//	USART_SendData(USART1,11);
+	}
+
+}
+
 void SendChannelData(uint8_t      _Channel)
 {
 	u8 ii;
 	
-	//if( u8Counter[_Channel] == 0)
-	//	return;
+	if (u8Counter[_Channel] == 0)
+		return;
 
 //	printf("Channel:%d,", _Channel);
 
@@ -281,8 +307,30 @@ void SendChannelData(uint8_t      _Channel)
 
 	for (ii = 0; ii < u8Counter[_Channel]; ii++)
 	{
-		printf("%llu", u64CLK[ii][_Channel]);
-		printf("%x;", bBit[ii][_Channel]);
+		
+	//	printf("%016llu", u64CLK[ii][_Channel]);
+	//	printf("%x;", bBit[ii][_Channel]);
+	//	USART_SendData(USART1, bBit[ii][_Channel]);
+		//Data[0] = u64CLK[ii][_Channel]  >> 48;
+		//Data[1] = (u64CLK[ii][_Channel] >> 32) % 0xFFFF;
+		//Data[2] = (u64CLK[ii][_Channel] >> 16) % 0xFFFF;
+		//Data[3] = (u64CLK[ii][_Channel]) % 0xFFFF;
+
+		//Data[0] = u64CLK[ii][_Channel]  / 1000000000000;
+		//Data[1] = (u64CLK[ii][_Channel] / 100000000 )%10000;
+		//Data[2] = (u64CLK[ii][_Channel] / 10000) % 10000;
+		//Data[3] = (u64CLK[ii][_Channel] % 10000);
+		
+
+			USART_SendData(USART1, 0xFF);
+		while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
+	
+			USART_SendData(USART1, bBit[ii][_Channel]);
+		while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
+		Send64Data(u64CLK[ii][_Channel]);
+
+
+
 	}
 
 	u8Counter[_Channel] = 0;
@@ -293,22 +341,20 @@ int main(void)
 {	
 	SysTick_Init(72);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
-	USART1_Init(9600);		//初始化串口波特率为115200 
+	USART1_Init(115200);		//初始化串口波特率为115200 
 	rcc_init();			   //外设时钟配置	
 			
-	TFTLCD_Init();
-	LCD_Clear(DARKBLUE);
+	//TFTLCD_Init();
+	//LCD_Clear(DARKBLUE);
 	nvic_init();		   // 中断优先级配置
 	//gpio_init();		   	//外设io口配置
 
 
-	set_background();	 	 //初始化背景
+	//set_background();	 	 //初始化背景
 	 
 	Tim_Init();			//定时器配置，测频率用的二个定时器
 	InitCLKList();
-
 	IO_Init();
-	
 	EXIT2_PARAM();
 
 	Tim_Enable();			//同步开始计数
@@ -318,7 +364,7 @@ int main(void)
 	while(1)
 	{	
 
-		ShowCLK2TFT(frequency/1000);
+		//ShowCLK2TFT(frequency/1000);
 
 
 		if (u8Counter[u8Channel] != 0)

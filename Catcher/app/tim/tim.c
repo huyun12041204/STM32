@@ -163,6 +163,8 @@ void Tim4_Init()
 }
 
 
+
+
 void Tim_Init(void)
 {
 
@@ -175,12 +177,12 @@ void Tim_Init(void)
 	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
 	Tim2_Init();
-	Tim4_Init();
+	//Tim4_Init();
 }
 void Tim_Enable(void)
 {
 	TIM_Cmd(TIM2, ENABLE);
-	TIM_Cmd(TIM4, ENABLE);
+	//TIM_Cmd(TIM4, ENABLE);
 //	TIM_Cmd(TIM3,ENABLE);	
 //	TIM_Cmd(TIM4, ENABLE);
 //	TIM_Cmd(TIM3, ENABLE);

@@ -274,17 +274,17 @@ void TIM4_IRQHandler(void)
 //}
 
 
-void TIM8_IRQHandler(void)
-{
+//void TIM8_CC_IRQn(void)
+//{
 
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
-	{
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-		count++;
+//	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
+//	{
+//		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+//		count++;
 
-	}
+//	}
 
-}
+//}
 
 
 

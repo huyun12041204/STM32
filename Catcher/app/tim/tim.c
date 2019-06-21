@@ -103,11 +103,11 @@ void Tim2_Init()
 {
 	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
 	GPIO_InitTypeDef           GPIO_InitTypeStruct;
-//	NVIC_InitTypeDef           NVIC_InitTypeStruct;
+	NVIC_InitTypeDef           NVIC_InitTypeStruct;
 
 
-	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
@@ -130,11 +130,11 @@ void Tim2_Init()
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM2, DISABLE);	  //失能
 
-	//NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
-	//NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
-	//NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-	//NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	//NVIC_Init(&NVIC_InitTypeStruct);
+	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitTypeStruct);
 
 }
 //TIM3:PD2 TIM3 ETR
@@ -274,22 +274,22 @@ void Tim_Enable(void)
 void IO_Init(void)
 {
 	EXTI_InitTypeDef   EXTI_InitTypeStruct;
-//	NVIC_InitTypeDef   NVIC_InitTypeStruct;
+	NVIC_InitTypeDef   NVIC_InitTypeStruct;
 	GPIO_InitTypeDef   GPIO_InitTypeStruct;
 
-	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
 
-	//NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI2_IRQn;
-	//NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
-	//NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-	//NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	//NVIC_Init(&NVIC_InitTypeStruct);
+	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI2_IRQn;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitTypeStruct);
 
-	//NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
-	//NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
-	//NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-	//NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	//NVIC_Init(&NVIC_InitTypeStruct);
+	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitTypeStruct);
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
 	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断

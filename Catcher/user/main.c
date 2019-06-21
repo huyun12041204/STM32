@@ -22,7 +22,7 @@
 extern uint8_t      u8Channel;
 extern uint64_t     u64CLK[1000][2];
 extern uint8_t      bBit[1000][2];
-extern uint8_t      u8Counter[2];
+extern uint16_t      u8Counter[2];
 
 
 #if 0
@@ -140,75 +140,75 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 }
 
 
-void nvic_init(void)
-{
-	NVIC_InitTypeDef    NVIC_InitTypeStruct;
+//void nvic_init(void)
+//{
+//	NVIC_InitTypeDef    NVIC_InitTypeStruct;
 
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
-//	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI0_IRQn;
+////	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI0_IRQn;
+////	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+////	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+////	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+////	NVIC_Init(&NVIC_InitTypeStruct);
+
+//	/*NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 1;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitTypeStruct);
+
+//	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI4_IRQn;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitTypeStruct);*/
+
+//	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
+//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	0;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitTypeStruct);
+
+////	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM3_IRQn; 
+////	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
+////	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
+////	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+////	NVIC_Init(&NVIC_InitTypeStruct);
+
+//	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM4_IRQn;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitTypeStruct);
+//	
+//	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI2_IRQn;
 //	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
 //	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
 //	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 //	NVIC_Init(&NVIC_InitTypeStruct);
 
-	/*NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 1;
-	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);
-
-	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI4_IRQn;
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
-	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);*/
-
-	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);
-
-//	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM3_IRQn; 
-//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
+//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
 //	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 //	NVIC_Init(&NVIC_InitTypeStruct);
+//}
 
-	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM4_IRQn;
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
-	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);
-	
-	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI2_IRQn;
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);
+//void rcc_init(void)
+//{
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+//	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
+//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+//	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+////	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 
-	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitTypeStruct);
-}
-
-void rcc_init(void)
-{
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
-	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
-
-	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOE|RCC_APB2Periph_AFIO, ENABLE);
-	////RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-	//RCC_ADCCLKConfig(RCC_PCLK2_Div6);
-	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
-}
+//	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOE|RCC_APB2Periph_AFIO, ENABLE);
+//	////RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+//	//RCC_ADCCLKConfig(RCC_PCLK2_Div6);
+//	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
+//}
 
 //void gpio_init(void)
 //{
@@ -355,13 +355,9 @@ void  Initialize_Module(void)
 
 	LCD_Dislay_Printf("Initialize LCD finished!");
 	
-	nvic_init();
-	rcc_init();
 
 	//初始化计时器
 	Tim_Init();		
-
-
 	LCD_Dislay_Printf("Initialize TIM finished!");
 
 	//IO口使用外部中断

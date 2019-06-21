@@ -2367,7 +2367,7 @@ delay_ms(50);
 #endif
 
 	LCD_Display_Dir(TFTLCD_DIR);		//0：竖屏  1：横屏  默认竖屏
-	LCD_Clear(WHITE);
+	LCD_Clear(BLACK);
 }
 
 //设置窗口,并自动设置画点坐标到窗口左上角(sx,sy).
@@ -3262,3 +3262,12 @@ void LCD_ShowPicture(u16 x, u16 y, u16 wide, u16 high,u8 *pic)
 	}
 	while(tmp < num);	
 }
+
+void LCD_Init()
+{
+
+	FRONT_COLOR = DARKBLUE;
+	LCD_Clear(DARKBLUE);
+	FRONT_COLOR = WHITE;
+}
+

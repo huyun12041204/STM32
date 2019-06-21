@@ -25,6 +25,67 @@ extern uint8_t      bBit[1000][2];
 extern uint8_t      u8Counter[2];
 
 
+#if 0
+
+
+void clear_point(u16 hang)
+{
+	u8 index_clear_lie = 0;
+	FRONT_COLOR = DARKBLUE;
+	for (index_clear_lie = 0; index_clear_lie < 201; index_clear_lie++)
+	{
+		//	lcd_huadian(hang,index_clear_lie,FRONT_COLOR);
+	}
+	FRONT_COLOR = RED;
+}
+void ShowCLK2TFT(u16 u16CLK)
+{
+	u8 clk_buf[6];
+
+	clk_buf[u16Digit2Ascii(u16CLK, clk_buf)] = '\0';
+
+	GUI_Show12ASCII(60, 20, clk_buf, FRONT_COLOR, WHITE);
+
+	GUI_Show12ASCII(100, 20, "kHz", FRONT_COLOR, WHITE);
+
+}
+
+#else
+
+u8 lCurY;
+
+void LCD_Dislay_Init()
+{
+	//初始化设备
+	TFTLCD_Init();
+	
+//	FRONT_COLOR = YELLOW;
+	LCD_Clear(BLACK);
+	FRONT_COLOR = RED;
+	lCurY = 20;
+
+}
+
+
+
+void LCD_Dislay_Printf(uint8_t *p)
+{
+
+	GUI_Show12ASCII(20, lCurY, p, FRONT_COLOR, BLACK);
+
+	lCurY += 20;
+
+	if (lCurY > 480)
+	{
+		lCurY = 20;
+	}
+	
+	delay_ms(2000);
+
+}
+#endif
+
+
 
 
 u8 u8Digit2Ascii(u8 u8Digit,u8* u8Ascii)
@@ -79,16 +140,6 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 }
 
 
-void clear_point(u16 hang)
-{
-	u8 index_clear_lie = 0; 
-	FRONT_COLOR = DARKBLUE;
-	for(index_clear_lie = 0;index_clear_lie <201;index_clear_lie++)
-	{		
-	//	lcd_huadian(hang,index_clear_lie,FRONT_COLOR);
-	}	
-	FRONT_COLOR=RED;	
-}
 void nvic_init(void)
 {
 	NVIC_InitTypeDef    NVIC_InitTypeStruct;
@@ -230,17 +281,7 @@ void gpio_init(void)
 
 }
 
-void ShowCLK2TFT(u16 u16CLK)
-{
-	u8 clk_buf[6];
 
-	clk_buf[u16Digit2Ascii(u16CLK, clk_buf)] = '\0';
-
-	GUI_Show12ASCII(60, 20, clk_buf, FRONT_COLOR, WHITE);
-
-	GUI_Show12ASCII(100, 20, "kHz", FRONT_COLOR, WHITE);
-
-}
 
 
 
@@ -298,10 +339,6 @@ void SendChannelData(uint8_t      _Channel)
 	if (u8Counter[_Channel] == 0)
 		return;
 
-//	printf("Channel:%d,", _Channel);
-
-//	printf("DataNumber :%d,", u8Counter[_Channel]);
-
 	for (ii = 0; ii < u8Counter[_Channel]; ii++)
 	{
 		
@@ -323,21 +360,29 @@ int main(void)
 	u8 SendEmpty;
 	SysTick_Init(72);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
+
+
 	USART1_Init(864000);		//初始化串口波特率为115200 
+
+	LCD_Dislay_Init();
+	
+	delay_us(100);
+
+	LCD_Dislay_Printf("Finish LCD Init");
+	
 	rcc_init();			   //外设时钟配置	
-			
-	//TFTLCD_Init();
-	//LCD_Clear(DARKBLUE);
+
+	LCD_Dislay_Printf("Finish RCC Init");
+	
 	nvic_init();		   // 中断优先级配置
 	//gpio_init();		   	//外设io口配置
-
-
-	//set_background();	 	 //初始化背景
-	 
+	LCD_Dislay_Printf("Finish NVIC Init");
+	
+	
+	
 	Tim_Init();			//定时器配置，测频率用的二个定时器
 	InitCLKList();
 	IO_Init();
-	EXIT2_PARAM();
 
 	Tim_Enable();			//同步开始计数
 	
@@ -346,7 +391,6 @@ int main(void)
 	while(1)
 	{	
 
-		//ShowCLK2TFT(frequency/1000);
 
 
 		if (u8Counter[u8Channel] != 0)

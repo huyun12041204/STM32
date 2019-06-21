@@ -31,7 +31,7 @@
 
 
 
-#define TFTLCD_DIR	1	//0：竖屏  1：横屏  默认竖屏
+#define TFTLCD_DIR	0	//0：竖屏  1：横屏  默认竖屏
 
 //TFTLCD地址结构体
 typedef struct
@@ -116,6 +116,8 @@ void LCD_ShowxNum(u16 x,u16 y,u32 num,u8 len,u8 size,u8 mode);
 void LCD_ShowString(u16 x,u16 y,u16 width,u16 height,u8 size,u8 *p);
 void LCD_ShowFontHZ(u16 x, u16 y, u8 *cn);					   						   																			
 void LCD_ShowPicture(u16 x, u16 y, u16 wide, u16 high,u8 *pic);
+
+
 
 #endif  
 	 

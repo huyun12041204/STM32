@@ -1,7 +1,9 @@
 #include "tim.h"
 
-u32 count = 0;
-u32 frequency = 0;
+#ifdef _ORI
+
+//u32 count = 0;
+//u32 frequency = 0;
 
 //u8	bTimEnable;
 
@@ -94,7 +96,7 @@ u32 frequency = 0;
 //}
 
 
-
+#else
 
 //TIM2:PA0 TIM2 ETR
 void Tim2_Init()
@@ -173,16 +175,16 @@ void TIM8_Init()
 
 
 	TIM_TimeBaseInitStructure.TIM_Prescaler = 0;
-	TIM_TimeBaseInitStructure.TIM_Period = 0xFFFF;  
+	TIM_TimeBaseInitStructure.TIM_Period = 0xFFFF;
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up; 
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM8, &TIM_TimeBaseInitStructure);
 
 
 	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
-	TIM_ICInitStructure.TIM_ICFilter = 0x00;  
+	TIM_ICInitStructure.TIM_ICFilter = 0x00;
 	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
-	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1; 
+	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
 	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
 	TIM_ICInit(TIM8, &TIM_ICInitStructure);
 
@@ -191,39 +193,39 @@ void TIM8_Init()
 	TIM_ITConfig(TIM8, TIM_IT_CC1 | TIM_IT_CC2, ENABLE);
 
 
-////	TIM_ICInitTypeDef  TIM_ICInitStructure;
-//	TIM_ICInitTypeDef TIM_ICInitStructure;
-//
-//
-//
-//	//TIM_ICInitStructure.TIM_ICMode
-//	TIM_DeInit(TIM8);
-//	//TIM_ICInitStructure.TIM_ICMode = TIM_ICMode_ICAP;                 //配置为输入捕获模式           
-//	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;                     //选择通道1 
-//	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;       //输入上升沿捕获   
-//	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;   // 通道方向选择    
-//	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;               //每次检测到捕获输入就触发一次捕获 
-//	TIM_ICInitStructure.TIM_ICFilter = 0x4;                            // 
-//	TIM_ICInit(TIM8, &TIM_ICInitStructure);
-//
-//	//TIM_PWMIConfig(TIM8,)
-//
-//	TIM_PrescalerConfig(TIM8, 71, TIM_PSCReloadMode_Immediate);//72M/72=1M
-//
-//	 /* Select the TIM8 Input Trigger: TI2FP2 【输入触发源选择】*/
-//	TIM_SelectInputTrigger(TIM8, TIM_TS_TI2FP2);                      //参考TIM结构图选择滤波后的TI2输入    寄存器SMCR 
-//
-//   /* Select the slave Mode: Reset Mode */
-//	TIM_SelectSlaveMode(TIM8, TIM_SlaveMode_Reset);          //复位模式-选中的触发输入（TRGI）的上升沿初始化计数器，并且产生一个更新线号 
-//
-//	/* Enable the Master/Slave Mode */
-//	TIM_SelectMasterSlaveMode(TIM8, TIM_MasterSlaveMode_Enable);        //启动定时器的被动触发. 
-//
-//	TIM_ITConfig(TIM8, TIM_IT_CC1, ENABLE);        //打开中断 
-//
-//	TIM_Cmd(TIM8, ENABLE);                         //启动TIM8 
-//
-//	//Tim8_SetupNVIC();
+	////	TIM_ICInitTypeDef  TIM_ICInitStructure;
+	//	TIM_ICInitTypeDef TIM_ICInitStructure;
+	//
+	//
+	//
+	//	//TIM_ICInitStructure.TIM_ICMode
+	//	TIM_DeInit(TIM8);
+	//	//TIM_ICInitStructure.TIM_ICMode = TIM_ICMode_ICAP;                 //配置为输入捕获模式           
+	//	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;                     //选择通道1 
+	//	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;       //输入上升沿捕获   
+	//	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;   // 通道方向选择    
+	//	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;               //每次检测到捕获输入就触发一次捕获 
+	//	TIM_ICInitStructure.TIM_ICFilter = 0x4;                            // 
+	//	TIM_ICInit(TIM8, &TIM_ICInitStructure);
+	//
+	//	//TIM_PWMIConfig(TIM8,)
+	//
+	//	TIM_PrescalerConfig(TIM8, 71, TIM_PSCReloadMode_Immediate);//72M/72=1M
+	//
+	//	 /* Select the TIM8 Input Trigger: TI2FP2 【输入触发源选择】*/
+	//	TIM_SelectInputTrigger(TIM8, TIM_TS_TI2FP2);                      //参考TIM结构图选择滤波后的TI2输入    寄存器SMCR 
+	//
+	//   /* Select the slave Mode: Reset Mode */
+	//	TIM_SelectSlaveMode(TIM8, TIM_SlaveMode_Reset);          //复位模式-选中的触发输入（TRGI）的上升沿初始化计数器，并且产生一个更新线号 
+	//
+	//	/* Enable the Master/Slave Mode */
+	//	TIM_SelectMasterSlaveMode(TIM8, TIM_MasterSlaveMode_Enable);        //启动定时器的被动触发. 
+	//
+	//	TIM_ITConfig(TIM8, TIM_IT_CC1, ENABLE);        //打开中断 
+	//
+	//	TIM_Cmd(TIM8, ENABLE);                         //启动TIM8 
+	//
+	//	//Tim8_SetupNVIC();
 
 
 
@@ -279,7 +281,7 @@ void IO_Init(void)
 	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 
 
-	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource2);	 
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource2);
 	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line2;
 	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Falling;
@@ -295,3 +297,5 @@ void IO_Init(void)
 	EXTI_Init(&EXTI_InitTypeStruct);
 
 }
+
+#endif

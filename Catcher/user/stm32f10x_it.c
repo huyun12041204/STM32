@@ -7,6 +7,24 @@
 #include "button.h"
 #include "led.h"
 #include "stdio.h" 
+
+
+
+
+
+
+				
+
+
+
+
+
+
+
+
+
+#ifdef _ORI
+
 //u8 frequency_flag = 0;
 //long int shao_miao_shu_du = 0;
 //u8 num_shao_miao = 8;
@@ -18,32 +36,7 @@
 //u16 vpp;
 
 
-#define EXIT_FALL  0
-#define EXIT_RAISE 1
-
-uint64_t u64StartCLK;
-
-uint8_t      u8Channel;
-uint64_t     u64CLK[1000][2];
-uint8_t      bBit[1000][2];
-uint8_t      u8Counter[2];
-
- EXTI_InitTypeDef EXTI_InitStructure2;
- EXTI_InitTypeDef EXTI_InitStructure3;
- u8       u8EXIT_Type ;
- uint64_t u64CurCLK   ;
-
-//int64_t      uTimes1[0x1000][2];
-//uint8_t      bBit1[0x1000];
-//uint16_t     uTimes2[0x1000];
-//uint8_t      bBit2[0x1000];
-//uint8_t  uCounter1;
-//uint8_t  uCounter2;
-
-//uint16_t ETU = 372;
-
-				
-//void set_io0(void)					  										
+ //void set_io0(void)					  										
 //{
 //	GPIO_ResetBits(GPIOA,GPIO_Pin_3);	
 //	GPIO_ResetBits(GPIOA,GPIO_Pin_4);
@@ -167,7 +160,7 @@ uint8_t      u8Counter[2];
 void set_background(void)
 {
 	FRONT_COLOR = YELLOW;
-  LCD_Clear(DARKBLUE);
+	LCD_Clear(DARKBLUE);
 	FRONT_COLOR = RED;
 	GUI_Show12ASCII(20, 20, "Fre:", FRONT_COLOR, YELLOW);
 
@@ -190,6 +183,28 @@ void set_background(void)
 	//GUI_Show12ASCII(260,160,"ADC1_In",FRONT_COLOR,YELLOW);
 }
 
+
+#else
+
+
+#define EXIT_FALL  0
+#define EXIT_RAISE 1
+
+uint64_t u64StartCLK;
+
+uint8_t      u8Channel;
+uint64_t     u64CLK[1000][2];
+uint8_t      bBit[1000][2];
+uint8_t      u8Counter[2];
+
+uint32_t count;
+
+//EXTI_InitTypeDef EXTI_InitStructure2;
+//EXTI_InitTypeDef EXTI_InitStructure3;
+u8       u8EXIT_Type;
+uint64_t u64CurCLK;
+
+
 int64_t GetCLKNumber()
 {
 	return  count * 0xFFFF + TIM_GetCounter(TIM2);
@@ -198,13 +213,13 @@ int64_t GetCLKNumber()
 void SaveCurrentCLK(u8 _Channel)
 {
 
-		u64CLK[u8Counter[_Channel]][_Channel] = u64CurCLK;
-		bBit  [u8Counter[_Channel]][_Channel] = u8EXIT_Type;
-	
-		u8Counter[_Channel]++;
-	
-	  if(	u8Counter[_Channel] > 1000)
-			printf("LIMIT");
+	u64CLK[u8Counter[_Channel]][_Channel] = u64CurCLK;
+	bBit[u8Counter[_Channel]][_Channel] = u8EXIT_Type;
+
+	u8Counter[_Channel]++;
+
+	if (u8Counter[_Channel] > 1000)
+		printf("LIMIT");
 
 }
 
@@ -233,29 +248,29 @@ void TIM2_IRQHandler(void)
 //	}
 //	
 //}
-	
-void TIM4_IRQHandler(void)
-{
-	if (TIM_GetITStatus(TIM4, TIM_IT_Update))
-	{
 
-		TIM_Cmd(TIM4, DISABLE);
-		//清除TIM状态
-		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
-		//获取TIM3计数
-		frequency = GetCLKNumber() - u64StartCLK;
-		if (frequency<1000000)
-			frequency = 0;
-
-
-
-		TIM_SetCounter(TIM4, 0);
-		u64StartCLK = GetCLKNumber();
-		//printf("%llu::",u64StartCLK);
-		TIM_Cmd(TIM4, ENABLE);
-
-	}
-}
+//void TIM4_IRQHandler(void)
+//{
+//	if (TIM_GetITStatus(TIM4, TIM_IT_Update))
+//	{
+//
+//		//TIM_Cmd(TIM4, DISABLE);
+//		////清除TIM状态
+//		//TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+//		////获取TIM3计数
+//		//frequency = GetCLKNumber() - u64StartCLK;
+//		//if (frequency < 1000000)
+//		//	frequency = 0;
+//
+//
+//
+//		//TIM_SetCounter(TIM4, 0);
+//		//u64StartCLK = GetCLKNumber();
+//		////printf("%llu::",u64StartCLK);
+//		//TIM_Cmd(TIM4, ENABLE);
+//
+//	}
+//}
 
 
 //void EXTI0_IRQHandler(void)
@@ -281,20 +296,6 @@ void TIM4_IRQHandler(void)
 
 
 
-void EXTI_ENABLE_2(FunctionalState State)
-{
-	EXTI_InitStructure2.EXTI_LineCmd = State;
-
-	EXTI_StructInit(&EXTI_InitStructure2);
-}
-
-void EXTI_ENABLE_3(FunctionalState State)
-{
-	EXTI_InitStructure3.EXTI_LineCmd = State;
-
-	EXTI_StructInit(&EXTI_InitStructure3);
-}
-
 
 void EXTI2_IRQHandler(void)
 {
@@ -303,8 +304,6 @@ void EXTI2_IRQHandler(void)
 	if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) == 0)
 	{
 		SaveCurrentCLK(u8Channel);
-		EXTI_ENABLE_2(DISABLE);
-		EXTI_ENABLE_3(ENABLE);
 		u8EXIT_Type = EXIT_RAISE;
 	}
 
@@ -316,9 +315,7 @@ void EXTI3_IRQHandler(void)
 	EXTI_ClearITPendingBit(EXTI_Line3);
 	if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3) == 1)
 	{
-		SaveCurrentCLK(u8Channel);	
-		EXTI_ENABLE_3(DISABLE);
-		EXTI_ENABLE_2(ENABLE);
+		SaveCurrentCLK(u8Channel);
 		u8EXIT_Type = EXIT_FALL;
 	}
 
@@ -327,19 +324,7 @@ void EXTI3_IRQHandler(void)
 
 
 
-void EXIT2_PARAM(void)
-{
-	EXTI_InitStructure2.EXTI_Line    = EXTI_Line2;
-	EXTI_InitStructure2.EXTI_Mode    = EXTI_Mode_Interrupt;
-	EXTI_InitStructure2.EXTI_Trigger = EXTI_Trigger_Falling;
-	EXTI_InitStructure2.EXTI_LineCmd = ENABLE;
-
-
-	EXTI_InitStructure3.EXTI_Line    = EXTI_Line3;
-	EXTI_InitStructure3.EXTI_Mode    = EXTI_Mode_Interrupt;
-	EXTI_InitStructure3.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_InitStructure3.EXTI_LineCmd = DISABLE;
-}
 
 
 
+#endif 

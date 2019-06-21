@@ -9,7 +9,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
 
-
+#ifndef EXIT_FALL
+#define EXIT_FALL  0
+#define EXIT_RAISE 1
+#define EXIT_ALL   2
+#endif
 
 
 

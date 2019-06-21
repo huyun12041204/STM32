@@ -19,10 +19,20 @@
 #include "String.h"
 
 
-extern uint8_t      u8Channel;
-extern uint64_t     u64CLK[1000][2];
-extern uint8_t      bBit[1000][2];
-extern uint16_t      u8Counter[2];
+extern u32 count;
+	//当前应该进入中断类别
+extern u8       u8EXIT_Type;
+
+//通道
+extern u8      u8Channel;
+
+extern u16     u8Counter[2];
+// 存储 CLK 间隔的 
+extern u16     u16CLK[2000][2];
+//当前CLKNumber
+extern uint64_t u64CurCLK;
+//之前CLKNumber
+extern uint64_t u64PreCLK;
 
 
 #if 0
@@ -143,9 +153,7 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 //void nvic_init(void)
 //{
 //	NVIC_InitTypeDef    NVIC_InitTypeStruct;
-
 //	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-
 ////	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI0_IRQn;
 ////	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
 ////	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
@@ -312,20 +320,32 @@ void Send64Data(uint64_t u64Data)
 
 }
 
+void Send16Data(u16 u16Data)
+{
+
+	SendCharData(u16Data/0x100);
+	SendCharData(u16Data %0x100);
+}
+
+
 void SendChannelData(uint8_t      _Channel)
 {
-	u8 ii;
+	u16 ii;
+	u8 Len;
+	u8 jj;
 	
-	if (u8Counter[_Channel] == 0)
-		return;
 
 	for (ii = 0; ii < u8Counter[_Channel]; ii++)
 	{
 		
+		SendCharData(0xFE);
+		Len = u16CLK[ii][_Channel]/0x2000 ;
+		
+		for(jj = 0 ; jj <= Len; jj++)
+			Send16Data(u16CLK[ii+jj][_Channel]);
+		
+		ii = ii+ Len;
 	
-		SendCharData(0xFF);
-		SendCharData(bBit[ii][_Channel]);
-		Send64Data(u64CLK[ii][_Channel]);
 
 
 
@@ -336,8 +356,7 @@ void SendChannelData(uint8_t      _Channel)
 }
 
 
-// 1111;1111;1111;1111;
-// 
+
 
 void  Initialize_Module(void)
 {
@@ -370,19 +389,28 @@ void  Initialize_Module(void)
 void  Initialize_Global_variable(void)
 {
 	//设置CLK计数器0
-	memset(u8Counter, 0, 2);
+	memset(u8Counter, 0, sizeof(u8Counter));
 	//设置通道0
 	u8Channel = 0;
-	memset(u64CLK, 0, sizeof(u64CLK));
+	memset(u16CLK, 0, sizeof(u16CLK));
 
 	//CLK总数
 	count = 0;
+
+	u8EXIT_Type = EXIT_ALL;
+
+	  u64CurCLK = 0;
+	  u64PreCLK = 0;
+
+//	  u8Counter =
+
+
 
 }
 
 int main(void)
 {	
-	u8 SendEmpty;
+	u8 SendEmpty = 0;
 
 	//初始化各个模块
 	Initialize_Module();
@@ -415,11 +443,14 @@ int main(void)
 		}
 		else if(	SendEmpty == 0)
 		{
-			SendEmpty = 1;
-			SendCharData(0xFF);
-			SendCharData(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2));
-			Send64Data(count * 0xFFFF + TIM_GetCounter(TIM2));
+			//SendEmpty = 1;
+			//SendCharData(0xFF);
+			//SendCharData(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2));
+			//Send64Data(count * 0xFFFF + TIM_GetCounter(TIM2));
 			
+		//	printf("Empty");
+
+			delay_ms(1000);
 
 		}
 

@@ -20,7 +20,7 @@
 
 
 extern uint8_t      u8Channel;
-extern uint64_t      u64CLK[1000][2];
+extern uint64_t     u64CLK[1000][2];
 extern uint8_t      bBit[1000][2];
 extern uint8_t      u8Counter[2];
 
@@ -52,7 +52,7 @@ void ShowCLK2TFT(u16 u16CLK)
 
 #else
 
-u8 lCurY;
+u16 lCurY;
 
 void LCD_Dislay_Init()
 {
@@ -71,7 +71,7 @@ void LCD_Dislay_Init()
 void LCD_Dislay_Printf(uint8_t *p)
 {
 
-	GUI_Show12ASCII(20, lCurY, p, FRONT_COLOR, BLACK);
+	GUI_Show12ASCII(10, lCurY, p, FRONT_COLOR, BLACK);
 
 	lCurY += 20;
 
@@ -202,7 +202,7 @@ void rcc_init(void)
 	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 
 	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOE|RCC_APB2Periph_AFIO, ENABLE);
 	////RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
@@ -210,98 +210,80 @@ void rcc_init(void)
 	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
 }
 
-void gpio_init(void)
-{
-	GPIO_InitTypeDef GPIO_InitTypeStruct;
-
-
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部时钟的，用来测频率的，
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
-
-
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPU; 
-	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
-	
-
-//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;				 //外部时钟的，用来测频率的，
-//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-//	GPIO_Init(GPIOD, &GPIO_InitTypeStruct);
+//void gpio_init(void)
+//{
+//	GPIO_InitTypeDef GPIO_InitTypeStruct;
 //
-//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //adc输入引脚
-//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AIN;
-//	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4;
-////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //外部中断的io配置
-////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-////	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 //
 //	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部中断的io配置
+//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部时钟的，用来测频率的，
 //	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 //	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+//
+//
+//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
+//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
+//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPU; 
+//	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
+//	
+//
+////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
+////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;				 //外部时钟的，用来测频率的，
+////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+////	GPIO_Init(GPIOD, &GPIO_InitTypeStruct);
+////
+////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
+////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //adc输入引脚
+////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AIN;
+////	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+////
+//////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4;
+//////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //外部中断的io配置
+//////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+//////	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
+////
+////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
+////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部中断的io配置
+////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+////	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_8;					 //定时器1触发ad转换的输出的那个口
+//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;
+//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3;
+//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc3
+//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_4;
+//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc4
+//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_5;
+//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc5
+//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_6;
+//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc6
+//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_7;
+//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc7
+//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+//
+//
+//}
 
-	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_8;					 //定时器1触发ad转换的输出的那个口
-	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
-	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3;
-	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc3
-	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
-	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_4;
-	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc4
-	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
-	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_5;
-	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc5
-	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
-	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_6;
-	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc6
-	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
-	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_7;
-	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc7
-	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
-
-}
 
 
 
-
-
-void InitCLKList()
-{
-
-	
-
-
-	//设置CLK计数器0
-	memset(u8Counter, 0, 2);
-	//设置通道0
-	u8Channel = 0;
-	memset(u64CLK, 0, 1000);
-	count = 0;
-
-
-	
-	//memset(bBit, 0,   sizeof(bBit));
-}
 
 void SendCharData(char cData)
 {
@@ -330,8 +312,6 @@ void Send64Data(uint64_t u64Data)
 
 }
 
-
-
 void SendChannelData(uint8_t      _Channel)
 {
 	u8 ii;
@@ -355,34 +335,63 @@ void SendChannelData(uint8_t      _Channel)
 
 }
 
+
+// 1111;1111;1111;1111;
+// 
+
+void  Initialize_Module(void)
+{
+	//初始化时钟
+	SysTick_Init(72);
+
+	//定义中断优先级
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组分2组
+
+	//USART1 115200
+	USART1_Init(115200);
+
+	//显示屏
+	LCD_Dislay_Init();
+
+	LCD_Dislay_Printf("Initialize LCD finished!");
+	
+	nvic_init();
+	rcc_init();
+
+	//初始化计时器
+	Tim_Init();		
+
+
+	LCD_Dislay_Printf("Initialize TIM finished!");
+
+	//IO口使用外部中断
+	IO_Init();
+
+	LCD_Dislay_Printf("Initialize Exit IO finished!");
+
+}
+
+void  Initialize_Global_variable(void)
+{
+	//设置CLK计数器0
+	memset(u8Counter, 0, 2);
+	//设置通道0
+	u8Channel = 0;
+	memset(u64CLK, 0, sizeof(u64CLK));
+
+	//CLK总数
+	count = 0;
+
+}
+
 int main(void)
 {	
 	u8 SendEmpty;
-	SysTick_Init(72);
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组 分2组
 
+	//初始化各个模块
+	Initialize_Module();
 
-	USART1_Init(864000);		//初始化串口波特率为115200 
-
-	LCD_Dislay_Init();
-	
-	delay_us(100);
-
-	LCD_Dislay_Printf("Finish LCD Init");
-	
-	rcc_init();			   //外设时钟配置	
-
-	LCD_Dislay_Printf("Finish RCC Init");
-	
-	nvic_init();		   // 中断优先级配置
-	//gpio_init();		   	//外设io口配置
-	LCD_Dislay_Printf("Finish NVIC Init");
-	
-	
-	
-	Tim_Init();			//定时器配置，测频率用的二个定时器
-	InitCLKList();
-	IO_Init();
+	Initialize_Global_variable();
 
 	Tim_Enable();			//同步开始计数
 	
@@ -392,7 +401,7 @@ int main(void)
 	{	
 
 
-
+  //  printf("%llu",count * 0xFFFF + TIM_GetCounter(TIM2));
 		if (u8Counter[u8Channel] != 0)
 		{
 			if (u8Channel == 0)

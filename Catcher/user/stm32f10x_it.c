@@ -190,12 +190,12 @@ void set_background(void)
 #define EXIT_FALL  0
 #define EXIT_RAISE 1
 
-uint64_t u64StartCLK;
+//uint64_t u64StartCLK;
 
 uint8_t      u8Channel;
 uint64_t     u64CLK[1000][2];
 uint8_t      bBit[1000][2];
-uint8_t      u8Counter[2];
+uint16_t      u8Counter[2];
 
 uint32_t count;
 

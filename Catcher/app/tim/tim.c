@@ -102,13 +102,23 @@
 void Tim2_Init()
 {
 	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
+	GPIO_InitTypeDef           GPIO_InitTypeStruct;
+//	NVIC_InitTypeDef           NVIC_InitTypeStruct;
+
+
+	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+
+	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部时钟的，用来测频率的，
+	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
+
+
 	//配置 TIMx 外部时钟模式 2
 	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 
-	//TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
-	//TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
-	//TIM_TimeBaseInitTypeStruct.TIM_Period = 65535;
-	//TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
 
 
 	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
@@ -119,6 +129,12 @@ void Tim2_Init()
 
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM2, DISABLE);	  //失能
+
+	//NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
+	//NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
+	//NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	//NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	//NVIC_Init(&NVIC_InitTypeStruct);
 
 }
 //TIM3:PD2 TIM3 ETR
@@ -233,17 +249,8 @@ void TIM8_Init()
 
 void Tim_Init(void)
 {
-
-
-	GPIO_InitTypeDef GPIO_InitTypeStruct;
-
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部时钟的，用来测频率的，
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-
 	Tim2_Init();
-	//Tim4_Init();
+
 }
 void Tim_Enable(void)
 {
@@ -267,8 +274,22 @@ void Tim_Enable(void)
 void IO_Init(void)
 {
 	EXTI_InitTypeDef   EXTI_InitTypeStruct;
+//	NVIC_InitTypeDef   NVIC_InitTypeStruct;
+	GPIO_InitTypeDef   GPIO_InitTypeStruct;
 
-	GPIO_InitTypeDef GPIO_InitTypeStruct;
+	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+
+	//NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI2_IRQn;
+	//NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
+	//NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	//NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	//NVIC_Init(&NVIC_InitTypeStruct);
+
+	//NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
+	//NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
+	//NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	//NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	//NVIC_Init(&NVIC_InitTypeStruct);
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
 	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
@@ -295,6 +316,10 @@ void IO_Init(void)
 	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising;
 	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitTypeStruct);
+
+
+
+
 
 }
 

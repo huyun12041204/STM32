@@ -199,8 +199,12 @@ void SaveCurrentCLK(u8 _Channel)
 {
 
 		u64CLK[u8Counter[_Channel]][_Channel] = u64CurCLK;
-		bBit  [u8Counter[_Channel]][_Channel] =    u8EXIT_Type;
+		bBit  [u8Counter[_Channel]][_Channel] = u8EXIT_Type;
+	
 		u8Counter[_Channel]++;
+	
+	  if(	u8Counter[_Channel] > 1000)
+			printf("LIMIT");
 
 }
 
@@ -274,17 +278,6 @@ void TIM4_IRQHandler(void)
 //}
 
 
-//void TIM8_CC_IRQn(void)
-//{
-
-//	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
-//	{
-//		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-//		count++;
-
-//	}
-
-//}
 
 
 
@@ -309,11 +302,10 @@ void EXTI2_IRQHandler(void)
 	EXTI_ClearITPendingBit(EXTI_Line2);
 	if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) == 0)
 	{
-		u8EXIT_Type = EXIT_FALL;
 		SaveCurrentCLK(u8Channel);
-		//EXTI_ENABLE_2(DISABLE);
-		//EXTI_ENABLE_3(ENABLE);
-		//u8EXIT_Type = EXIT_RAISE;
+		EXTI_ENABLE_2(DISABLE);
+		EXTI_ENABLE_3(ENABLE);
+		u8EXIT_Type = EXIT_RAISE;
 	}
 
 }
@@ -324,11 +316,10 @@ void EXTI3_IRQHandler(void)
 	EXTI_ClearITPendingBit(EXTI_Line3);
 	if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3) == 1)
 	{
-		u8EXIT_Type = EXIT_RAISE;
 		SaveCurrentCLK(u8Channel);	
-		//EXTI_ENABLE_3(DISABLE);
-		//EXTI_ENABLE_2(ENABLE);
-		//u8EXIT_Type = EXIT_FALL;
+		EXTI_ENABLE_3(DISABLE);
+		EXTI_ENABLE_2(ENABLE);
+		u8EXIT_Type = EXIT_FALL;
 	}
 
 }

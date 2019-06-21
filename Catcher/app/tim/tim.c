@@ -10,19 +10,19 @@ u32 frequency = 0;
 //	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;		 
 //
 //	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 7199;  //tim2  72000000 10us
-//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;//Ôö¼ÆÊı
+//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;//å¢è®¡æ•°
 //	TIM_TimeBaseInitTypeStruct.TIM_Period =	9999+1;		//10000  100ms					  
 //	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
 //	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseInitTypeStruct);	 		   
 //
-//	TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);	 //TIM2³õÊ¼»¯	   
+//	TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);	 //TIM2åˆå§‹åŒ–	   
 //	TIM_Cmd(TIM2,DISABLE);
 //}
 //
 //void time3_init(void)
 //{
 //	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-//	//ÅäÖÃ TIMx Íâ²¿Ê±ÖÓÄ£Ê½ 2
+//	//é…ç½® TIMx å¤–éƒ¨æ—¶é’Ÿæ¨¡å¼ 2
 //	TIM_ETRClockMode2Config(TIM3,TIM_ExtTRGPSC_OFF,TIM_ExtTRGPolarity_NonInverted,0);
 //	
 //	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
@@ -32,35 +32,35 @@ u32 frequency = 0;
 //	TIM_TimeBaseInit(TIM3,&TIM_TimeBaseInitTypeStruct);
 //
 //	TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE);
-//	TIM_Cmd(TIM3,DISABLE);	  //Ê§ÄÜ
+//	TIM_Cmd(TIM3,DISABLE);	  //å¤±èƒ½
 //
 //}
 //
 //void time1_init(void)
-//{					 //ÓÃÀ´´¥·¢ad×ª»»£¬TIM1´¥·¢ADC
+//{					 //ç”¨æ¥è§¦å‘adè½¬æ¢ï¼ŒTIM1è§¦å‘ADC
 //	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
 //	TIM_OCInitTypeDef TIM_OCInitTypeStruct;		 
 //
-//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 71; //72·ÖÆµ
-//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up; //Ôö¼ÆÊı
-//	TIM_TimeBaseInitTypeStruct.TIM_Period =	1;	//×Ô¶¯ÖØ×°Öµ£¬1us´¥·¢Ò»´Î						  
-//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;//Ê±ÖÓ²»·ÖÆµ
-//	TIM_TimeBaseInit(TIM1,&TIM_TimeBaseInitTypeStruct);	//TIM1³õÊ¼»¯ 		   	 	   
-//	TIM_Cmd(TIM1,DISABLE);	 //TIM1²»Ê¹ÄÜ
+//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 71; //72åˆ†é¢‘
+//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up; //å¢è®¡æ•°
+//	TIM_TimeBaseInitTypeStruct.TIM_Period =	1;	//è‡ªåŠ¨é‡è£…å€¼ï¼Œ1usè§¦å‘ä¸€æ¬¡						  
+//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;//æ—¶é’Ÿä¸åˆ†é¢‘
+//	TIM_TimeBaseInit(TIM1,&TIM_TimeBaseInitTypeStruct);	//TIM1åˆå§‹åŒ– 		   	 	   
+//	TIM_Cmd(TIM1,DISABLE);	 //TIM1ä¸ä½¿èƒ½
 //
-//	TIM_OCInitTypeStruct.TIM_OCMode = TIM_OCMode_PWM1; 					   //Õâ¸öÒ²ÊÇ±ØĞëÅäÖÃ³ÉpwmÄ£Ê½ 
+//	TIM_OCInitTypeStruct.TIM_OCMode = TIM_OCMode_PWM1; 					   //è¿™ä¸ªä¹Ÿæ˜¯å¿…é¡»é…ç½®æˆpwmæ¨¡å¼ 
 //	TIM_OCInitTypeStruct.TIM_OutputState = TIM_OutputState_Enable; 
 //	TIM_OCInitTypeStruct.TIM_Pulse = 1;
 //	TIM_OCInitTypeStruct.TIM_OCPolarity = TIM_OCPolarity_High;
 //	TIM_OC1Init(TIM1, &TIM_OCInitTypeStruct);
 //
-//	TIM_CtrlPWMOutputs(TIM1, ENABLE);				  //Õâ¸öÊÇ±ØĞëÓĞµÄ
+//	TIM_CtrlPWMOutputs(TIM1, ENABLE);				  //è¿™ä¸ªæ˜¯å¿…é¡»æœ‰çš„
 //}
 ////TIM2:PA0 TIM2 ETR
 //void Tim2_Init()
 //{
 //	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-//	//ÅäÖÃ TIMx Íâ²¿Ê±ÖÓÄ£Ê½ 2
+//	//é…ç½® TIMx å¤–éƒ¨æ—¶é’Ÿæ¨¡å¼ 2
 //	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 //
 //	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
@@ -70,7 +70,7 @@ u32 frequency = 0;
 //	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitTypeStruct);
 //
 //	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-//	TIM_Cmd(TIM2, DISABLE);	  //Ê§ÄÜ
+//	TIM_Cmd(TIM2, DISABLE);	  //å¤±èƒ½
 //
 //}
 //
@@ -78,7 +78,7 @@ u32 frequency = 0;
 //void Tim3_Init()
 //{
 //	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-//	//ÅäÖÃ TIMx Íâ²¿Ê±ÖÓÄ£Ê½ 2
+//	//é…ç½® TIMx å¤–éƒ¨æ—¶é’Ÿæ¨¡å¼ 2
 //	TIM_ETRClockMode2Config(TIM3, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 //
 //	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
@@ -88,7 +88,7 @@ u32 frequency = 0;
 //	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitTypeStruct);
 //
 //	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-//	TIM_Cmd(TIM3, DISABLE);	  //Ê§ÄÜ
+//	TIM_Cmd(TIM3, DISABLE);	  //å¤±èƒ½
 //
 //
 //}
@@ -100,7 +100,7 @@ u32 frequency = 0;
 void Tim2_Init()
 {
 	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-	//ÅäÖÃ TIMx Íâ²¿Ê±ÖÓÄ£Ê½ 2
+	//é…ç½® TIMx å¤–éƒ¨æ—¶é’Ÿæ¨¡å¼ 2
 	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 
 	//TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
@@ -116,14 +116,14 @@ void Tim2_Init()
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitTypeStruct);
 
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-	TIM_Cmd(TIM2, DISABLE);	  //Ê§ÄÜ
+	TIM_Cmd(TIM2, DISABLE);	  //å¤±èƒ½
 
 }
 //TIM3:PD2 TIM3 ETR
 void Tim3_Init()
 {
 	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-	//ÅäÖÃ TIMx Íâ²¿Ê±ÖÓÄ£Ê½ 2
+	//é…ç½® TIMx å¤–éƒ¨æ—¶é’Ÿæ¨¡å¼ 2
 	TIM_ETRClockMode2Config(TIM3, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 
 	//TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
@@ -139,19 +139,19 @@ void Tim3_Init()
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitTypeStruct);
 
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-	TIM_Cmd(TIM3, DISABLE);	  //Ê§ÄÜ
+	TIM_Cmd(TIM3, DISABLE);	  //å¤±èƒ½
 
 
 }
 
-//TIM4£º1S¼ÆÊ±
+//TIM4ï¼š1Sè®¡æ—¶
 void Tim4_Init()
 {
 
 	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
 
 	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 7199;  //tim2  72000000 10us
-	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;//Ôö¼ÆÊı
+	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;//å¢è®¡æ•°
 	TIM_TimeBaseInitTypeStruct.TIM_Period = 9999 + 1;		//10000  100ms					  
 	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitTypeStruct);
@@ -163,7 +163,71 @@ void Tim4_Init()
 }
 
 
+void TIM8_Init()
+{
+	TIM_ICInitTypeDef TIM_ICInitStructure;
+	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitStructure;
+	//é…ç½® TIMx å¤–éƒ¨æ—¶é’Ÿæ¨¡å¼ 2
+	TIM_ETRClockMode2Config(TIM8, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 
+
+
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 0;
+	TIM_TimeBaseInitStructure.TIM_Period = 0xFFFF;  
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up; 
+	TIM_TimeBaseInit(TIM8, &TIM_TimeBaseInitStructure);
+
+
+	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
+	TIM_ICInitStructure.TIM_ICFilter = 0x00;  
+	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1; 
+	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+	TIM_ICInit(TIM8, &TIM_ICInitStructure);
+
+	//TIM_ITConfig(TIM8, TIM_IT_Update|TIM_IT_CC1|TIM_IT_CC2, ENABLE);
+
+	TIM_ITConfig(TIM8, TIM_IT_CC1 | TIM_IT_CC2, ENABLE);
+
+
+////	TIM_ICInitTypeDef  TIM_ICInitStructure;
+//	TIM_ICInitTypeDef TIM_ICInitStructure;
+//
+//
+//
+//	//TIM_ICInitStructure.TIM_ICMode
+//	TIM_DeInit(TIM8);
+//	//TIM_ICInitStructure.TIM_ICMode = TIM_ICMode_ICAP;                 //é…ç½®ä¸ºè¾“å…¥æ•è·æ¨¡å¼           
+//	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;                     //é€‰æ‹©é€šé“1 
+//	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;       //è¾“å…¥ä¸Šå‡æ²¿æ•è·   
+//	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;   // é€šé“æ–¹å‘é€‰æ‹©    
+//	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;               //æ¯æ¬¡æ£€æµ‹åˆ°æ•è·è¾“å…¥å°±è§¦å‘ä¸€æ¬¡æ•è· 
+//	TIM_ICInitStructure.TIM_ICFilter = 0x4;                            // 
+//	TIM_ICInit(TIM8, &TIM_ICInitStructure);
+//
+//	//TIM_PWMIConfig(TIM8,)
+//
+//	TIM_PrescalerConfig(TIM8, 71, TIM_PSCReloadMode_Immediate);//72M/72=1M
+//
+//	 /* Select the TIM8 Input Trigger: TI2FP2 ã€è¾“å…¥è§¦å‘æºé€‰æ‹©ã€‘*/
+//	TIM_SelectInputTrigger(TIM8, TIM_TS_TI2FP2);                      //å‚è€ƒTIMç»“æ„å›¾é€‰æ‹©æ»¤æ³¢åçš„TI2è¾“å…¥    å¯„å­˜å™¨SMCR 
+//
+//   /* Select the slave Mode: Reset Mode */
+//	TIM_SelectSlaveMode(TIM8, TIM_SlaveMode_Reset);          //å¤ä½æ¨¡å¼-é€‰ä¸­çš„è§¦å‘è¾“å…¥ï¼ˆTRGIï¼‰çš„ä¸Šå‡æ²¿åˆå§‹åŒ–è®¡æ•°å™¨ï¼Œå¹¶ä¸”äº§ç”Ÿä¸€ä¸ªæ›´æ–°çº¿å· 
+//
+//	/* Enable the Master/Slave Mode */
+//	TIM_SelectMasterSlaveMode(TIM8, TIM_MasterSlaveMode_Enable);        //å¯åŠ¨å®šæ—¶å™¨çš„è¢«åŠ¨è§¦å‘. 
+//
+//	TIM_ITConfig(TIM8, TIM_IT_CC1, ENABLE);        //æ‰“å¼€ä¸­æ–­ 
+//
+//	TIM_Cmd(TIM8, ENABLE);                         //å¯åŠ¨TIM8 
+//
+//	//Tim8_SetupNVIC();
+
+
+
+}
 
 void Tim_Init(void)
 {
@@ -172,7 +236,7 @@ void Tim_Init(void)
 	GPIO_InitTypeDef GPIO_InitTypeStruct;
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//Íâ²¿Ê±ÖÓµÄ£¬ÓÃÀ´²âÆµÂÊµÄ£¬
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//å¤–éƒ¨æ—¶é’Ÿçš„ï¼Œç”¨æ¥æµ‹é¢‘ç‡çš„ï¼Œ
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
 
@@ -205,12 +269,12 @@ void IO_Init(void)
 	GPIO_InitTypeDef GPIO_InitTypeStruct;
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO ¿ÚÏÂÑØÖĞ¶Ï
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO å£ä¸‹æ²¿ä¸­æ–­
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO ¿ÚÏÂÑØÖĞ¶Ï
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO å£ä¸‹æ²¿ä¸­æ–­
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 

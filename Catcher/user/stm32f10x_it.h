@@ -10,11 +10,30 @@
 #include "stm32f10x.h"
 
 #ifndef EXIT_FALL
-#define EXIT_FALL  0
-#define EXIT_RAISE 1
-#define EXIT_ALL   2
+#define EXIT_FALL  0x000
+#define EXIT_RAISE 0x800
+#define EXIT_ALL   0xFFF
 #endif
 
+
+#ifndef  Pin_ALL
+#define  Pin_ALL 0x7000
+#define  Pin_VCC 0x1000
+#define  Pin_RES 0x2000
+#define  Pin_CLK 0x3000
+#define  Pin_IO  0x4000   
+#endif
+
+#ifndef Bits_Number
+#define Bits_Number 0x700
+#define Bits_Len1   0x100
+#define Bits_Len2   0x200
+#define Bits_Len3   0x300
+#define Bits_Len4   0x400
+#define Bits_Len5   0x500
+#define Bits_Len6   0x600
+#define Bits_Len7   0x700
+#endif 
 
 
 #ifdef _ORI
@@ -34,6 +53,7 @@
 	 void hua_wang(void);
 	 void set_background(void);
 
+	
 	 void key_init(void);
 
 	 void IO3_Init(void);
@@ -67,7 +87,7 @@
 #else
 void IO_Init(void);
 void EXIT2_PARAM(void);
-
+void SaveCurrentCLK(u8 _Channel, u16 u16EXTI_Type, u16 _Pin = Pin_IO);
 #endif
 
 

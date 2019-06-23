@@ -15,13 +15,13 @@
 #include "tim.h"
 #include "stm32f10x_it.h"
 #include "adc.h"
-
+#include "sram.h" 
 #include "String.h"
 
 
 extern u32 count;
 	//当前应该进入中断类别
-extern u8       u8EXIT_Type;
+extern u16       u8EXIT_Type;
 
 //通道
 extern u8      u8Channel;
@@ -335,19 +335,14 @@ void SendChannelData(uint8_t      _Channel)
 	u8 jj;
 	
 
-	for (ii = 0; ii < u8Counter[_Channel]; ii++)
+	for (ii = 0; ii < u8Counter[_Channel]; ii+= Len)
 	{
 		
-		SendCharData(0xFE);
-		Len = u16CLK[ii][_Channel]/0x2000 ;
+		//SendCharData(0xFE);
+		Len = (u16CLK[ii][_Channel]>>8)&0xF;
 		
-		for(jj = 0 ; jj <= Len; jj++)
+		for(jj = 0 ; jj < Len; jj++)
 			Send16Data(u16CLK[ii+jj][_Channel]);
-		
-		ii = ii+ Len;
-	
-
-
 
 	}
 
@@ -379,8 +374,8 @@ void  Initialize_Module(void)
 	Tim_Init();		
 	LCD_Dislay_Printf("Initialize TIM finished!");
 
-	//IO口使用外部中断
-	IO_Init();
+	//IO口使用外部中断 , CLK 外部中断 
+	EXTI_Init();
 
 	LCD_Dislay_Printf("Initialize Exit IO finished!");
 
@@ -402,10 +397,39 @@ void  Initialize_Global_variable(void)
 	  u64CurCLK = 0;
 	  u64PreCLK = 0;
 
-//	  u8Counter =
 
+}
 
+void SendRamData(u8* SendEmpty)
+{
 
+	if (u8Counter[u8Channel] != 0)
+		{
+			if (u8Channel == 0)
+			{
+				u8Channel = 1;
+				SendChannelData(0);
+			}
+			else
+			{
+				u8Channel = 0;
+				SendChannelData(1);
+
+			}
+			*SendEmpty = 0;
+		}
+		else if(*SendEmpty == 0)
+		{
+			//SendEmpty = 1;
+			//SendCharData(0xFF);
+			//SendCharData(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2));
+			//Send64Data(count * 0xFFFF + TIM_GetCounter(TIM2));
+			
+		  //printf("Empty");
+
+			//delay_ms(1000);
+
+		}
 }
 
 int main(void)
@@ -423,40 +447,8 @@ int main(void)
 
 	while(1)
 	{	
-
-
-  //  printf("%llu",count * 0xFFFF + TIM_GetCounter(TIM2));
-		if (u8Counter[u8Channel] != 0)
-		{
-			if (u8Channel == 0)
-			{
-				u8Channel = 1;
-				SendChannelData(0);
-			}
-			else
-			{
-				u8Channel = 0;
-				SendChannelData(1);
-
-			}
-			SendEmpty = 0;
-		}
-		else if(	SendEmpty == 0)
-		{
-			//SendEmpty = 1;
-			//SendCharData(0xFF);
-			//SendCharData(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2));
-			//Send64Data(count * 0xFFFF + TIM_GetCounter(TIM2));
-			
-		//	printf("Empty");
-
-			delay_ms(1000);
-
-		}
-
-
+		SendRamData(&SendEmpty);
 		
-	
 	}
 }
 

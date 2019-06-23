@@ -271,7 +271,7 @@ void Tim_Enable(void)
 //}
 
 
-void IO_Init(void)
+void EXTI_Init(void)
 {
 	EXTI_InitTypeDef   EXTI_InitTypeStruct;
 	NVIC_InitTypeDef   NVIC_InitTypeStruct;
@@ -291,6 +291,12 @@ void IO_Init(void)
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 
+	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI4_IRQn;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitTypeStruct);
+
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
 	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
@@ -301,6 +307,10 @@ void IO_Init(void)
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 
+	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_4;
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
+	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource2);
 	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line2;
@@ -317,6 +327,12 @@ void IO_Init(void)
 	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitTypeStruct);
 
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOE, GPIO_PinSource4);
+	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line4;
+	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitTypeStruct);
 
 
 

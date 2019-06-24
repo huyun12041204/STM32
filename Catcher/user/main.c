@@ -36,6 +36,12 @@ extern uint64_t u64CurCLK;
 //֮ǰCLKNumber
 extern uint64_t u64PreCLK;
 
+u8 u8CurSDData[512];
+u32 u32CurSDDataLen;
+
+u32 u32SaveSDLen;
+u32 u32SavedSector;
+
 
 #if 0
 
@@ -443,7 +449,11 @@ void  Initialize_Global_variable(void)
 	u8Clk_EXIT_TYPE = CLK_EXITT_ALL;
 
 	u64CurCLK = 0;
-  u64PreCLK = 0;
+    u64PreCLK = 0;
+
+    u32SavedSector  = 20;
+	u32CurSDDataLen = 0;
+	u32SaveSDLen    = 0;
 
 
 }
@@ -512,6 +522,71 @@ void SendRamData(u8* SendEmpty)
 
 		}
 }
+
+void Save2SD(u8* u8Data,u32 uLen)
+{
+
+	u8 SaveCount;
+	u32 uCurLen;
+	//u32 Countl
+
+	uCurLen = u32CurSDDataLen + uLen;
+
+	SaveCount = uCurLen / 512;
+
+	SD_WriteDisk(u8Data, u32SavedSector, SaveCount);
+
+	u32CurSDDataLen = uCurLen % 512;
+
+	u32SavedSector += SaveCount;
+
+
+}
+
+void SaveChannelData(u8 _Channel)
+{
+
+		u16 ii;
+		u8 Len;
+		u8 jj;
+
+
+		for (ii = 0; ii < u8Counter[_Channel]; ii += Len)
+		{
+
+			//SendCharData(0xFE);
+			Len = (u16CLK[ii][_Channel] >> 8) & 0x7;
+
+			for (jj = 0; jj < Len; jj++)
+				Send16Data(u16CLK[ii + jj][_Channel]);
+
+		}
+
+		u8Counter[_Channel] = 0;
+
+
+}
+
+
+
+
+void SaveRamData()
+{
+
+	if (u8Counter[u8Channel] != 0)
+	{
+		if (u8Channel == 0)
+		{
+			u8Channel = 1;
+			SendChannelData(0);
+		}
+		else
+		{
+			u8Channel = 0;
+			SendChannelData(1);
+
+		
+	}
 
 
 

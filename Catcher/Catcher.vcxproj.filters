@@ -129,6 +129,12 @@
     <ClCompile Include="app\sram\sram.c">
       <Filter>App</Filter>
     </ClCompile>
+    <ClCompile Include="app\spi\spi.c">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="app\sd\sd.c">
+      <Filter>App</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="core\startup_stm32f10x_hd.s">

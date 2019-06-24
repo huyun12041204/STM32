@@ -14,7 +14,8 @@
 #include "gui.h"
 #include "tim.h"
 #include "stm32f10x_it.h"
-#include "adc.h"
+//#include "adc.h"
+#include "sd.h"
 #include "sram.h" 
 #include "String.h"
 
@@ -358,6 +359,10 @@ void  Initialize_Module(void)
 {
 		//FSMC_SRAM_Init();
 
+	u8 i = 0;
+	u32 sd_size;
+	u8 sd_buf[6];
+
 	//初始化时钟
 	SysTick_Init(72);
 
@@ -381,7 +386,44 @@ void  Initialize_Module(void)
 	PINx_EXIT_Init();
 
 	LCD_Dislay_Printf("Initialize Exit IO finished!");
+
+	if (SD_Init())
+	{
+		LCD_Dislay_Printf("Initialize SD failed!");
+	}
+	LCD_Dislay_Printf("Initialize SD finished!");
 	
+	
+
+    if(SD_Type == 0x06)
+	{
+		LCD_Dislay_Printf("SDV2HC OK!");
+	}
+	else if(SD_Type == 0x04)
+	{
+		LCD_Dislay_Printf("SDV2 OK!");
+	}
+	else if(SD_Type == 0x02)
+	{
+		LCD_Dislay_Printf("SDV1 OK!");
+	}
+	else if(SD_Type == 0x01)
+	{
+		LCD_Dislay_Printf("MMC OK!");
+	}
+	
+	LCD_Dislay_Printf("SD Card Size:");
+	
+	sd_size=SD_GetSectorCount();//得到扇区数
+	sd_size=sd_size>>11;  //显示SD卡容量   MB
+
+	sd_buf[0] = sd_size / 10000 + 0x30;
+	sd_buf[1] = sd_size % 10000 / 1000 + 0x30;
+	sd_buf[2] = sd_size % 10000 % 1000 / 100 + 0x30;
+	sd_buf[3] = sd_size % 10000 % 1000 % 100 / 10 + 0x30;
+	sd_buf[4] = sd_size % 10000 % 1000 % 100 % 10 + 0x30;
+	sd_buf[5] = '\0';
+	LCD_Dislay_Printf(sd_buf);
 
 
 }

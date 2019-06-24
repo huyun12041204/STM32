@@ -1,7 +1,7 @@
 #ifndef _spi_H
 #define _spi_H
-#include "sys.h"
-#include "delay.h"
+#include "system.h"
+//#include "delay.h"
 
 void SPI2_Init(void);  //SPI2初始化
 u8 SPI2_ReadWriteByte(u8 dat);		 //SPI2读写一个字节

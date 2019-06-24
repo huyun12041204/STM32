@@ -16,6 +16,13 @@
 #endif
 
 
+#ifndef CLK_EXITT_ALL 
+#define CLK_EXITT_FALL  0x1
+#define CLK_EXITT_RAISE  0x2
+#define CLK_EXITT_ALL   0x3
+#endif
+
+
 #ifndef  Pin_ALL
 #define  Pin_ALL 0x7000
 #define  Pin_VCC 0x1000
@@ -87,7 +94,9 @@
 #else
 void IO_Init(void);
 void EXIT2_PARAM(void);
-void SaveCurrentCLK(u8 _Channel, u16 u16EXTI_Type, u16 _Pin = Pin_IO);
+void _ConverntClkDif(uint64_t u64CLKDiff, u16 u16EXTI_Type, u16 _Pin, u16* uData, u16* uDataLen);
+void SaveCurrentCLK(u8 _Channel, u16 u16EXTI_Type, u16 _Pin);
+void PINx_EXIT_Init(void);
 #endif
 
 

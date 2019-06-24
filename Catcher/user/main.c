@@ -21,14 +21,15 @@
 
 extern u32 count;
 	//当前应该进入中断类别
-extern u16       u8EXIT_Type;
+extern u16       u16EXIT_Type;
+extern u8         u8Clk_EXIT_TYPE;
 
 //通道
 extern u8      u8Channel;
 
 extern u16     u8Counter[2];
 // 存储 CLK 间隔的 
-extern u16     u16CLK[2000][2];
+extern u16     u16CLK[100000][2];
 //当前CLKNumber
 extern uint64_t u64CurCLK;
 //之前CLKNumber
@@ -339,7 +340,7 @@ void SendChannelData(uint8_t      _Channel)
 	{
 		
 		//SendCharData(0xFE);
-		Len = (u16CLK[ii][_Channel]>>8)&0xF;
+		Len = (u16CLK[ii][_Channel]>>8)&0x7;
 		
 		for(jj = 0 ; jj < Len; jj++)
 			Send16Data(u16CLK[ii+jj][_Channel]);
@@ -355,6 +356,8 @@ void SendChannelData(uint8_t      _Channel)
 
 void  Initialize_Module(void)
 {
+		//FSMC_SRAM_Init();
+
 	//初始化时钟
 	SysTick_Init(72);
 
@@ -375,9 +378,11 @@ void  Initialize_Module(void)
 	LCD_Dislay_Printf("Initialize TIM finished!");
 
 	//IO口使用外部中断 , CLK 外部中断 
-	EXTI_Init();
+	PINx_EXIT_Init();
 
 	LCD_Dislay_Printf("Initialize Exit IO finished!");
+	
+
 
 }
 
@@ -392,10 +397,39 @@ void  Initialize_Global_variable(void)
 	//CLK总数
 	count = 0;
 
-	u8EXIT_Type = EXIT_ALL;
+	u16EXIT_Type    = EXIT_ALL;
+	u8Clk_EXIT_TYPE = CLK_EXITT_ALL;
 
-	  u64CurCLK = 0;
-	  u64PreCLK = 0;
+	u64CurCLK = 0;
+  u64PreCLK = 0;
+
+
+}
+
+void SendEmptyData()
+{
+
+	uint64_t u64CurClk;
+	uint64_t u64Diff;
+	u16      uCurDiff[8];
+	u16      u16DiffLen;
+	u16      u16CurStatue;
+	u8       jj;
+
+	u16DiffLen   = 0;
+	u16CurStatue = 0;
+	u64CurClk    = count * 0xFFFF + TIM_GetCounter(TIM2);
+	u64Diff      = u64CurClk - u64PreCLK;
+	u16CurStatue = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2);
+	if (u16CurStatue)
+		u16CurStatue = EXIT_RAISE;
+
+	_ConverntClkDif(u64Diff, u16CurStatue, Pin_IO, uCurDiff, &u16DiffLen);
+
+	for (jj = 0; jj < u16DiffLen; jj++)
+		Send16Data(uCurDiff[jj]);
+	
+	u64PreCLK = u64CurClk;
 
 
 }
@@ -427,10 +461,17 @@ void SendRamData(u8* SendEmpty)
 			
 		  //printf("Empty");
 
-			//delay_ms(1000);
+			//Send16Data(0x4);
+		  
+	//	_ConverntClkDif()
+	//		SendEmptyData();
+			*SendEmpty = 1;
+		//	delay_ms(100);
 
 		}
 }
+
+
 
 int main(void)
 {	

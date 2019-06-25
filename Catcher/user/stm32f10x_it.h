@@ -10,9 +10,9 @@
 #include "stm32f10x.h"
 
 #ifndef EXIT_FALL
-#define EXIT_FALL  0x000
-#define EXIT_RAISE 0x800
-#define EXIT_ALL   0xFFF
+#define EXIT_FALL  0x0
+#define EXIT_RAISE 0x8
+#define EXIT_ALL   0xF
 #endif
 
 
@@ -24,23 +24,25 @@
 
 
 #ifndef  Pin_ALL
-#define  Pin_ALL 0x7000
-#define  Pin_VCC 0x1000
-#define  Pin_RES 0x2000
-#define  Pin_CLK 0x3000
-#define  Pin_IO  0x4000   
+#define  Pin_ALL 0x70
+#define  Pin_VCC 0x10
+#define  Pin_RES 0x20
+#define  Pin_CLK 0x30
+#define  Pin_IO  0x40 
 #endif
 
 #ifndef Bits_Number
-#define Bits_Number 0x700
-#define Bits_Len1   0x100
-#define Bits_Len2   0x200
-#define Bits_Len3   0x300
-#define Bits_Len4   0x400
-#define Bits_Len5   0x500
-#define Bits_Len6   0x600
-#define Bits_Len7   0x700
+#define Bits_Number 0x7
+#define Bits_Len1   0x1
+#define Bits_Len2   0x2
+#define Bits_Len3   0x3
+#define Bits_Len4   0x4
+#define Bits_Len5   0x5
+#define Bits_Len6   0x6
+#define Bits_Len7   0x7
 #endif 
+
+#define _MaxCLKCount 3000
 
 
 #ifdef _ORI
@@ -95,7 +97,7 @@
 void IO_Init(void);
 void EXIT2_PARAM(void);
 void _ConverntClkDif(uint64_t u64CLKDiff, u16 u16EXTI_Type, u16 _Pin, u16* uData, u16* uDataLen);
-void SaveCurrentCLK(u8 _Channel, u16 u16EXTI_Type, u16 _Pin);
+void SaveCurrentCLK( u16 u16EXTI_Type, u16 _Pin);
 void PINx_EXIT_Init(void);
 #endif
 

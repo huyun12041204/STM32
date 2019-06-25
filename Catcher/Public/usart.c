@@ -1,13 +1,13 @@
 #include "usart.h"		 
 
-int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
-{
-		
-     	USART_SendData(USART1,(u8)ch);	
-	while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
+//int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
+//{
+//		
+//     	USART_SendData(USART1,(u8)ch);	
+//	while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
 
-	return ch;
-}
+//	return ch;
+//}
 
 /*******************************************************************************
 * 函 数 名         : USART1_Init
@@ -70,12 +70,15 @@ void USART1_Init(u32 bound)
 *******************************************************************************/ 
 void USART1_IRQHandler(void)                	//串口1中断服务程序
 {
+	extern u8 	willSend;
 	u8 r;
 	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //接收中断
 	{
 		r =USART_ReceiveData(USART1);//(USART1->DR);	//读取接收到的数据
 		USART_SendData(USART1,r+1);
 		while(USART_GetFlagStatus(USART1,USART_FLAG_TC) != SET);
+	
+		willSend = 1;
 	} 
 	USART_ClearFlag(USART1,USART_FLAG_TC);
 } 	

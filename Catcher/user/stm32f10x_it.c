@@ -3,7 +3,6 @@
 #include "system.h"
 #include "SysTick.h"
 #include "tim.h"
-#include "adc.h"
 #include "button.h"
 #include "led.h"
 #include "stdio.h" 
@@ -198,6 +197,7 @@ void set_background(void)
 //uint8_t      bBit[1000][2];
 //uint16_t      u8Counter[2];
 
+
 //TIM2 的计数器
 uint32_t count;
 
@@ -209,12 +209,12 @@ u16       u16EXIT_Type;
 u8        u8Clk_EXIT_TYPE;
 
 //通道
-u8      u8Channel;
 
+u16 uCLKCount;
+u16 uSendCLKCOunt;
 
-u16     u8Counter[2];
 // 存储 CLK 间隔的 
-u16     u16CLK[100000][2];
+u8    u8CLK[_MaxCLKCount];
 //当前CLKNumber
 uint64_t u64CurCLK;
 //之前CLKNumber
@@ -230,6 +230,7 @@ int64_t GetCLKNumber()
 
 void _ConverntClkDif(	uint64_t u64CLKDiff,u16 u16EXTI_Type,u16 _Pin,u16* uData,u16* uDataLen)
 {
+	
 	
 	
 	
@@ -267,54 +268,82 @@ void _ConverntClkDif(	uint64_t u64CLKDiff,u16 u16EXTI_Type,u16 _Pin,u16* uData,u
 	
 }
 
-void SaveCurrentCLK(u8 _Channel, u16 u16EXTI_Type,u16 _Pin)
+void SaveCurrentCLK(u16 u16EXTI_Type,u16 _Pin)
 {
 	uint64_t u64CLKDiff;
-	u16 uCLKLen;
+	u8 __ClkLen;
+	u8 ii;
 
 	u64CLKDiff = u64CurCLK - u64PreCLK;
-	uCLKLen    = 0;
 
-#if _MODE2
 
 	if (u64CLKDiff < 0xFF)
-	{
-		u16CLK[u8Counter[_Channel]][_Channel] = _Pin + u16EXTI_Type + Bits_Len1 + u64CLKDiff;
-		u8Counter[_Channel] += 1;
-	}
+		__ClkLen = Bits_Len1;
 	else if (u64CLKDiff < 0xFFFFFF)
-	{
-		u16CLK[u8Counter[_Channel]][_Channel] = _Pin + u16EXTI_Type + Bits_Len2 + ((u64CLKDiff >>16)&0xFF);
-		u16CLK[u8Counter[_Channel] + 1][_Channel] = u64CLKDiff & 0xFFFF;
-		u8Counter[_Channel] += 2;
-
-	}
-
+		__ClkLen = Bits_Len2;
 	else if (u64CLKDiff < 0xFFFFFFFFFF)
+		__ClkLen = Bits_Len3;
+
+	if ((uCLKCount + 1) == _MaxCLKCount)
+		uCLKCount = 0;
+
+	u8CLK[uCLKCount] = _Pin + u16EXTI_Type + __ClkLen;
+	uCLKCount += 1;
+
+	for (ii = (__ClkLen*2-1) ; ii>0 ; ii -= 1)
 	{
-		u16CLK[u8Counter[_Channel]][_Channel] = _Pin + u16EXTI_Type + Bits_Len3 + ((u64CLKDiff >> 32) & 0xFF);
-		u16CLK[u8Counter[_Channel] + 1][_Channel] = (u64CLKDiff >> 16) & 0xFFFF;
-		u16CLK[u8Counter[_Channel] + 1][_Channel] = u64CLKDiff & 0xFFFF;
-		u8Counter[_Channel] += 3;
+		if ((uCLKCount + 1) == _MaxCLKCount)
+			uCLKCount = 0;
+		u8CLK[uCLKCount] = ((u64CLKDiff >> ((ii - 1)*8)) & 0xFF);
+
+		uCLKCount += 1;
 	}
 
-//	else if (u64CLKDiff < 0xFFFFFFFFFFFFFF)
-//	{
-//		u16CLK[u8Counter[_Channel]][_Channel] = _Pin + u16EXTI_Type + Bits_Len4 + ((u64CLKDiff >> 48) & 0xFF);
-//		u16CLK[u8Counter[_Channel] + 1][_Channel] = (u64CLKDiff >> 32) & 0xFFFF;
-//		u16CLK[u8Counter[_Channel] + 1][_Channel] = (u64CLKDiff >> 16) & 0xFFFF;
-//		u16CLK[u8Counter[_Channel] + 1][_Channel] = u64CLKDiff & 0xFFFF;
-//		u8Counter[_Channel] += 4;
-//	}
+	/*
+		if (u64CLKDiff < 0xFF)
+		{
+			if ((uCLKCount+1) == _MaxCLKCount )
+				uCLKCount = 0;
+			u8CLK[uCLKCount] = _Pin + u16EXTI_Type + Bits_Len1 + u64CLKDiff;
+			uCLKCount += 1;
+		}
+		else if (u64CLKDiff < 0xFFFFFF)
+		{
 
-#else
-	
+			if ((uCLKCount+1) == _MaxCLKCount )
+				uCLKCount = 0;
+			u8CLK[uCLKCount] =  _Pin + u16EXTI_Type + Bits_Len2 + ((u64CLKDiff >>16)&0xFF);
 
-	_ConverntClkDif(u64CLKDiff, u16EXTI_Type,_Pin,u16CLK[_Channel] + u8Counter[_Channel],&uCLKLen);
+			uCLKCount += 1;
+			if ((uCLKCount+1) == _MaxCLKCount )
+				uCLKCount = 0;
 
-	u8Counter[_Channel] += uCLKLen;
+			u8CLK[uCLKCount] =  u64CLKDiff & 0xFFFF;
+				uCLKCount += 1;
 
-#endif
+		}
+			else if (u64CLKDiff < 0xFFFFFFFFFF)
+		{
+
+			if ((uCLKCount+1) == _MaxCLKCount )
+				uCLKCount = 0;
+			u8CLK[uCLKCount] =  _Pin + u16EXTI_Type + Bits_Len3 + ((u64CLKDiff >> 32) & 0xFF);
+			uCLKCount += 1;
+
+
+			if ((uCLKCount+1) == _MaxCLKCount )
+				uCLKCount = 0;
+			u8CLK[uCLKCount] =  (u64CLKDiff >> 16) & 0xFFFF;
+
+				uCLKCount += 1;
+
+
+			if ((uCLKCount+1) == _MaxCLKCount )
+				uCLKCount = 0;
+			u8CLK[uCLKCount] =  u64CLKDiff & 0xFFFF;
+			uCLKCount += 1;
+		}*/
+
 	u64PreCLK = u64CurCLK;
 
 }
@@ -403,7 +432,7 @@ void EXTI2_IRQHandler(void)
 		(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) == 0))
 	{
 		u16EXIT_Type = EXIT_FALL;
-		SaveCurrentCLK(u8Channel,EXIT_RAISE ,Pin_IO);
+		SaveCurrentCLK(EXIT_RAISE ,Pin_IO);
 		
 	}
 
@@ -417,7 +446,7 @@ void EXTI3_IRQHandler(void)
 		(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3) == 1))
 	{
 		u16EXIT_Type = EXIT_RAISE;
-		SaveCurrentCLK(u8Channel,EXIT_FALL,Pin_IO);
+		SaveCurrentCLK(EXIT_FALL,Pin_IO);
 		
 	}
 
@@ -434,7 +463,7 @@ void EXTI4_IRQHandler(void)
 		(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 1))
 	{
 		u8Clk_EXIT_TYPE = CLK_EXITT_FALL;
-		SaveCurrentCLK(u8Channel, EXIT_FALL,Pin_CLK);
+		SaveCurrentCLK( EXIT_FALL,Pin_CLK);
 
 	}
 
@@ -442,7 +471,7 @@ void EXTI4_IRQHandler(void)
 		(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) == 0))
 	{
 		u8Clk_EXIT_TYPE = CLK_EXITT_RAISE;
-		SaveCurrentCLK(u8Channel, EXIT_RAISE, Pin_CLK);
+		SaveCurrentCLK(EXIT_RAISE, Pin_CLK);
 
 	}
 

@@ -1,7 +1,7 @@
 #ifndef _malloc_H
 #define _malloc_H
-#include "sys.h"
-#include "delay.h"
+#include "system.h"
+//#include "delay.h"
 
 
 #ifndef NULL

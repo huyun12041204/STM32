@@ -14,33 +14,40 @@
 #include "gui.h"
 #include "tim.h"
 #include "stm32f10x_it.h"
-//#include "adc.h"
-#include "sd.h"
-#include "sram.h" 
+//#include "sram.h" 
 #include "String.h"
+#include "malloc.h" 
+#include "sd.h"
+#include "flash.h"
+#include "ff.h" 
+#include "fatfs_app.h"
+#include "flash.h"
 
 
 extern u32 count;
 	//当前应该进入中断类别
-extern u16       u16EXIT_Type;
+extern u16        u16EXIT_Type;
 extern u8         u8Clk_EXIT_TYPE;
 
 //通道
-extern u8      u8Channel;
+extern u16 uCLKCount;
+extern u16 uSendCLKCOunt;
 
-extern u16     u8Counter[2];
 // 存储 CLK 间隔的 
-extern u16     u16CLK[100000][2];
+extern u8     u8CLK[_MaxCLKCount];
 //当前CLKNumber
 extern uint64_t u64CurCLK;
 //之前CLKNumber
 extern uint64_t u64PreCLK;
 
-u8 u8CurSDData[512];
-u32 u32CurSDDataLen;
+// 未满512长度的输入先放在Ram内;
+u8 SDTemp[512];
+u16 u16Save2SDTempLen;
 
 u32 u32SaveSDLen;
 u32 u32SavedSector;
+
+u8 willSend;
 
 
 #if 0
@@ -71,6 +78,7 @@ void ShowCLK2TFT(u16 u16CLK)
 #else
 
 u16 lCurY;
+u16 lCurX;
 
 void LCD_Dislay_Init()
 {
@@ -80,8 +88,8 @@ void LCD_Dislay_Init()
 //	FRONT_COLOR = YELLOW;
 	LCD_Clear(BLACK);
 	FRONT_COLOR = RED;
-	lCurY = 20;
-
+	lCurY = 10;
+  lCurX = 10;
 }
 
 
@@ -98,11 +106,39 @@ void LCD_Dislay_Printf(uint8_t *p)
 		lCurY = 20;
 	}
 	
-	delay_ms(2000);
+	delay_ms(10);
 
 }
 #endif
 
+
+int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
+{
+		
+
+ 
+	
+	if(ch == '\n')
+	{
+		lCurX  = 10;
+		lCurY += 20;
+		if (lCurY > 480)	
+			lCurY = 10;
+	}
+	else
+	{
+		 GUI_Show12ASCII(lCurX, lCurY, (uint8_t*)&ch, FRONT_COLOR, BLACK);
+			lCurX += 8;
+	}
+		
+	
+
+	
+//     	USART_SendData(USART1,(u8)ch);	
+//	while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
+
+	return ch;
+}
 
 
 
@@ -336,25 +372,30 @@ void Send16Data(u16 u16Data)
 }
 
 
-void SendChannelData(uint8_t      _Channel)
+void SendChannelData()
 {
+
 	u16 ii;
-	u8 Len;
-	u8 jj;
+	u16 u16CurCLKCount;
 	
-
-	for (ii = 0; ii < u8Counter[_Channel]; ii+= Len)
+	u16CurCLKCount = uCLKCount;
+	if (uSendCLKCOunt > u16CurCLKCount)
 	{
-		
-		//SendCharData(0xFE);
-		Len = (u16CLK[ii][_Channel]>>8)&0x7;
-		
-		for(jj = 0 ; jj < Len; jj++)
-			Send16Data(u16CLK[ii+jj][_Channel]);
-
+		u16CurCLKCount = u16CurCLKCount +_MaxCLKCount;
 	}
-
-	u8Counter[_Channel] = 0;
+	
+	
+	for (ii = uSendCLKCOunt; ii < u16CurCLKCount; ii+= 1)
+	{
+		if(ii >= _MaxCLKCount)
+			SendCharData(u8CLK[ii -_MaxCLKCount]);
+		else
+			SendCharData(u8CLK[ii]);
+	}
+	if(ii >= _MaxCLKCount)
+		uSendCLKCOunt = ii -_MaxCLKCount;
+	else
+		uSendCLKCOunt = ii;
 
 }
 
@@ -365,9 +406,12 @@ void  Initialize_Module(void)
 {
 		//FSMC_SRAM_Init();
 
-	u8 i = 0;
-	u32 sd_size;
-	u8 sd_buf[6];
+	
+//	u8 i=0;
+//	u32 free,total;
+//	u8 i = 0;
+//	u32 sd_size;
+//	u8 sd_buf[6];
 
 	//初始化时钟
 	SysTick_Init(72);
@@ -392,16 +436,42 @@ void  Initialize_Module(void)
 	PINx_EXIT_Init();
 
 	LCD_Dislay_Printf("Initialize Exit IO finished!");
+	
+	
+	
+	//EN25QXX_Init();				//初始化EN25Q128	  
+	
+	LCD_Dislay_Printf("Initialize flash finished!");
+	
 
 	if (SD_Init())
 	{
-		LCD_Dislay_Printf("Initialize SD failed!");
+		LCD_Dislay_Printf("SD Card Error!");
 	}
-	LCD_Dislay_Printf("Initialize SD finished!");
+	LCD_Dislay_Printf("SD Card OK!");
 	
-	
+//	FATFS_Init();							//为fatfs相关变量申请内存				 
+//	
 
-    if(SD_Type == 0x06)
+//	
+// 	f_mount(fs[0],"0:",1); 					//挂载SD卡 	
+//	
+//	while(FATFS_GetFree("0:",&total,&free))	//得到SD卡的总容量和剩余容量
+//	{
+//		LCD_Dislay_Printf("FATFS Error!");
+//		delay_ms(200);
+//	}
+//	
+//	
+//	printf("SD Total Size:%ldMB\n",total>>10);
+//	
+//	printf("SD Total Size:%ldMB\n",free>>10);
+	
+//	LCD_Dislay_Printf("SD Total Size:");
+	
+	//LCD_Dislay_Printf("SD Free Size:");
+
+  if(SD_Type == 0x06)
 	{
 		LCD_Dislay_Printf("SDV2HC OK!");
 	}
@@ -418,18 +488,21 @@ void  Initialize_Module(void)
 		LCD_Dislay_Printf("MMC OK!");
 	}
 	
-	LCD_Dislay_Printf("SD Card Size:");
+	//LCD_Dislay_Printf("SD Card Size:");
 	
-	sd_size=SD_GetSectorCount();//得到扇区数
-	sd_size=sd_size>>11;  //显示SD卡容量   MB
+	//sd_size=SD_GetSectorCount;//得到扇区数
+	
+	printf("SD Total Size:%ld MB\n",(SD_GetSectorCount()>>11));
+	
+//	sd_size=sd_size>>11;  //显示SD卡容量   MB
 
-	sd_buf[0] = sd_size / 10000 + 0x30;
-	sd_buf[1] = sd_size % 10000 / 1000 + 0x30;
-	sd_buf[2] = sd_size % 10000 % 1000 / 100 + 0x30;
-	sd_buf[3] = sd_size % 10000 % 1000 % 100 / 10 + 0x30;
-	sd_buf[4] = sd_size % 10000 % 1000 % 100 % 10 + 0x30;
-	sd_buf[5] = '\0';
-	LCD_Dislay_Printf(sd_buf);
+//	sd_buf[0] = sd_size / 10000 + 0x30;
+//	sd_buf[1] = sd_size % 10000 / 1000 + 0x30;
+//	sd_buf[2] = sd_size % 10000 % 1000 / 100 + 0x30;
+//	sd_buf[3] = sd_size % 10000 % 1000 % 100 / 10 + 0x30;
+//	sd_buf[4] = sd_size % 10000 % 1000 % 100 % 10 + 0x30;
+//	sd_buf[5] = '\0';
+//	LCD_Dislay_Printf(sd_buf);
 
 
 }
@@ -437,10 +510,11 @@ void  Initialize_Module(void)
 void  Initialize_Global_variable(void)
 {
 	//设置CLK计数器0
-	memset(u8Counter, 0, sizeof(u8Counter));
-	//设置通道0
-	u8Channel = 0;
-	memset(u16CLK, 0, sizeof(u16CLK));
+
+ uCLKCount     = 0 ;
+ uSendCLKCOunt = 0 ;
+	
+	memset(u8CLK, 0, sizeof(u8CLK));
 
 	//CLK总数
 	count = 0;
@@ -449,12 +523,15 @@ void  Initialize_Global_variable(void)
 	u8Clk_EXIT_TYPE = CLK_EXITT_ALL;
 
 	u64CurCLK = 0;
-    u64PreCLK = 0;
+  u64PreCLK = 0;
 
-    u32SavedSector  = 20;
-	u32CurSDDataLen = 0;
-	u32SaveSDLen    = 0;
+//  u32SavedSector  = 20;
+//	u32CurSDDataLen = 0;
+//	u32SaveSDLen    = 0;
+	
+	
 
+    willSend = 0;
 
 }
 
@@ -488,111 +565,145 @@ void SendEmptyData()
 
 void SendRamData(u8* SendEmpty)
 {
+	
+	
+	SendChannelData();
 
-	if (u8Counter[u8Channel] != 0)
-		{
-			if (u8Channel == 0)
-			{
-				u8Channel = 1;
-				SendChannelData(0);
-			}
-			else
-			{
-				u8Channel = 0;
-				SendChannelData(1);
-
-			}
-			*SendEmpty = 0;
-		}
-		else if(*SendEmpty == 0)
-		{
-			//SendEmpty = 1;
-			//SendCharData(0xFF);
-			//SendCharData(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2));
-			//Send64Data(count * 0xFFFF + TIM_GetCounter(TIM2));
-			
-		  //printf("Empty");
-
-			//Send16Data(0x4);
-		  
-	//	_ConverntClkDif()
-	//		SendEmptyData();
-			*SendEmpty = 1;
-		//	delay_ms(100);
-
-		}
 }
 
-void Save2SD(u8* u8Data,u32 uLen)
+u8 Save2SD(u8* u8Data,u32 uLen)
 {
 
 	u8 SaveCount;
-	u32 uCurLen;
-	//u32 Countl
+	u32 u32SavedLen = 0;
+//	u32 u32WillLen = 0;
+	u8 u8Ret = 0;
 
-	uCurLen = u32CurSDDataLen + uLen;
-
-	SaveCount = uCurLen / 512;
-
-	SD_WriteDisk(u8Data, u32SavedSector, SaveCount);
-
-	u32CurSDDataLen = uCurLen % 512;
-
-	u32SavedSector += SaveCount;
-
-
-}
-
-void SaveChannelData(u8 _Channel)
-{
-
-		u16 ii;
-		u8 Len;
-		u8 jj;
-
-
-		for (ii = 0; ii < u8Counter[_Channel]; ii += Len)
-		{
-
-			//SendCharData(0xFE);
-			Len = (u16CLK[ii][_Channel] >> 8) & 0x7;
-
-			for (jj = 0; jj < Len; jj++)
-				Send16Data(u16CLK[ii + jj][_Channel]);
-
-		}
-
-		u8Counter[_Channel] = 0;
-
-
-}
-
-
-
-
-void SaveRamData()
-{
-
-	if (u8Counter[u8Channel] != 0)
+	if (u16Save2SDTempLen != 0) // 未满512长度的输入先放在Ram内 == 0)
 	{
-		if (u8Channel == 0)
-		{
-			u8Channel = 1;
-			SendChannelData(0);
-		}
-		else
-		{
-			u8Channel = 0;
-			SendChannelData(1);
+		u32SavedLen = 512 - u16Save2SDTempLen;
 
-		
+		if (uLen < u32SavedLen)
+		{
+			memcpy(SDTemp, u8Data, uLen);
+			u16Save2SDTempLen = +uLen;
+			return u8Ret;
+		}
+
+		memcpy(SDTemp, u8Data, u32SavedLen);
+		u8Ret = SD_WriteDisk(u8Data, u32SavedSector, 1);
+		if (u8Ret != 0)
+			return u8Ret;
+
+		u32SavedSector += 1;
+	}
+
+	SaveCount = (uLen - u32SavedLen) / 512;
+
+	if (SaveCount != 0)
+	{
+		u8Ret = SD_WriteDisk(u8Data+ u32SavedLen, u32SavedSector, SaveCount);
+		if (u8Ret != 0)
+			return u8Ret;
+		u32SavedSector += SaveCount;
 	}
 
 
+	u32SavedLen = u32SavedLen + SaveCount * 512;
 
+	memcpy(SDTemp , u8Data + u32SavedLen, uLen - u32SavedLen);
+
+	u32SaveSDLen += uLen;
+
+	return u8Ret;
+
+}
+
+u8 SaveChannelData()
+{
+
+	u16 u16CurCLKCount;
+	u8 u8Ret = 0;
+	u16CurCLKCount = uCLKCount;
+	if (uSendCLKCOunt > u16CurCLKCount)
+	{
+
+		u8Ret = Save2SD(u8CLK+ uSendCLKCOunt, _MaxCLKCount - uSendCLKCOunt);
+		if (u8Ret == 0)
+			u8Ret = Save2SD(u8CLK, u16CurCLKCount);
+
+	}
+	else
+	{
+		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, u16CurCLKCount - uSendCLKCOunt);
+	}
+
+	return u8Ret;
+
+
+}
+
+u8 ReadSDData(u32 u32Offset, u16 u16Len,u8* u8buf,u16 *u16bufLen)
+{
+
+	u16 u16OffSector;
+	u16 uCurSectorOff;
+	u8 u8Ret = 0;
+	if ((u32Offset%512) != 0)
+	{
+		u16OffSector  = u32Offset / 512;
+		uCurSectorOff = u32Offset % 512;
+		u8Ret = SD_ReadDisk(u8buf, u16OffSector, 1);
+
+		memcpy(u8buf, u8buf + uCurSectorOff, 512-uCurSectorOff);
+
+		*u16bufLen = 512 - uCurSectorOff;
+	}
+	else
+	{
+		if ((u16Len % 512) != 0)
+		{
+			memcpy(u8buf, SDTemp, u16Save2SDTempLen);
+			*u16bufLen = u16Save2SDTempLen;
+		}
+		else
+		{
+			u16OffSector = (u32Offset % 512) + 20;
+			u8Ret = SD_ReadDisk(u8buf, u16OffSector, 1);
+			*u16bufLen = 512;
+		}
+	}
+
+	return u8Ret;
+}
+
+
+void ReadSendBuf()
+{
+	u8  ubuf[512];
+	u16 uLen,ii;
+	
+	if(ReadSDData(0, 512,ubuf,&uLen) == 0)
+	{
+		printf("Read OK\n");
+		
+		for(ii = 0 ; ii <uLen;ii++ )
+	   	SendCharData(ubuf[ii]);
+		
+	}
+	else
+	{
+			printf("Read Error\n");
+	}
+	
+	
+	
+
+
+}
 int main(void)
-{	
-	u8 SendEmpty = 0;
+{
+//	u8 SendEmpty = 0;
 
 	//初始化各个模块
 	Initialize_Module();
@@ -605,12 +716,25 @@ int main(void)
 
 	while(1)
 	{	
-		SendRamData(&SendEmpty);
+		//SendChannelData();
+
+		if(uSendCLKCOunt == uCLKCount)
+		{
+			
+			continue;
+		}
+		if (SaveChannelData() == 0)
+		{
+					printf("Save successful\n");
+		}
+	
+		if(willSend == 1)
+		{		
+			ReadSendBuf();
+			willSend = 0;
+		}
+
 		
+
 	}
 }
-
-
-
-
-

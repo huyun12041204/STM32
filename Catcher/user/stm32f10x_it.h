@@ -42,7 +42,7 @@
 #define Bits_Len7   0x7
 #endif 
 
-#define _MaxCLKCount 3000
+#define _MaxCLKCount 50000
 
 
 #ifdef _ORI

@@ -16,12 +16,13 @@
 #include "stm32f10x_it.h"
 //#include "sram.h" 
 #include "String.h"
-#include "malloc.h" 
+//#include "malloc.h" 
 #include "sd.h"
-#include "flash.h"
-#include "ff.h" 
-#include "fatfs_app.h"
-#include "flash.h"
+//#include "flash.h"
+//#include "ff.h" 
+//#include "fatfs_app.h"
+//#include "flash.h"
+#include "Command.h"
 
 
 extern u32 count;
@@ -43,11 +44,8 @@ extern uint64_t u64PreCLK;
 // 未满512长度的输入先放在Ram内;
 u8 SDTemp[512];
 u16 u16Save2SDTempLen;
-
-u32 u32SaveSDLen;
 u32 u32SavedSector;
 
-u8 willSend;
 
 
 #if 0
@@ -337,39 +335,39 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 
 
 
-void SendCharData(char cData)
-{
-	USART_SendData(USART1, cData);
-	while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+//void SendCharData(char cData)
+//{
+//	USART_SendData(USART1, cData);
+//	while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
 
-}
-void Send64Data(uint64_t u64Data)
-{
-	uint64_t temp;
-	u8 ii;
-	char Data[8];
+//}
+//void Send64Data(uint64_t u64Data)
+//{
+//	uint64_t temp;
+//	u8 ii;
+//	char Data[8];
 
-	temp = u64Data;
+//	temp = u64Data;
 
-	for (ii = 8 ; ii > 0 ; ii--)
-	{
-		Data[ii - 1] = temp % 0x100;
-		temp = temp / 0x100;
-	}
-	for (ii = 0; ii < 8; ii++)
-	{
-		SendCharData(Data[ii]);
-			
-	}
+//	for (ii = 8 ; ii > 0 ; ii--)
+//	{
+//		Data[ii - 1] = temp % 0x100;
+//		temp = temp / 0x100;
+//	}
+//	for (ii = 0; ii < 8; ii++)
+//	{
+//		SendCharData(Data[ii]);
+//			
+//	}
 
-}
+//}
 
-void Send16Data(u16 u16Data)
-{
+//void Send16Data(u16 u16Data)
+//{
 
-	SendCharData(u16Data/0x100);
-	SendCharData(u16Data %0x100);
-}
+//	SendCharData(u16Data/0x100);
+//	SendCharData(u16Data %0x100);
+//}
 
 
 void SendChannelData()
@@ -531,37 +529,37 @@ void  Initialize_Global_variable(void)
 	
 	
 
-    willSend = 0;
-
-}
-
-void SendEmptyData()
-{
-
-	uint64_t u64CurClk;
-	uint64_t u64Diff;
-	u16      uCurDiff[8];
-	u16      u16DiffLen;
-	u16      u16CurStatue;
-	u8       jj;
-
-	u16DiffLen   = 0;
-	u16CurStatue = 0;
-	u64CurClk    = count * 0xFFFF + TIM_GetCounter(TIM2);
-	u64Diff      = u64CurClk - u64PreCLK;
-	u16CurStatue = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2);
-	if (u16CurStatue)
-		u16CurStatue = EXIT_RAISE;
-
-	_ConverntClkDif(u64Diff, u16CurStatue, Pin_IO, uCurDiff, &u16DiffLen);
-
-	for (jj = 0; jj < u16DiffLen; jj++)
-		Send16Data(uCurDiff[jj]);
-	
-	u64PreCLK = u64CurClk;
 
 
 }
+
+//void SendEmptyData()
+//{
+
+//	uint64_t u64CurClk;
+//	uint64_t u64Diff;
+//	u16      uCurDiff[8];
+//	u16      u16DiffLen;
+//	u16      u16CurStatue;
+//	u8       jj;
+
+//	u16DiffLen   = 0;
+//	u16CurStatue = 0;
+//	u64CurClk    = count * 0xFFFF + TIM_GetCounter(TIM2);
+//	u64Diff      = u64CurClk - u64PreCLK;
+//	u16CurStatue = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2);
+//	if (u16CurStatue)
+//		u16CurStatue = EXIT_RAISE;
+
+//	_ConverntClkDif(u64Diff, u16CurStatue, Pin_IO, uCurDiff, &u16DiffLen);
+
+//	for (jj = 0; jj < u16DiffLen; jj++)
+//		Send16Data(uCurDiff[jj]);
+//	
+//	u64PreCLK = u64CurClk;
+
+
+//}
 
 void SendRamData(u8* SendEmpty)
 {
@@ -609,11 +607,11 @@ u8 Save2SD(u8* u8Data,u32 uLen)
 	}
 
 
-	u32SavedLen = u32SavedLen + SaveCount * 512;
+	u32SavedLen       = u32SavedLen + SaveCount * 512;
+	u16Save2SDTempLen = uLen - u32SavedLen;
+	memcpy(SDTemp , u8Data + u32SavedLen, u16Save2SDTempLen);
 
-	memcpy(SDTemp , u8Data + u32SavedLen, uLen - u32SavedLen);
 
-	u32SaveSDLen += uLen;
 
 	return u8Ret;
 
@@ -709,6 +707,9 @@ int main(void)
 	Initialize_Module();
 
 	Initialize_Global_variable();
+	
+	_SendBuf_Init();
+	_Command_Init();
 
 	Tim_Enable();			//同步开始计数
 	
@@ -725,14 +726,14 @@ int main(void)
 		}
 		if (SaveChannelData() == 0)
 		{
-					printf("Save successful\n");
+				//	printf("Save successful\n");
 		}
 	
-		if(willSend == 1)
-		{		
-			ReadSendBuf();
-			willSend = 0;
-		}
+//		if(willSend == 1)
+//		{		
+//			ReadSendBuf();
+//			willSend = 0;
+//		}
 
 		
 

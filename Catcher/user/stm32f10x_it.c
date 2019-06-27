@@ -6,7 +6,7 @@
 #include "button.h"
 #include "led.h"
 #include "stdio.h" 
-
+#include "var.h"
 
 
 
@@ -190,35 +190,7 @@ void set_background(void)
 
 
 
-//uint64_t u64StartCLK;
 
-//uint8_t      u8Channel;
-//uint64_t     u64CLK[1000][2];
-//uint8_t      bBit[1000][2];
-//uint16_t      u8Counter[2];
-
-
-//TIM2 的计数器
-uint32_t count;
-
-//EXTI_InitTypeDef EXTI_InitStructure2;
-//EXTI_InitTypeDef EXTI_InitStructure3;
-
-//当前应该进入中断类别
-u16       u16EXIT_Type;
-u8        u8Clk_EXIT_TYPE;
-
-//通道
-
-u16 uCLKCount;
-u16 uSendCLKCOunt;
-
-// 存储 CLK 间隔的 
-u8    u8CLK[_MaxCLKCount];
-//当前CLKNumber
-uint64_t u64CurCLK;
-//之前CLKNumber
-uint64_t u64PreCLK;
 
 int64_t GetCLKNumber()
 {

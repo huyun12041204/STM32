@@ -1,28 +1,8 @@
 #include "Command.h"
 #include "usart.h"	 
 #include "system.h"
-u8 u8Command[5];
-u8 u8RecLen;
-u8 u8CommandRet;
-
-
-
-//最后一包的发送长度，0-512
-u16 u16SendCurSector;
-
-//已经发送的完整块数
-u32 u32SendSector   ;
-
-
-//未满512 存在Ram内的长度
-extern u16 u16Save2SDTempLen;
-
-//已经存储在 SD 卡内的完整块数
-extern u32 u32SavedSector;
-
-//设备信息
-const char u8Information[8] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77 };
-
+#include "var.h"
+#include "String.h"
 
 void _SendBuf_Init(void)
 {

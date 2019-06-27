@@ -23,28 +23,10 @@
 //#include "fatfs_app.h"
 //#include "flash.h"
 #include "Command.h"
+#include "var.h"
 
 
-extern u32 count;
-	//当前应该进入中断类别
-extern u16        u16EXIT_Type;
-extern u8         u8Clk_EXIT_TYPE;
 
-//通道
-extern u16 uCLKCount;
-extern u16 uSendCLKCOunt;
-
-// 存储 CLK 间隔的 
-extern u8     u8CLK[_MaxCLKCount];
-//当前CLKNumber
-extern uint64_t u64CurCLK;
-//之前CLKNumber
-extern uint64_t u64PreCLK;
-
-// 未满512长度的输入先放在Ram内;
-u8 SDTemp[512];
-u16 u16Save2SDTempLen;
-u32 u32SavedSector;
 
 
 
@@ -92,7 +74,7 @@ void LCD_Dislay_Init()
 
 
 
-void LCD_Dislay_Printf(uint8_t *p)
+void LCD_Dislay_Printf(u8 *p)
 {
 
 	GUI_Show12ASCII(10, lCurY, p, FRONT_COLOR, BLACK);
@@ -471,26 +453,26 @@ void  Initialize_Module(void)
 
   if(SD_Type == 0x06)
 	{
-		LCD_Dislay_Printf("SDV2HC OK!");
+		LCD_Dislay_Printf((u8*)"SDV2HC OK!");
 	}
 	else if(SD_Type == 0x04)
 	{
-		LCD_Dislay_Printf("SDV2 OK!");
+		LCD_Dislay_Printf((u8*)"SDV2 OK!");
 	}
 	else if(SD_Type == 0x02)
 	{
-		LCD_Dislay_Printf("SDV1 OK!");
+		LCD_Dislay_Printf((u8*)"SDV1 OK!");
 	}
 	else if(SD_Type == 0x01)
 	{
-		LCD_Dislay_Printf("MMC OK!");
+		LCD_Dislay_Printf((u8*)"MMC OK!");
 	}
 	
 	//LCD_Dislay_Printf("SD Card Size:");
 	
 	//sd_size=SD_GetSectorCount;//得到扇区数
 	
-	printf("SD Total Size:%ld MB\n",(SD_GetSectorCount()>>11));
+	printf(("SD Total Size:%ld MB\n"),(long)(SD_GetSectorCount()>>11));
 	
 //	sd_size=sd_size>>11;  //显示SD卡容量   MB
 

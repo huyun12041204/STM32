@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClCompile Include="app\adc\adc.c" />
     <ClCompile Include="app\button\button.c" />
+    <ClCompile Include="app\Command\Command.c" />
+    <ClCompile Include="app\dma\dma.c" />
     <ClCompile Include="app\gui\gui.c" />
     <ClCompile Include="app\led\led.c" />
     <ClCompile Include="app\sd\sd.c" />
@@ -58,6 +60,7 @@
     <ClCompile Include="user\main.c" />
     <ClCompile Include="user\stm32f10x_it.c" />
     <ClCompile Include="user\system_stm32f10x.c" />
+    <ClCompile Include="var\var.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="core\startup_stm32f10x_hd.s" />
@@ -151,7 +154,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;__CC_ARM;STM32F10X_HD;USE_STDPERIPH_DRIVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)user;$(ProjectDir)stm32f10x_fwlib\inc;$(ProjectDir)stm32f10x_fwlib\src;$(ProjectDir)app;$(ProjectDir)core;$(ProjectDir)Public;$(ProjectDir)app\adc;$(ProjectDir)app\button;$(ProjectDir)app\gui;$(ProjectDir)app\led;$(ProjectDir)app\tim;$(ProjectDir)app\tftlcd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)user;$(ProjectDir)stm32f10x_fwlib\inc;$(ProjectDir)stm32f10x_fwlib\src;$(ProjectDir)app;$(ProjectDir)core;$(ProjectDir)Public;$(ProjectDir)app\adc;$(ProjectDir)app\button;$(ProjectDir)app\gui;$(ProjectDir)app\led;$(ProjectDir)app\tim;$(ProjectDir)app\tftlcd;$(ProjectDir)var;$(ProjectDir)app\Command;$(ProjectDir)app\SD;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

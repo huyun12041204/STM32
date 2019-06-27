@@ -69,7 +69,7 @@ void LCD_Dislay_Init()
 	LCD_Clear(BLACK);
 	FRONT_COLOR = RED;
 	lCurY = 10;
-  lCurX = 10;
+    lCurX = 10;
 }
 
 
@@ -81,9 +81,9 @@ void LCD_Dislay_Printf(u8 *p)
 
 	lCurY += 20;
 
-	if (lCurY > 480)
+	if (lCurY > 380)
 	{
-		lCurY = 20;
+		lCurY = 10;
 	}
 	
 	delay_ms(10);
@@ -491,8 +491,8 @@ void  Initialize_Global_variable(void)
 {
 	//设置CLK计数器0
 
- uCLKCount     = 0 ;
- uSendCLKCOunt = 0 ;
+    uCLKCount     = 0 ;
+    uSendCLKCOunt = 0 ;
 	
 	memset(u8CLK, 0, sizeof(u8CLK));
 
@@ -503,9 +503,10 @@ void  Initialize_Global_variable(void)
 	u8Clk_EXIT_TYPE = CLK_EXITT_ALL;
 
 	u64CurCLK = 0;
-  u64PreCLK = 0;
+    u64PreCLK = 0;
 
-//  u32SavedSector  = 20;
+    u32SavedSector    = _Start_Sector;
+	u16Save2SDTempLen = 0;
 //	u32CurSDDataLen = 0;
 //	u32SaveSDLen    = 0;
 	
@@ -555,30 +556,33 @@ u8 Save2SD(u8* u8Data,u32 uLen)
 {
 
 	u8 SaveCount;
-	u32 u32SavedLen = 0;
-//	u32 u32WillLen = 0;
 	u8 u8Ret = 0;
+	u32 u32SavedLen = 0;
 
-	if (u16Save2SDTempLen != 0) // 未满512长度的输入先放在Ram内 == 0)
+
+
+	//Ram内存在未存储到SD内的数据，需要先存储
+
+	if (u16Save2SDTempLen != 0) 
 	{
-		u32SavedLen = 512 - u16Save2SDTempLen;
+		u32SavedLen = _MaxSectorSize - u16Save2SDTempLen;
 
+	    //如果现有数据和存储数据还是不够512 则放在SDTemp
 		if (uLen < u32SavedLen)
 		{
-			memcpy(SDTemp, u8Data, uLen);
-			u16Save2SDTempLen = +uLen;
+			memcpy(SDTemp+ u16Save2SDTempLen, u8Data, uLen);
+			u16Save2SDTempLen = u16Save2SDTempLen + uLen;
 			return u8Ret;
 		}
-
-		memcpy(SDTemp, u8Data, u32SavedLen);
-		u8Ret = SD_WriteDisk(u8Data, u32SavedSector, 1);
+		//否则先存一个扇区
+		memcpy(SDTemp+ u16Save2SDTempLen, u8Data, u32SavedLen);
+		u8Ret = SD_WriteDisk(SDTemp, u32SavedSector, 1);
 		if (u8Ret != 0)
 			return u8Ret;
-
 		u32SavedSector += 1;
 	}
 
-	SaveCount = (uLen - u32SavedLen) / 512;
+	SaveCount = (uLen - u32SavedLen) / _MaxSectorSize;
 
 	if (SaveCount != 0)
 	{
@@ -589,7 +593,7 @@ u8 Save2SD(u8* u8Data,u32 uLen)
 	}
 
 
-	u32SavedLen       = u32SavedLen + SaveCount * 512;
+	u32SavedLen       = u32SavedLen + SaveCount * _MaxSectorSize;
 	u16Save2SDTempLen = uLen - u32SavedLen;
 	memcpy(SDTemp , u8Data + u32SavedLen, u16Save2SDTempLen);
 
@@ -605,6 +609,9 @@ u8 SaveChannelData()
 	u16 u16CurCLKCount;
 	u8 u8Ret = 0;
 	u16CurCLKCount = uCLKCount;
+
+
+	//如果send 大于 现有的 说明已经回滚了
 	if (uSendCLKCOunt > u16CurCLKCount)
 	{
 
@@ -617,6 +624,14 @@ u8 SaveChannelData()
 	{
 		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, u16CurCLKCount - uSendCLKCOunt);
 	}
+
+
+	uSendCLKCOunt = u16CurCLKCount;
+	
+	//if(u8Ret == 0)
+	//	printf("Save Success\n");
+	//else
+	//	printf("Save Failed %d\n",u8Ret);
 
 	return u8Ret;
 

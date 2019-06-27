@@ -16,6 +16,9 @@
     <Filter Include="App">
       <UniqueIdentifier>{4cb8d8b2-156b-4667-9de2-05f7b8adc72c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="var">
+      <UniqueIdentifier>{db539db8-8da8-42a5-b0f7-9831ed87a091}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="user\main.c">
@@ -134,6 +137,15 @@
     </ClCompile>
     <ClCompile Include="app\sd\sd.c">
       <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="app\Command\Command.c">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="app\dma\dma.c">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="var\var.c">
+      <Filter>var</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

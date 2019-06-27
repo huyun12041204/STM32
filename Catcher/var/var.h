@@ -10,6 +10,8 @@
 #define _MaxCLKCount 50000
 #define _MaxCommandLen 0x15
 
+#define _MaxSectorSize  512
+
 //存储 CLK 间隔的Ram变量
 extern u8  u8CLK[_MaxCLKCount];
 //当前CLKNumber
@@ -55,4 +57,8 @@ extern u8 u8RecLen;
 //指令的结果
 extern u8 u8CommandRet;
 
+//用于读SD 数据后发送的全局变量，应该使用DMA USART 方式发送
+extern u8 u8UsartSendBuf[_MaxSectorSize];
+
+extern u16 u16UsartSendBufLength;
 #endif

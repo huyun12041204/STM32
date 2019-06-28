@@ -22,9 +22,14 @@
 
 #define _Com_Success     0x9000
 #define _Com_WrongLength 0x6700
-#define _Com_WrongP3     0x6C00
+
 
 #define _Com_WrongOffset 0x6B00
+#define _Com_WrongP1     0x6B00
+#define _Com_WrongP2     0x6B00
+#define _Com_WrongP3     0x6C00
+#define _Com_WrongIns    0x6D00
+#define _Com_WrongClass  0x6E00
 
 #define _Com_ReadSDFailed    0x6F01
 #define _Com_ReadFlashFailed 0x6F02

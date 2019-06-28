@@ -7,10 +7,13 @@
 #include "System.h"
 
 
-#define _MaxCLKCount 50000
+//#define  _2Channel 
+
+#define _MaxCLKCount 10000
 #define _MaxCommandLen 0x15
 
 #define _MaxSectorSize  512
+#define _MaxUsartSendSize 600
 
 //存储 CLK 间隔的Ram变量
 extern u8  u8CLK[_MaxCLKCount];
@@ -58,7 +61,16 @@ extern u8 u8RecLen;
 extern u8 u8CommandRet;
 
 //用于读SD 数据后发送的全局变量，应该使用DMA USART 方式发送
-extern u8 u8UsartSendBuf[_MaxSectorSize];
+extern u8 u8UsartSendBuf[_MaxUsartSendSize];
 
 extern u16 u16UsartSendBufLength;
+#endif
+
+
+
+#ifdef _2Channel
+//存储 CLK 间隔的Ram变量
+extern u8  u8CLKT[_MaxCLKCount][2];
+extern u16 uCount[2];
+extern u8  u8Channel;
 #endif

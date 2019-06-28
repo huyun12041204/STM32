@@ -4,14 +4,12 @@
 //cpar:外设地址
 //cmar:存储器地址
 //cndtr:数据传输量
-u16 DMA1_MEM_LEN; 
-void dma_init(DMA_Channel_TypeDef* DMA_CHx,u32 cpar,u32 cmar,u16 cndtr)
+void DMA_Init_(DMA_Channel_TypeDef* DMA_CHx,u32 cpar,u32 cmar,u16 cndtr)
 {
 	DMA_InitTypeDef DMA_InitStructure;
 
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);	//开启DMA1时钟
 	DMA_DeInit(DMA_CHx);  //复位DMA各寄存器值
-	DMA1_MEM_LEN=cndtr;
 	USART_DMACmd(USART1,USART_DMAReq_Tx,ENABLE);	  //使能指定的DMA请求
 
 	DMA_InitStructure.DMA_PeripheralBaseAddr =cpar; //外设地址
@@ -28,10 +26,10 @@ void dma_init(DMA_Channel_TypeDef* DMA_CHx,u32 cpar,u32 cmar,u16 cndtr)
 	DMA_Init(DMA_CHx, &DMA_InitStructure);	
 	 
 }
-void DMA_Enable(DMA_Channel_TypeDef* DMA_CHx)  //开启DMA一次传输
+void DMA_Enable(DMA_Channel_TypeDef* DMA_CHx,u16 cndtr) //开启DMA一次传输
 {
 	DMA_Cmd(DMA_CHx,DISABLE);  //使能通道DMA
-	DMA_SetCurrDataCounter(DMA_CHx,DMA1_MEM_LEN);	//设置DMA缓存大小
+	DMA_SetCurrDataCounter(DMA_CHx,cndtr);	//设置DMA缓存大小
 	DMA_Cmd(DMA_CHx,ENABLE);  //使能通道DMA		
 }
 

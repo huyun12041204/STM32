@@ -24,7 +24,7 @@
 //#include "flash.h"
 #include "Command.h"
 #include "var.h"
-
+#include "dma.h"
 
 
 
@@ -355,27 +355,27 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 void SendChannelData()
 {
 
-	u16 ii;
-	u16 u16CurCLKCount;
-	
-	u16CurCLKCount = uCLKCount;
-	if (uSendCLKCOunt > u16CurCLKCount)
-	{
-		u16CurCLKCount = u16CurCLKCount +_MaxCLKCount;
-	}
-	
-	
-	for (ii = uSendCLKCOunt; ii < u16CurCLKCount; ii+= 1)
-	{
-		if(ii >= _MaxCLKCount)
-			SendCharData(u8CLK[ii -_MaxCLKCount]);
-		else
-			SendCharData(u8CLK[ii]);
-	}
-	if(ii >= _MaxCLKCount)
-		uSendCLKCOunt = ii -_MaxCLKCount;
-	else
-		uSendCLKCOunt = ii;
+//	u16 ii;
+//	u16 u16CurCLKCount;
+//	
+//	u16CurCLKCount = uCLKCount;
+//	if (uSendCLKCOunt > u16CurCLKCount)
+//	{
+//		u16CurCLKCount = u16CurCLKCount +_MaxCLKCount;
+//	}
+//	
+//	
+//	for (ii = uSendCLKCOunt; ii < u16CurCLKCount; ii+= 1)
+//	{
+//		if(ii >= _MaxCLKCount)
+//			SendCharData(u8CLK[ii -_MaxCLKCount]);
+//		else
+//			SendCharData(u8CLK[ii]);
+//	}
+//	if(ii >= _MaxCLKCount)
+//		uSendCLKCOunt = ii -_MaxCLKCount;
+//	else
+//		uSendCLKCOunt = ii;
 
 }
 
@@ -493,8 +493,16 @@ void  Initialize_Global_variable(void)
 
     uCLKCount     = 0 ;
     uSendCLKCOunt = 0 ;
-	
+
+#ifndef _2Channel
 	memset(u8CLK, 0, sizeof(u8CLK));
+#else
+	memset(u8CLKT, 0, sizeof(u8CLKT));
+	memset(uCount, 0, sizeof(uCount));
+	u8Channel = 0;
+#endif
+	
+
 
 	//CLK总数
 	count = 0;
@@ -560,7 +568,7 @@ u8 Save2SD(u8* u8Data,u32 uLen)
 	u32 u32SavedLen = 0;
 
 
-
+  // printf("%d",uLen);
 	//Ram内存在未存储到SD内的数据，需要先存储
 
 	if (u16Save2SDTempLen != 0) 
@@ -606,6 +614,7 @@ u8 Save2SD(u8* u8Data,u32 uLen)
 u8 SaveChannelData()
 {
 
+#ifndef _2Channel
 	u16 u16CurCLKCount;
 	u8 u8Ret = 0;
 	u16CurCLKCount = uCLKCount;
@@ -615,7 +624,7 @@ u8 SaveChannelData()
 	if (uSendCLKCOunt > u16CurCLKCount)
 	{
 
-		u8Ret = Save2SD(u8CLK+ uSendCLKCOunt, _MaxCLKCount - uSendCLKCOunt);
+		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, _MaxCLKCount - uSendCLKCOunt);
 		if (u8Ret == 0)
 			u8Ret = Save2SD(u8CLK, u16CurCLKCount);
 
@@ -627,13 +636,37 @@ u8 SaveChannelData()
 
 
 	uSendCLKCOunt = u16CurCLKCount;
-	
+
 	//if(u8Ret == 0)
 	//	printf("Save Success\n");
 	//else
 	//	printf("Save Failed %d\n",u8Ret);
 
 	return u8Ret;
+
+#else
+	u8 u8Ret = 0;
+	u8 u8Cur = u8Channel;
+
+
+	if (uCount[u8Cur]!=0)
+	{
+		if (u8Channel == 0)
+			u8Channel = 1;
+		else
+			u8Channel = 0;
+		u8Ret = Save2SD(u8CLKT[u8Cur], uCount[u8Cur]);
+		uCount[u8Cur] = 0;
+	}
+
+
+
+
+	return u8Ret;
+
+#endif
+
+
 
 
 }
@@ -705,8 +738,13 @@ int main(void)
 
 	Initialize_Global_variable();
 	
+	DMA_Init_(DMA1_Channel4,(u32)&USART1->DR,(u32)u8UsartSendBuf,_MaxUsartSendSize);
+	
 	_SendBuf_Init();
 	_Command_Init();
+	
+	
+	
 
 	Tim_Enable();			//同步开始计数
 	
@@ -726,6 +764,8 @@ int main(void)
 				//	printf("Save successful\n");
 		}
 	
+		if(DMA_GetFlagStatus(DMA1_FLAG_TC4)!=0)//判断通道4传输完成
+				DMA_ClearFlag(DMA1_FLAG_TC4);
 //		if(willSend == 1)
 //		{		
 //			ReadSendBuf();

@@ -154,7 +154,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;__CC_ARM;STM32F10X_HD;USE_STDPERIPH_DRIVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)user;$(ProjectDir)stm32f10x_fwlib\inc;$(ProjectDir)stm32f10x_fwlib\src;$(ProjectDir)app;$(ProjectDir)core;$(ProjectDir)Public;$(ProjectDir)app\adc;$(ProjectDir)app\button;$(ProjectDir)app\gui;$(ProjectDir)app\led;$(ProjectDir)app\tim;$(ProjectDir)app\tftlcd;$(ProjectDir)var;$(ProjectDir)app\Command;$(ProjectDir)app\SD;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)user;$(ProjectDir)stm32f10x_fwlib\inc;$(ProjectDir)stm32f10x_fwlib\src;$(ProjectDir)app;$(ProjectDir)core;$(ProjectDir)Public;$(ProjectDir)app\adc;$(ProjectDir)app\button;$(ProjectDir)app\gui;$(ProjectDir)app\led;$(ProjectDir)app\tim;$(ProjectDir)app\tftlcd;$(ProjectDir)var;$(ProjectDir)app\Command;$(ProjectDir)app\SD;$(ProjectDir)app\adm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

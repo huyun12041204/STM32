@@ -2,9 +2,11 @@
 
 
 
-
+#ifndef _2Channel
 //存储 CLK 间隔的Ram变量
 u8  u8CLK[_MaxCLKCount];
+#endif
+
 //当前CLKNumber
 uint64_t u64CurCLK;
 //之前CLKNumber
@@ -43,16 +45,18 @@ u8 u8RecLen;
 u8 u8CommandRet;
 
 
-u8 u8UsartSendBuf[_MaxSectorSize];
+u8 u8UsartSendBuf[_MaxUsartSendSize];
 u16 u16UsartSendBufLength;
 
 const char u8Information[8] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77 };
 
 
-
-
-
-
+#ifdef _2Channel
+//存储 CLK 间隔的Ram变量
+u8  u8CLKT[_MaxCLKCount][2];
+u16 uCount[2];
+u8  u8Channel;
+#endif
 
 
 

@@ -248,6 +248,31 @@ void SaveCurrentCLK(u16 u16EXTI_Type,u16 _Pin)
 
 	u64CLKDiff = u64CurCLK - u64PreCLK;
 
+#ifndef _2Channel
+	if (u64CLKDiff < 0xFF)
+		__ClkLen = Bits_Len1;
+	else if (u64CLKDiff < 0xFFFFFF)
+		__ClkLen = Bits_Len2;
+	else if (u64CLKDiff < 0xFFFFFFFFFF)
+		__ClkLen = Bits_Len3;
+
+	if ((uCLKCount + 1) > _MaxCLKCount)
+		uCLKCount = 0;
+
+	u8CLK[uCLKCount] = _Pin + u16EXTI_Type + __ClkLen;
+	uCLKCount += 1;
+
+	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
+	{
+		if ((uCLKCount + 1) > _MaxCLKCount)
+			uCLKCount = 0;
+		u8CLK[uCLKCount] = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);
+
+		uCLKCount += 1;
+	}
+	u64PreCLK = u64CurCLK;
+
+#else
 
 	if (u64CLKDiff < 0xFF)
 		__ClkLen = Bits_Len1;
@@ -256,67 +281,19 @@ void SaveCurrentCLK(u16 u16EXTI_Type,u16 _Pin)
 	else if (u64CLKDiff < 0xFFFFFFFFFF)
 		__ClkLen = Bits_Len3;
 
-	if ((uCLKCount + 1) == _MaxCLKCount)
-		uCLKCount = 0;
 
-	u8CLK[uCLKCount] = _Pin + u16EXTI_Type + __ClkLen;
-	uCLKCount += 1;
-
-	for (ii = (__ClkLen*2-1) ; ii>0 ; ii -= 1)
+	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
 	{
-		if ((uCLKCount + 1) == _MaxCLKCount)
-			uCLKCount = 0;
-		u8CLK[uCLKCount] = ((u64CLKDiff >> ((ii - 1)*8)) & 0xFF);
+		u8CLKT[uCount[u8Channel]][u8Channel] = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);
 
-		uCLKCount += 1;
+		uCount[u8Channel] += 1;
 	}
 
-	/*
-		if (u64CLKDiff < 0xFF)
-		{
-			if ((uCLKCount+1) == _MaxCLKCount )
-				uCLKCount = 0;
-			u8CLK[uCLKCount] = _Pin + u16EXTI_Type + Bits_Len1 + u64CLKDiff;
-			uCLKCount += 1;
-		}
-		else if (u64CLKDiff < 0xFFFFFF)
-		{
-
-			if ((uCLKCount+1) == _MaxCLKCount )
-				uCLKCount = 0;
-			u8CLK[uCLKCount] =  _Pin + u16EXTI_Type + Bits_Len2 + ((u64CLKDiff >>16)&0xFF);
-
-			uCLKCount += 1;
-			if ((uCLKCount+1) == _MaxCLKCount )
-				uCLKCount = 0;
-
-			u8CLK[uCLKCount] =  u64CLKDiff & 0xFFFF;
-				uCLKCount += 1;
-
-		}
-			else if (u64CLKDiff < 0xFFFFFFFFFF)
-		{
-
-			if ((uCLKCount+1) == _MaxCLKCount )
-				uCLKCount = 0;
-			u8CLK[uCLKCount] =  _Pin + u16EXTI_Type + Bits_Len3 + ((u64CLKDiff >> 32) & 0xFF);
-			uCLKCount += 1;
-
-
-			if ((uCLKCount+1) == _MaxCLKCount )
-				uCLKCount = 0;
-			u8CLK[uCLKCount] =  (u64CLKDiff >> 16) & 0xFFFF;
-
-				uCLKCount += 1;
-
-
-			if ((uCLKCount+1) == _MaxCLKCount )
-				uCLKCount = 0;
-			u8CLK[uCLKCount] =  u64CLKDiff & 0xFFFF;
-			uCLKCount += 1;
-		}*/
 
 	u64PreCLK = u64CurCLK;
+#endif
+
+
 
 }
 

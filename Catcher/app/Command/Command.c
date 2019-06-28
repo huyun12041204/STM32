@@ -4,7 +4,7 @@
 #include "var.h"
 #include "sd.h"
 #include "usart.h"	 
-//#include "dma.h"
+#include "dma.h"
 
 void _SendBuf_Init(void)
 {
@@ -60,6 +60,7 @@ u16 GetSectorCount(u8* u8Buf, u16* bufLen)
 	//	return _Com_WrongLength;
 	//}
 
+	memset(u8Buf,0,10);
 	Limit = (_Max_Sector_Count > 0xFFFFFFFF ? 0 : 4);
 
 	for(i = 8; i > Limit;i++)
@@ -127,18 +128,14 @@ u16 ReadSector(u8* u8Buf, u16* bufLen)
 	u32Sector = u32Sector + _Start_Sector;
 
 
-	printf("Want Read %d\n", u32Sector);
-
-	printf("Saved %d\n", u32SavedSector);
-
 	//超出最大读取返回
 	if (u32Sector < u32SavedSector)
 		return ReaduSectorData(u32Sector, u16Offset, u8Buf, bufLen);
-	else if ((u32Sector == u32SavedSector+1) &&
+	else if ((u32Sector == u32SavedSector) &&
 		     (u16Offset<u16Save2SDTempLen))
 	{
 		*bufLen = u16Save2SDTempLen - u16Offset;
-		memcpy(u8Buf, SDTemp, *bufLen);
+		memcpy(u8Buf, SDTemp+u16Offset, *bufLen);
 		return _Com_Success;
 	}else return _Com_OverLimit;
 	
@@ -155,36 +152,49 @@ u16 ReadSector(u8* u8Buf, u16* bufLen)
 //************************************
 void Excute_Command(void)
 {
+	u16 u16SW;
+	u16UsartSendBufLength = 0;
 	if(u8Command[_Com_CLA] != 0xFE)
-		goto Command_Finish;
+	{
+		u16SW = _Com_WrongClass;
+		goto DMA_USART_Send;
+		
+	}
 	
 		if(u8Command[_Com_INS] == _INS_GetInfo)
 		{		
 			//_SendBuf2USART(u8Information, 8); 
 			u16UsartSendBufLength = 8;
 			memcpy(u8UsartSendBuf, u8Information, u16UsartSendBufLength);
+			u16SW = _Com_Success;
 			goto DMA_USART_Send;
 		}
 
 		if (u8Command[_Com_INS] == _INS_GetSectorCount)
 		{
-			if (GetSectorCount(u8UsartSendBuf, &u16UsartSendBufLength) == _Com_Success)
-				goto DMA_USART_Send;
-			else
-				goto Command_Finish;
+			u16SW = GetSectorCount(u8UsartSendBuf, &u16UsartSendBufLength);
+			if (u16SW != _Com_Success)
+				u16UsartSendBufLength = 0;
+			
 
 		}	
 		if (u8Command[_Com_INS] == _INS_ReadSector)
 		{
-			if (ReadSector(u8UsartSendBuf, &u16UsartSendBufLength) == _Com_Success)
-				goto DMA_USART_Send;
-			else
-				goto Command_Finish;
+			u16SW = ReadSector(u8UsartSendBuf, &u16UsartSendBufLength);
+			if (u16SW  != _Com_Success)
+				u16UsartSendBufLength = 0;
 
 			
 		}
 	DMA_USART_Send:
-		_SendBuf2USART((char*)u8UsartSendBuf,u16UsartSendBufLength);
+		u8UsartSendBuf[u16UsartSendBufLength]   = (u16SW>>8)&0xFF;
+		u8UsartSendBuf[u16UsartSendBufLength+1] = u16SW&0xFF;	
+		u16UsartSendBufLength += 2;	
+	//	_SendBuf2USART((char*)u8UsartSendBuf,u16UsartSendBufLength);
+		
+		USART_DMACmd(USART1,USART_DMAReq_Tx,ENABLE);  //使能串口1的DMA发送     
+		DMA_Enable(DMA1_Channel4,u16UsartSendBufLength);     //开始一次DMA传输！
+		
 		
 		goto Command_Finish;
 

@@ -27,6 +27,10 @@ u16 uCLKCount;
 u16 uSendCLKCOunt;
 
 
+uint64_t SramOffset;
+
+
+
 //最后一包的发送长度，0-512
 u16 u16SendCurSector;
 

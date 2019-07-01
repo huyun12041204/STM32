@@ -5,6 +5,7 @@
 #include "sd.h"
 #include "usart.h"	 
 #include "dma.h"
+#include "sram.h"
 
 void _SendBuf_Init(void)
 {
@@ -125,8 +126,27 @@ u16 ReadSector(u8* u8Buf, u16* bufLen)
 	for (i = 4; i < 8 ; i++)
 		u32Sector = (u32Sector << (i-4)*8) + u8Command[i+_Com_Data];	
 
-	u32Sector = u32Sector + _Start_Sector;
+	
+	#ifdef __2Sram
+	
+	if(( u32Sector*512+512) <= SramOffset)
+	{
+			FSMC_SRAM_ReadBuf(u8Buf, (u32Sector*512+u16Offset)%0x1000000 ,512-u16Offset);
+		
+		* bufLen = 512-u16Offset;
+	}
+	else
+	{
+		* bufLen = SramOffset -(u32Sector*512+u16Offset);
+		 FSMC_SRAM_ReadBuf(u8Buf, (u32Sector*512+u16Offset)%0x1000000,SramOffset -(u32Sector*512+u16Offset) );
+	}
+	
+		return _Com_Success;
+	
 
+	#else
+	
+		u32Sector = u32Sector + _Start_Sector;
 
 	//超出最大读取返回
 	if (u32Sector < u32SavedSector)
@@ -138,6 +158,19 @@ u16 ReadSector(u8* u8Buf, u16* bufLen)
 		memcpy(u8Buf, SDTemp+u16Offset, *bufLen);
 		return _Com_Success;
 	}else return _Com_OverLimit;
+	
+	
+	#endif
+	
+	
+	
+
+	
+
+
+	
+	
+
 	
 }
 
@@ -181,6 +214,9 @@ void Excute_Command(void)
 		if (u8Command[_Com_INS] == _INS_ReadSector)
 		{
 			u16SW = ReadSector(u8UsartSendBuf, &u16UsartSendBufLength);
+			
+			
+			
 			if (u16SW  != _Com_Success)
 				u16UsartSendBufLength = 0;
 
@@ -203,7 +239,7 @@ void Excute_Command(void)
 
 void Install_Command(u8 _u8CommandByte)
 {
-	
+
 		u8Command[u8RecLen] =_u8CommandByte;
 		u8RecLen +=1;
 	 // LCD_Dislay_Printf(_u8CommandByte );

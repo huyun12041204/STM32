@@ -39,7 +39,7 @@
 
 
 
-#define _Start_Sector      20
+#define _Start_Sector      0x1000
 
 
 //************************************

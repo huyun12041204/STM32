@@ -8,7 +8,7 @@
 #include "stdio.h" 
 #include "var.h"
 
-
+#include "sram.h"
 
 
 
@@ -259,18 +259,57 @@ void SaveCurrentCLK(u16 u16EXTI_Type,u16 _Pin)
 	if ((uCLKCount + 1) > _MaxCLKCount)
 		uCLKCount = 0;
 
+
+	
+	
+	#ifdef __2Sram
+	
 	u8CLK[uCLKCount] = _Pin + u16EXTI_Type + __ClkLen;
+	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset%0x1000000,1);
 	uCLKCount += 1;
+	SramOffset += 1;
 
 	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
 	{
 		if ((uCLKCount + 1) > _MaxCLKCount)
 			uCLKCount = 0;
 		u8CLK[uCLKCount] = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);
-
+  	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset%0x1000000,1);
 		uCLKCount += 1;
+		SramOffset += 1;
 	}
+	
+	
+	
+	
+	
+
+	#else
+	
+	
+			u8CLK[uCLKCount] = _Pin + u16EXTI_Type + __ClkLen;
+//	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset,1);
+	uCLKCount += 1;
+	//SramOffset += 1;
+
+	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
+	{
+		if ((uCLKCount + 1) > _MaxCLKCount)
+			uCLKCount = 0;
+		u8CLK[uCLKCount] = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);
+  //	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset,1);
+		uCLKCount += 1;
+	//	SramOffset += 1;
+	}
+	
+
+	#endif
+	
+	
+	
 	u64PreCLK = u64CurCLK;
+	
+	
 
 #else
 
@@ -289,6 +328,7 @@ void SaveCurrentCLK(u16 u16EXTI_Type,u16 _Pin)
 		uCount[u8Channel] += 1;
 	}
 
+	
 
 	u64PreCLK = u64CurCLK;
 #endif

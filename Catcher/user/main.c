@@ -14,9 +14,9 @@
 #include "gui.h"
 #include "tim.h"
 #include "stm32f10x_it.h"
-//#include "sram.h" 
+#include "sram.h" 
 #include "String.h"
-//#include "malloc.h" 
+#include "malloc.h" 
 #include "sd.h"
 //#include "flash.h"
 //#include "ff.h" 
@@ -174,210 +174,7 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 }
 
 
-//void nvic_init(void)
-//{
-//	NVIC_InitTypeDef    NVIC_InitTypeStruct;
-//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-////	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI0_IRQn;
-////	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-////	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-////	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-////	NVIC_Init(&NVIC_InitTypeStruct);
 
-//	/*NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 1;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitTypeStruct);
-
-//	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI4_IRQn;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitTypeStruct);*/
-
-//	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
-//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	0;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitTypeStruct);
-
-////	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM3_IRQn; 
-////	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-////	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
-////	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-////	NVIC_Init(&NVIC_InitTypeStruct);
-
-//	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM4_IRQn;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 2;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitTypeStruct);
-//	
-//	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI2_IRQn;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =	2;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitTypeStruct);
-
-//	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI3_IRQn;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-//	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitTypeStruct);
-//}
-
-//void rcc_init(void)
-//{
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
-//	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
-//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-//	//RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-////	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
-
-//	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOE|RCC_APB2Periph_AFIO, ENABLE);
-//	////RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-//	//RCC_ADCCLKConfig(RCC_PCLK2_Div6);
-//	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
-//}
-
-//void gpio_init(void)
-//{
-//	GPIO_InitTypeDef GPIO_InitTypeStruct;
-//
-//
-//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部时钟的，用来测频率的，
-//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-//	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-//
-//
-//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
-//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IPU; 
-//	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
-//	
-//
-////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;				 //外部时钟的，用来测频率的，
-////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-////	GPIO_Init(GPIOD, &GPIO_InitTypeStruct);
-////
-////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //adc输入引脚
-////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AIN;
-////	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-////
-//////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4;
-//////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		 //外部中断的io配置
-//////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-//////	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
-////
-////	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-////	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部中断的io配置
-////	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-////	GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_8;					 //定时器1触发ad转换的输出的那个口
-//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;
-//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3;
-//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc3
-//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_4;
-//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc4
-//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_5;
-//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc5
-//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_6;
-//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//	adc6
-//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-//	//GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_7;
-//	//GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		// adc7
-//	//GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-//	//GPIO_Init(GPIOA, &GPIO_InitTypeStruct);
-//
-//
-//}
-
-
-
-
-
-//void SendCharData(char cData)
-//{
-//	USART_SendData(USART1, cData);
-//	while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
-
-//}
-//void Send64Data(uint64_t u64Data)
-//{
-//	uint64_t temp;
-//	u8 ii;
-//	char Data[8];
-
-//	temp = u64Data;
-
-//	for (ii = 8 ; ii > 0 ; ii--)
-//	{
-//		Data[ii - 1] = temp % 0x100;
-//		temp = temp / 0x100;
-//	}
-//	for (ii = 0; ii < 8; ii++)
-//	{
-//		SendCharData(Data[ii]);
-//			
-//	}
-
-//}
-
-//void Send16Data(u16 u16Data)
-//{
-
-//	SendCharData(u16Data/0x100);
-//	SendCharData(u16Data %0x100);
-//}
-
-
-void SendChannelData()
-{
-
-//	u16 ii;
-//	u16 u16CurCLKCount;
-//	
-//	u16CurCLKCount = uCLKCount;
-//	if (uSendCLKCOunt > u16CurCLKCount)
-//	{
-//		u16CurCLKCount = u16CurCLKCount +_MaxCLKCount;
-//	}
-//	
-//	
-//	for (ii = uSendCLKCOunt; ii < u16CurCLKCount; ii+= 1)
-//	{
-//		if(ii >= _MaxCLKCount)
-//			SendCharData(u8CLK[ii -_MaxCLKCount]);
-//		else
-//			SendCharData(u8CLK[ii]);
-//	}
-//	if(ii >= _MaxCLKCount)
-//		uSendCLKCOunt = ii -_MaxCLKCount;
-//	else
-//		uSendCLKCOunt = ii;
-
-}
 
 
 
@@ -400,7 +197,7 @@ void  Initialize_Module(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组分2组
 
 	//USART1 115200
-	USART1_Init(115200);
+	USART1_Init(864000);
 
 	//显示屏
 	LCD_Dislay_Init();
@@ -430,26 +227,6 @@ void  Initialize_Module(void)
 	}
 	LCD_Dislay_Printf("SD Card OK!");
 	
-//	FATFS_Init();							//为fatfs相关变量申请内存				 
-//	
-
-//	
-// 	f_mount(fs[0],"0:",1); 					//挂载SD卡 	
-//	
-//	while(FATFS_GetFree("0:",&total,&free))	//得到SD卡的总容量和剩余容量
-//	{
-//		LCD_Dislay_Printf("FATFS Error!");
-//		delay_ms(200);
-//	}
-//	
-//	
-//	printf("SD Total Size:%ldMB\n",total>>10);
-//	
-//	printf("SD Total Size:%ldMB\n",free>>10);
-	
-//	LCD_Dislay_Printf("SD Total Size:");
-	
-	//LCD_Dislay_Printf("SD Free Size:");
 
   if(SD_Type == 0x06)
 	{
@@ -474,17 +251,7 @@ void  Initialize_Module(void)
 	
 	printf(("SD Total Size:%ld MB\n"),(long)(SD_GetSectorCount()>>11));
 	
-//	sd_size=sd_size>>11;  //显示SD卡容量   MB
-
-//	sd_buf[0] = sd_size / 10000 + 0x30;
-//	sd_buf[1] = sd_size % 10000 / 1000 + 0x30;
-//	sd_buf[2] = sd_size % 10000 % 1000 / 100 + 0x30;
-//	sd_buf[3] = sd_size % 10000 % 1000 % 100 / 10 + 0x30;
-//	sd_buf[4] = sd_size % 10000 % 1000 % 100 % 10 + 0x30;
-//	sd_buf[5] = '\0';
-//	LCD_Dislay_Printf(sd_buf);
-
-
+  FSMC_SRAM_Init();
 }
 
 void  Initialize_Global_variable(void)
@@ -524,41 +291,6 @@ void  Initialize_Global_variable(void)
 
 }
 
-//void SendEmptyData()
-//{
-
-//	uint64_t u64CurClk;
-//	uint64_t u64Diff;
-//	u16      uCurDiff[8];
-//	u16      u16DiffLen;
-//	u16      u16CurStatue;
-//	u8       jj;
-
-//	u16DiffLen   = 0;
-//	u16CurStatue = 0;
-//	u64CurClk    = count * 0xFFFF + TIM_GetCounter(TIM2);
-//	u64Diff      = u64CurClk - u64PreCLK;
-//	u16CurStatue = GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2);
-//	if (u16CurStatue)
-//		u16CurStatue = EXIT_RAISE;
-
-//	_ConverntClkDif(u64Diff, u16CurStatue, Pin_IO, uCurDiff, &u16DiffLen);
-
-//	for (jj = 0; jj < u16DiffLen; jj++)
-//		Send16Data(uCurDiff[jj]);
-//	
-//	u64PreCLK = u64CurClk;
-
-
-//}
-
-void SendRamData(u8* SendEmpty)
-{
-	
-	
-	SendChannelData();
-
-}
 
 u8 Save2SD(u8* u8Data,u32 uLen)
 {
@@ -584,19 +316,30 @@ u8 Save2SD(u8* u8Data,u32 uLen)
 		}
 		//否则先存一个扇区
 		memcpy(SDTemp+ u16Save2SDTempLen, u8Data, u32SavedLen);
+		
+
 		u8Ret = SD_WriteDisk(SDTemp, u32SavedSector, 1);
-		if (u8Ret != 0)
-			return u8Ret;
+		if(u8Ret != 0) 
+				printf("L%d",u8Ret);
+			//printf("1%d",u8Ret);
+
+		
+	
 		u32SavedSector += 1;
 	}
 
 	SaveCount = (uLen - u32SavedLen) / _MaxSectorSize;
 
 	if (SaveCount != 0)
-	{
-		u8Ret = SD_WriteDisk(u8Data+ u32SavedLen, u32SavedSector, SaveCount);
-		if (u8Ret != 0)
-			return u8Ret;
+	{	
+//		for(ii = 0 ; ii < 10 ; ii ++)
+//		{
+		  u8Ret = SD_WriteDisk(u8Data+ u32SavedLen, u32SavedSector, SaveCount);
+			if(u8Ret != 0) 
+				printf("2L%d",u8Ret);
+		//	u8Ret = SD_WriteDisk(u8Data+ u32SavedLen, u32SavedSector, SaveCount);
+				printf("2%d",u8Ret);
+		//}
 		u32SavedSector += SaveCount;
 	}
 
@@ -610,6 +353,40 @@ u8 Save2SD(u8* u8Data,u32 uLen)
 	return u8Ret;
 
 }
+
+
+u8 SendChannelData()
+{
+	
+	u16 u16CurCLKCount;
+	u8 u8Ret = 0;
+	u16CurCLKCount = uCLKCount;
+
+
+	//如果send 大于 现有的 说明已经回滚了
+	if (uSendCLKCOunt > u16CurCLKCount)
+	{
+
+		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, _MaxCLKCount - uSendCLKCOunt);
+		if (u8Ret == 0)
+			u8Ret = Save2SD(u8CLK, u16CurCLKCount);
+
+	}
+	else
+	{
+		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, u16CurCLKCount - uSendCLKCOunt);
+	}
+
+
+	uSendCLKCOunt = u16CurCLKCount;
+
+	
+	return u8Ret;
+	
+	
+	
+}
+
 
 u8 SaveChannelData()
 {
@@ -671,64 +448,42 @@ u8 SaveChannelData()
 
 }
 
-u8 ReadSDData(u32 u32Offset, u16 u16Len,u8* u8buf,u16 *u16bufLen)
+
+void Test_SD(void)
 {
-
-	u16 u16OffSector;
-	u16 uCurSectorOff;
-	u8 u8Ret = 0;
-	if ((u32Offset%512) != 0)
+	 u32 i;
+	u8 u8Ret;
+	 memset(u8CLK , 0x55 ,1024);
+	
+	 printf("Start Write SD\n"); 
+	for(i = 0 ; i < 20000 ; i++)
 	{
-		u16OffSector  = u32Offset / 512;
-		uCurSectorOff = u32Offset % 512;
-		u8Ret = SD_ReadDisk(u8buf, u16OffSector, 1);
-
-		memcpy(u8buf, u8buf + uCurSectorOff, 512-uCurSectorOff);
-
-		*u16bufLen = 512 - uCurSectorOff;
+		u8Ret = SD_WriteDisk(u8CLK,i,1);
+		
+		if(u8Ret!=0)
+			printf("%d,%d!!\n",i,u8Ret);
+			
 	}
-	else
+	
+	printf("End Write SD\n"); 
+	
+	
+		printf("Start Read SD\n"); 
+		for(i = 0 ; i < 20000 ; i++)
 	{
-		if ((u16Len % 512) != 0)
-		{
-			memcpy(u8buf, SDTemp, u16Save2SDTempLen);
-			*u16bufLen = u16Save2SDTempLen;
-		}
-		else
-		{
-			u16OffSector = (u32Offset % 512) + 20;
-			u8Ret = SD_ReadDisk(u8buf, u16OffSector, 1);
-			*u16bufLen = 512;
-		}
+		u8Ret =SD_ReadDisk(u8CLK+1024,i,1);
+		
+		if(u8Ret!=0)
+			printf("%d,%d!!\n",i,u8Ret);
+		
+		if(memcmp(u8CLK+1024,u8CLK,512) != 0)
+			printf("%d^^\n",i);
+					
 	}
-
-	return u8Ret;
+	
+		printf("End Read SD\n"); 
 }
 
-
-void ReadSendBuf()
-{
-	u8  ubuf[512];
-	u16 uLen,ii;
-	
-	if(ReadSDData(0, 512,ubuf,&uLen) == 0)
-	{
-		printf("Read OK\n");
-		
-		for(ii = 0 ; ii <uLen;ii++ )
-	   	SendCharData(ubuf[ii]);
-		
-	}
-	else
-	{
-			printf("Read Error\n");
-	}
-	
-	
-	
-
-
-}
 int main(void)
 {
 //	u8 SendEmpty = 0;
@@ -743,36 +498,24 @@ int main(void)
 	_SendBuf_Init();
 	_Command_Init();
 	
-	
+	//SramOffset = 0;
 	
 
 	Tim_Enable();			//同步开始计数
 	
-
+ // Test_SD();
 
 	while(1)
 	{	
 		//SendChannelData();
 
-		if(uSendCLKCOunt == uCLKCount)
+		if(uSendCLKCOunt != uCLKCount)
 		{
-			
-			continue;
-		}
-		if (SaveChannelData() == 0)
-		{
-				//	printf("Save successful\n");
-		}
-	
-		if(DMA_GetFlagStatus(DMA1_FLAG_TC4)!=0)//判断通道4传输完成
+			//delay_us()
+			SaveChannelData();	
+		}else if(DMA_GetFlagStatus(DMA1_FLAG_TC4)!=0)//判断通道4传输完成
 				DMA_ClearFlag(DMA1_FLAG_TC4);
-//		if(willSend == 1)
-//		{		
-//			ReadSendBuf();
-//			willSend = 0;
-//		}
 
-		
-
+	
 	}
 }

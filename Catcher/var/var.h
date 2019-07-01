@@ -8,8 +8,9 @@
 
 
 //#define  _2Channel 
+//#define __2Sram
 
-#define _MaxCLKCount 10000
+#define _MaxCLKCount 30000
 #define _MaxCommandLen 0x15
 
 #define _MaxSectorSize  512
@@ -73,4 +74,10 @@ extern u16 u16UsartSendBufLength;
 extern u8  u8CLKT[_MaxCLKCount][2];
 extern u16 uCount[2];
 extern u8  u8Channel;
+#endif
+
+
+#ifdef __2Sram
+//≤‚ ‘ π”√
+extern uint64_t SramOffset;
 #endif

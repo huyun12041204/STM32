@@ -15,7 +15,7 @@ void _SendBuf_Init(void)
 
 void _Command_Init(void)
 {
-	memset(u8Command,0, 5);
+	memset(u8Command,0, sizeof(u8Command));
 	u8RecLen     = 0;
 	//u8CommandRet = 0;
 
@@ -111,6 +111,8 @@ u16 ReadSector(u8* u8Buf, u16* bufLen)
 	u8 i;
 	u16 u16Offset;
 	u32 u32Sector = 0;
+	uint64_t CurrentSramOffset = SramOffset;
+	
 
 	u16UsartSendBufLength = 0;
 	//P3 错误返回6CXX
@@ -129,16 +131,17 @@ u16 ReadSector(u8* u8Buf, u16* bufLen)
 	
 	#ifdef __2Sram
 	
-	if(( u32Sector*512+512) <= SramOffset)
+	if((uint64_t)( u32Sector*512+512) <= CurrentSramOffset)
 	{
-			FSMC_SRAM_ReadBuf(u8Buf, (u32Sector*512+u16Offset)%0x1000000 ,512-u16Offset);
-		
-		* bufLen = 512-u16Offset;
+		*bufLen = 512-u16Offset;
+		FSMC_SRAM_ReadBuf(u8Buf, (u32Sector*512+u16Offset) ,*bufLen);	
+	
 	}
 	else
 	{
-		* bufLen = SramOffset -(u32Sector*512+u16Offset);
-		 FSMC_SRAM_ReadBuf(u8Buf, (u32Sector*512+u16Offset)%0x1000000,SramOffset -(u32Sector*512+u16Offset) );
+		 *bufLen = CurrentSramOffset -(uint64_t)(u32Sector*512+u16Offset);
+		 FSMC_SRAM_ReadBuf(u8Buf, (u32Sector*512+u16Offset) , *bufLen );
+
 	}
 	
 		return _Com_Success;
@@ -187,68 +190,66 @@ void Excute_Command(void)
 {
 	u16 u16SW;
 	u16UsartSendBufLength = 0;
+	
 	if(u8Command[_Com_CLA] != 0xFE)
 	{
-		u16SW = _Com_WrongClass;
-		goto DMA_USART_Send;
-		
+		u16SW = _Com_WrongClass;	
+	}
+
+	switch (u8Command[_Com_INS])
+	{
+	case _INS_GetInfo:
+		u16UsartSendBufLength = 8;
+		memcpy(u8UsartSendBuf, u8Information, u16UsartSendBufLength);
+		u16SW = _Com_Success;
+		break;
+
+	case _INS_GetSectorCount:
+		u16SW = GetSectorCount(u8UsartSendBuf, &u16UsartSendBufLength);
+		if (u16SW != _Com_Success)
+			u16UsartSendBufLength = 0;
+		break;
+
+	case _INS_ReadSector:
+		u16SW = ReadSector(u8UsartSendBuf, &u16UsartSendBufLength);
+		if (u16SW != _Com_Success)
+			u16UsartSendBufLength = 0;
+		break;
+
+	default:
+		u16UsartSendBufLength = 0;
+		u16SW = _Com_WrongIns;
+		break;
 	}
 	
-		if(u8Command[_Com_INS] == _INS_GetInfo)
-		{		
-			//_SendBuf2USART(u8Information, 8); 
-			u16UsartSendBufLength = 8;
-			memcpy(u8UsartSendBuf, u8Information, u16UsartSendBufLength);
-			u16SW = _Com_Success;
-			goto DMA_USART_Send;
-		}
-
-		if (u8Command[_Com_INS] == _INS_GetSectorCount)
-		{
-			u16SW = GetSectorCount(u8UsartSendBuf, &u16UsartSendBufLength);
-			if (u16SW != _Com_Success)
-				u16UsartSendBufLength = 0;
-			
-
-		}	
-		if (u8Command[_Com_INS] == _INS_ReadSector)
-		{
-			u16SW = ReadSector(u8UsartSendBuf, &u16UsartSendBufLength);
-			
-			
-			
-			if (u16SW  != _Com_Success)
-				u16UsartSendBufLength = 0;
-
-			
-		}
-	DMA_USART_Send:
-		u8UsartSendBuf[u16UsartSendBufLength]   = (u16SW>>8)&0xFF;
-		u8UsartSendBuf[u16UsartSendBufLength+1] = u16SW&0xFF;	
-		u16UsartSendBufLength += 2;	
-	//	_SendBuf2USART((char*)u8UsartSendBuf,u16UsartSendBufLength);
+	u8UsartSendBuf[u16UsartSendBufLength]   = (u16SW>>8)&0xFF;
+	u8UsartSendBuf[u16UsartSendBufLength+1] = u16SW&0xFF;	
+	u16UsartSendBufLength += 2;	
 		
-		USART_DMACmd(USART1,USART_DMAReq_Tx,ENABLE);  //使能串口1的DMA发送     
-		DMA_Enable(DMA1_Channel4,u16UsartSendBufLength);     //开始一次DMA传输！
-		
-		
-		goto Command_Finish;
-
-	Command_Finish:_Command_Init();
+	USART_DMACmd(USART1,USART_DMAReq_Tx,ENABLE);  //使能串口1的DMA发送     
+	DMA_Enable(DMA1_Channel4,u16UsartSendBufLength);     //开始一次DMA传输！
+	_Command_Init();
 }
 
 void Install_Command(u8 _u8CommandByte)
 {
 
-		u8Command[u8RecLen] =_u8CommandByte;
-		u8RecLen +=1;
+	u8Command[u8RecLen] =_u8CommandByte;
+	u8RecLen +=1;
 	 // LCD_Dislay_Printf(_u8CommandByte );
 	//  SendCharData(_u8CommandByte);
-		if(u8RecLen == 5+ u8Command[_Com_P3])
-		{
-			Excute_Command();		
-			u8RecLen = 0;
-		}
+	
+	if(u8RecLen < 5)
+		return;
+	else if(u8RecLen == 5+ u8Command[_Com_P3])
+	{
+		USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+		Excute_Command();		
+//		u8RecLen = 0;
+	}
+
+	
+	
 	
 	
 }

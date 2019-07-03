@@ -8,7 +8,7 @@
 
 
 //#define  _2Channel 
-//#define __2Sram
+#define __2Sram
 
 #define _MaxCLKCount 30000
 #define _MaxCommandLen 0x15

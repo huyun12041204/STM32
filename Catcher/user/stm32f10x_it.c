@@ -265,7 +265,7 @@ void SaveCurrentCLK(u16 u16EXTI_Type,u16 _Pin)
 	#ifdef __2Sram
 	
 	u8CLK[uCLKCount] = _Pin + u16EXTI_Type + __ClkLen;
-	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset%0x1000000,1);
+	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset,1);
 	uCLKCount += 1;
 	SramOffset += 1;
 
@@ -274,7 +274,7 @@ void SaveCurrentCLK(u16 u16EXTI_Type,u16 _Pin)
 		if ((uCLKCount + 1) > _MaxCLKCount)
 			uCLKCount = 0;
 		u8CLK[uCLKCount] = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);
-  	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset%0x1000000,1);
+  	    FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset ,1);
 		uCLKCount += 1;
 		SramOffset += 1;
 	}

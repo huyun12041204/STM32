@@ -83,6 +83,7 @@ void FSMC_SRAM_WriteBuf(u8 *pbuf,u32 writeaddr,u32 len)
 {
 	while(len--)
 	{
+		writeaddr = writeaddr & 0xFFFFFF;
 		*(u8*)(SRAM_ADDR+writeaddr)=*pbuf;
 		writeaddr++;
 		pbuf++;
@@ -97,6 +98,7 @@ void FSMC_SRAM_ReadBuf(u8 *pbuf,u32 readaddr,u32 len)
 {
 	while(len--)
 	{
+		readaddr = readaddr & 0xFFFFFF;
 		*pbuf=*(u8*)(SRAM_ADDR+readaddr);
 		readaddr++;
 		pbuf++;

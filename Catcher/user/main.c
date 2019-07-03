@@ -252,6 +252,8 @@ void  Initialize_Module(void)
 	printf(("SD Total Size:%ld MB\n"),(long)(SD_GetSectorCount()>>11));
 	
   FSMC_SRAM_Init();
+	
+	printf("Initialize Sram!\n"); 
 }
 
 void  Initialize_Global_variable(void)
@@ -504,7 +506,7 @@ int main(void)
 	Tim_Enable();			//同步开始计数
 	
  // Test_SD();
-
+	printf("Start ...!\n"); 
 	while(1)
 	{	
 		//SendChannelData();
@@ -513,8 +515,15 @@ int main(void)
 		{
 			//delay_us()
 			SaveChannelData();	
-		}else if(DMA_GetFlagStatus(DMA1_FLAG_TC4)!=0)//判断通道4传输完成
-				DMA_ClearFlag(DMA1_FLAG_TC4);
+		}
+		else if (DMA_GetFlagStatus(DMA1_FLAG_TC4) != 0)//判断通道4传输完成
+		{
+	//		printf("Enable USART IT\n"); 
+			USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+			DMA_ClearFlag(DMA1_FLAG_TC4);
+			
+		}
+				
 
 	
 	}

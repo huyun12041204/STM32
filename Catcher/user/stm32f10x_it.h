@@ -24,6 +24,15 @@
 
 
 #ifndef  Pin_ALL
+#define  Pin_ALL 0xF8
+#define  Pin_RST 0x10
+#define  Pin_VCC 0x20
+#define  Pin_IO  0x40 
+#define  Pin_CLK 0x80 
+#define  Pin_GND 0x08 
+#endif
+
+#ifndef  Pin_ALL
 #define  Pin_ALL 0x70
 #define  Pin_VCC 0x10
 #define  Pin_RES 0x20
@@ -45,66 +54,23 @@
 
 
 
-#ifdef _ORI
-
-	 //extern u8 frequency_flag;
-//extern long int shao_miao_shu_du;
-//extern u8 num_shao_miao;
-//extern u8 mode;
-//extern u8 num_fu_du;
-//extern u8 ad_flag;
-//extern u16 vpp;
-//extern float gao_pin_palus;
-//extern u16 vcc_div;
-
-	 void lcd_huadian(u16 a, u16 b, u16 color);
-	 void lcd_huaxian(u16 x1, u16 y1, u16 x2, u16 y2, u16 color);
-	 void hua_wang(void);
-	 void set_background(void);
-
-	
-	 void key_init(void);
-
-	 void IO3_Init(void);
-	 void set_io0(void);
-	 void set_io1(void);
-	 void set_io2(void);
-	 void set_io3(void);
-	 void set_io4(void);
-	 void set_io5(void);
-	 void set_io6(void);
-	 void set_io7(void);
-	 void set_io8(void);
-	 void set_io9(void);
-	 void set_io10(void);
-	 void set_io11(void);
-	 /* Exported types ------------------------------------------------------------*/
-	 /* Exported constants --------------------------------------------------------*/
-	 /* Exported macro ------------------------------------------------------------*/
-	 /* Exported functions ------------------------------------------------------- */
-
-	 void NMI_Handler(void);
-	 void HardFault_Handler(void);
-	 void MemManage_Handler(void);
-	 void BusFault_Handler(void);
-	 void UsageFault_Handler(void);
-	 void SVC_Handler(void);
-	 void DebugMon_Handler(void);
-	 void PendSV_Handler(void);
-	 void SysTick_Handler(void);
-
-#else
-void IO_Init(void);
-void EXIT2_PARAM(void);
-void _ConverntClkDif(uint64_t u64CLKDiff, u16 u16EXTI_Type, u16 _Pin, u16* uData, u16* uDataLen);
-void SaveCurrentCLK( u16 u16EXTI_Type, u16 _Pin);
-void PINx_EXIT_Init(void);
-#endif
 
 
+	 int64_t GetCLKNumber(void);
+	 void SaveCurrentStatue(u8 _Pin);
+	 void PINx_EXIT_Init(void);
+	 u8   GetPinValue(void);
 
 
-
+	 //************************************
+	 // Method:    PINx_Level_Conversion_Init
+	 // FullName:  PINx_Level_Conversion_Init
+	 // Access:    public 
+	 // Returns:   void
+	 // Qualifier: 初始化电平转换模块
+	 // Parameter: void
+	 //************************************
+	 void PINx_Level_Conversion_Init(void);
 #ifdef __cplusplus
 }
 #endif

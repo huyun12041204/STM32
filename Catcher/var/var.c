@@ -64,5 +64,12 @@ u8  u8Channel;
 
 
 
+#ifdef _Mode_V2
 
+u8 _Pre_Pin_Statue;
+u8 _Cur_Pin_Statue;
 
+#endif
+
+u8 TIM5_CH1_CAPTURE_STA; //输入捕获状态 
+u16 TIM5_CH1_CAPTURE_VAL;//输入捕获值

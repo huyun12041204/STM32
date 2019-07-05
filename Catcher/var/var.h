@@ -3,6 +3,7 @@
 #ifndef _Var_H
 #define _Var_H
 
+#define  _Mode_V2
 
 #include "System.h"
 
@@ -81,3 +82,15 @@ extern u8  u8Channel;
 //测试使用
 extern uint64_t SramOffset;
 #endif
+
+
+#ifdef _Mode_V2
+
+extern  u8 _Pre_Pin_Statue;
+extern  u8 _Cur_Pin_Statue;
+
+#endif
+
+
+extern u8  TIM5_CH1_CAPTURE_STA; //输入捕获状态 
+extern u16 TIM5_CH1_CAPTURE_VAL;//输入捕获值

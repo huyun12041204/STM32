@@ -243,9 +243,9 @@ void Install_Command(u8 _u8CommandByte)
 		return;
 	else if(u8RecLen == 5+ u8Command[_Com_P3])
 	{
+		
 		USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 		Excute_Command();		
-//		u8RecLen = 0;
 	}
 
 	

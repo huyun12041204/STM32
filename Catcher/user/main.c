@@ -216,44 +216,48 @@ void  Initialize_Module(void)
 	
 	
 	
-	//EN25QXX_Init();				//初始化EN25Q128	  
-	
-	LCD_Dislay_Printf("Initialize flash finished!");
-	
+	////EN25QXX_Init();				//初始化EN25Q128	  
+	//
+	//LCD_Dislay_Printf("Initialize flash finished!");
+	//
 
 	if (SD_Init())
 	{
 		LCD_Dislay_Printf("SD Card Error!");
 	}
 	LCD_Dislay_Printf("SD Card OK!");
-	
 
-  if(SD_Type == 0x06)
-	{
-		LCD_Dislay_Printf((u8*)"SDV2HC OK!");
-	}
-	else if(SD_Type == 0x04)
-	{
-		LCD_Dislay_Printf((u8*)"SDV2 OK!");
-	}
-	else if(SD_Type == 0x02)
-	{
-		LCD_Dislay_Printf((u8*)"SDV1 OK!");
-	}
-	else if(SD_Type == 0x01)
-	{
-		LCD_Dislay_Printf((u8*)"MMC OK!");
-	}
-	
-	//LCD_Dislay_Printf("SD Card Size:");
-	
-	//sd_size=SD_GetSectorCount;//得到扇区数
-	
-	printf(("SD Total Size:%ld MB\n"),(long)(SD_GetSectorCount()>>11));
-	
+
+ // if(SD_Type == 0x06)
+	//{
+	//	LCD_Dislay_Printf((u8*)"SDV2HC OK!");
+	//}
+	//else if(SD_Type == 0x04)
+	//{
+	//	LCD_Dislay_Printf((u8*)"SDV2 OK!");
+	//}
+	//else if(SD_Type == 0x02)
+	//{
+	//	LCD_Dislay_Printf((u8*)"SDV1 OK!");
+	//}
+	//else if(SD_Type == 0x01)
+	//{
+	//	LCD_Dislay_Printf((u8*)"MMC OK!");
+	//}
+	//
+	////LCD_Dislay_Printf("SD Card Size:");
+	//
+	////sd_size=SD_GetSectorCount;//得到扇区数
+	//
+	//printf(("SD Total Size:%ld MB\n"),(long)(SD_GetSectorCount()>>11));
+	//
   FSMC_SRAM_Init();
 	
 	printf("Initialize Sram!\n"); 
+
+	PINx_Level_Conversion_Init();
+
+	printf("Level conversion finish!\n");
 }
 
 void  Initialize_Global_variable(void)
@@ -501,7 +505,8 @@ int main(void)
 	_Command_Init();
 	
 	//SramOffset = 0;
-	
+	//此处需要先读取当前各个端口状态,VCC RST IO
+	_Pre_Pin_Statue = GetPinValue();
 
 	Tim_Enable();			//同步开始计数
 	
@@ -518,8 +523,9 @@ int main(void)
 		}
 		else if (DMA_GetFlagStatus(DMA1_FLAG_TC4) != 0)//判断通道4传输完成
 		{
-	//		printf("Enable USART IT\n"); 
+		//	printf("Enable USART IT\n"); 
 			USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+		//	USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 			DMA_ClearFlag(DMA1_FLAG_TC4);
 			
 		}
@@ -528,3 +534,5 @@ int main(void)
 	
 	}
 }
+
+

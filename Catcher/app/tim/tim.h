@@ -6,10 +6,7 @@
 extern u32 count;
 extern u32 frequency;
 
-//void time_init(void);
-//void time_enable(void);
-//
-//void time1_init(void);
+
 
 void Tim3_Init(void);
 //void Tim4_Init();

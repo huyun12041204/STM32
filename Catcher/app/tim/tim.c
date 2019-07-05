@@ -1,102 +1,7 @@
 #include "tim.h"
+#include "var.h"
+#include "STM32F10x_it.h"
 
-#ifdef _ORI
-
-//u32 count = 0;
-//u32 frequency = 0;
-
-//u8	bTimEnable;
-
-//void time2_init(void)
-//{					 
-//	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;		 
-//
-//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 7199;  //tim2  72000000 10us
-//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;//增计数
-//	TIM_TimeBaseInitTypeStruct.TIM_Period =	9999+1;		//10000  100ms					  
-//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
-//	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseInitTypeStruct);	 		   
-//
-//	TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);	 //TIM2初始化	   
-//	TIM_Cmd(TIM2,DISABLE);
-//}
-//
-//void time3_init(void)
-//{
-//	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-//	//配置 TIMx 外部时钟模式 2
-//	TIM_ETRClockMode2Config(TIM3,TIM_ExtTRGPSC_OFF,TIM_ExtTRGPolarity_NonInverted,0);
-//	
-//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
-//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
-//	TIM_TimeBaseInitTypeStruct.TIM_Period =	65535;							  
-//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
-//	TIM_TimeBaseInit(TIM3,&TIM_TimeBaseInitTypeStruct);
-//
-//	TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE);
-//	TIM_Cmd(TIM3,DISABLE);	  //失能
-//
-//}
-//
-//void time1_init(void)
-//{					 //用来触发ad转换，TIM1触发ADC
-//	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-//	TIM_OCInitTypeDef TIM_OCInitTypeStruct;		 
-//
-//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 71; //72分频
-//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up; //增计数
-//	TIM_TimeBaseInitTypeStruct.TIM_Period =	1;	//自动重装值，1us触发一次						  
-//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;//时钟不分频
-//	TIM_TimeBaseInit(TIM1,&TIM_TimeBaseInitTypeStruct);	//TIM1初始化 		   	 	   
-//	TIM_Cmd(TIM1,DISABLE);	 //TIM1不使能
-//
-//	TIM_OCInitTypeStruct.TIM_OCMode = TIM_OCMode_PWM1; 					   //这个也是必须配置成pwm模式 
-//	TIM_OCInitTypeStruct.TIM_OutputState = TIM_OutputState_Enable; 
-//	TIM_OCInitTypeStruct.TIM_Pulse = 1;
-//	TIM_OCInitTypeStruct.TIM_OCPolarity = TIM_OCPolarity_High;
-//	TIM_OC1Init(TIM1, &TIM_OCInitTypeStruct);
-//
-//	TIM_CtrlPWMOutputs(TIM1, ENABLE);				  //这个是必须有的
-//}
-////TIM2:PA0 TIM2 ETR
-//void Tim2_Init()
-//{
-//	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-//	//配置 TIMx 外部时钟模式 2
-//	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
-//
-//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
-//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Down;
-//	TIM_TimeBaseInitTypeStruct.TIM_Period = 0;
-//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
-//	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitTypeStruct);
-//
-//	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-//	TIM_Cmd(TIM2, DISABLE);	  //失能
-//
-//}
-//
-////TIM3:PD2 TIM3 ETR
-//void Tim3_Init()
-//{
-//	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
-//	//配置 TIMx 外部时钟模式 2
-//	TIM_ETRClockMode2Config(TIM3, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
-//
-//	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
-//	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
-//	TIM_TimeBaseInitTypeStruct.TIM_Period = 65535;
-//	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
-//	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitTypeStruct);
-//
-//	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-//	TIM_Cmd(TIM3, DISABLE);	  //失能
-//
-//
-//}
-
-
-#else
 
 //TIM2:PA0 TIM2 ETR
 void Tim2_Init()
@@ -141,14 +46,21 @@ void Tim2_Init()
 void Tim3_Init()
 {
 	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
+	GPIO_InitTypeDef           GPIO_InitTypeStruct;
+	NVIC_InitTypeDef           NVIC_InitTypeStruct;
+
+
+
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 	//配置 TIMx 外部时钟模式 2
 	TIM_ETRClockMode2Config(TIM3, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
 
-	//TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
-	//TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
-	//TIM_TimeBaseInitTypeStruct.TIM_Period = 65535;
-	//TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
-
+	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部时钟的，用来测频率的，
+	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOD, &GPIO_InitTypeStruct);
 
 	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 0;
 	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;
@@ -159,8 +71,28 @@ void Tim3_Init()
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM3, DISABLE);	  //失能
 
+	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM3_IRQn;  		   //配置中断优先级
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitTypeStruct);
+
 
 }
+
+void TIM3_IRQHandler(void)
+{
+
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update))
+	{
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+		count++;
+
+	}
+
+}
+
+
 
 //TIM4：1S计时
 void Tim4_Init()
@@ -179,6 +111,74 @@ void Tim4_Init()
 
 
 }
+
+void TIM5_Init()
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+	TIM_ICInitTypeDef TIM_ICInitStructure;
+	NVIC_InitTypeDef  NVIC_InitTypeStruct;
+	GPIO_InitTypeDef  GPIO_InitStructure;
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5,ENABLE);//使能TIM5时钟
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 		//外部时钟的，用来测频率的，
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+	//TIM_TimeBaseInitStructure.TIM_Period= 0xFFFF;   //自动装载值
+	//TIM_TimeBaseInitStructure.TIM_Prescaler=71; //分频系数
+	//TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1;
+	//TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up; //设置向上计数模式
+	//TIM_TimeBaseInit(TIM5,&TIM_TimeBaseInitStructure);	
+	
+	TIM_ICInitStructure.TIM_Channel=TIM_Channel_1; //通道1
+	TIM_ICInitStructure.TIM_ICFilter=0x00;  //滤波
+	TIM_ICInitStructure.TIM_ICPolarity=TIM_ICPolarity_Rising;//捕获极性
+	TIM_ICInitStructure.TIM_ICPrescaler=TIM_ICPSC_DIV1; //分频系数
+	TIM_ICInitStructure.TIM_ICSelection=TIM_ICSelection_DirectTI;//直接映射到TI1
+	TIM_ICInit(TIM5,&TIM_ICInitStructure);
+	//TIM_ITConfig(TIM5,TIM_IT_Update|TIM_IT_CC1,DISABLE);
+	TIM_ITConfig(TIM5, TIM_IT_CC1, DISABLE);
+
+	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM5_IRQn;  		   //配置中断优先级
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitTypeStruct);
+	TIM_Cmd(TIM5, DISABLE); //使能定时器
+
+}
+
+void TIM5_IRQHandler(void)
+{
+	//printf("TIM5!");
+	//if((TIM5_CH1_CAPTURE_STA&0x80)==0) //还未成功捕获
+	//{
+		//if(TIM_GetITStatus(TIM5,TIM_IT_Update)) //发生更新中断
+		//{
+
+		//	TIM5_CH1_CAPTURE_VAL ++ ;
+		//}
+		if(TIM_GetITStatus(TIM5,TIM_IT_CC1)) //发生捕获中断
+		{
+			u64CurCLK = GetCLKNumber();
+			_Cur_Pin_Statue = GetPinValue();
+			
+			if((_Cur_Pin_Statue&Pin_IO) ==  Pin_IO)
+				TIM_OC1PolarityConfig(TIM5, TIM_ICPolarity_Falling); //设置下降沿捕获	
+			else
+				TIM_OC1PolarityConfig(TIM5, TIM_ICPolarity_Rising); //设置上升沿捕获
+			//_Cur_Pin_Statue = GetPinValue();
+			SaveCurrentStatue(_Cur_Pin_Statue);
+			_Pre_Pin_Statue = _Cur_Pin_Statue;
+		}
+	//}
+	//TIM_ClearITPendingBit(TIM5,TIM_IT_CC1|TIM_IT_Update);
+	TIM_ClearITPendingBit(TIM5, TIM_IT_CC1);
+}
+
 
 
 void TIM8_Init()
@@ -246,30 +246,23 @@ void TIM8_Init()
 
 
 }
-
 void Tim_Init(void)
 {
-	Tim2_Init();
-
+	Tim3_Init();
+	TIM5_Init();
 }
 void Tim_Enable(void)
 {
-	TIM_Cmd(TIM2, ENABLE);
-	//TIM_Cmd(TIM4, ENABLE);
-//	TIM_Cmd(TIM3,ENABLE);	
-//	TIM_Cmd(TIM4, ENABLE);
-//	TIM_Cmd(TIM3, ENABLE);
-	//Enable_TIM4(ENABLE);
+	TIM_Cmd(TIM3, ENABLE);
+	TIM_ITConfig(TIM5, TIM_IT_CC1, ENABLE);
+	TIM_Cmd(TIM5, ENABLE);
+
 }
 
 
 
-//void Enable_TIM4(FunctionalState NewState)
-//{
-//	TIM_Cmd(TIM4, NewState);
-//	bTimEnable = ((u8)NewState<<4) | bTimEnable;
-//}
 
 
 
-#endif
+
+

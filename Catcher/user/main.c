@@ -26,8 +26,18 @@
 #include "var.h"
 #include "dma.h"
 
+//移植USB时候的头文件
+#include "mass_mal.h"
+#include "usb_lib.h"
+#include "hw_config.h"
+#include "usb_pwr.h"
+#include "memory.h"	    
+#include "usb_bot.h"
 
 
+#include "flash.h"
+#include "ff.h" 
+#include "fatfs_app.h"
 
 
 #if 0
@@ -69,7 +79,7 @@ void LCD_Dislay_Init()
 	LCD_Clear(BLACK);
 	FRONT_COLOR = RED;
 	lCurY = 10;
-    lCurX = 10;
+  lCurX = 10;
 }
 
 
@@ -176,19 +186,24 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 
 
 
+void USB_Port_Set(u8 enable)
+{
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);    //使能PORTA时钟		 
+	if (enable)_SetCNTR(_GetCNTR()&(~(1 << 1)));//退出断电模式
+	else
+	{
+		_SetCNTR(_GetCNTR() | (1 << 1));  // 断电模式
+		GPIOA->CRH &= 0XFFF00FFF;
+		GPIOA->CRH |= 0X00033000;
+		PAout(12) = 0;
+	}
+}
 
 
 
 void  Initialize_Module(void)
 {
-		//FSMC_SRAM_Init();
 
-	
-//	u8 i=0;
-//	u32 free,total;
-//	u8 i = 0;
-//	u32 sd_size;
-//	u8 sd_buf[6];
 
 	//初始化时钟
 	SysTick_Init(72);
@@ -206,20 +221,13 @@ void  Initialize_Module(void)
 	
 
 	//初始化计时器
-	Tim_Init();		
+	//Tim_Init();		
 	LCD_Dislay_Printf("Initialize TIM finished!");
 
 	//IO口使用外部中断 , CLK 外部中断 
 	PINx_EXIT_Init();
 
 	LCD_Dislay_Printf("Initialize Exit IO finished!");
-	
-	
-	
-	////EN25QXX_Init();				//初始化EN25Q128	  
-	//
-	//LCD_Dislay_Printf("Initialize flash finished!");
-	//
 
 	if (SD_Init())
 	{
@@ -228,29 +236,9 @@ void  Initialize_Module(void)
 	LCD_Dislay_Printf("SD Card OK!");
 
 
- // if(SD_Type == 0x06)
-	//{
-	//	LCD_Dislay_Printf((u8*)"SDV2HC OK!");
-	//}
-	//else if(SD_Type == 0x04)
-	//{
-	//	LCD_Dislay_Printf((u8*)"SDV2 OK!");
-	//}
-	//else if(SD_Type == 0x02)
-	//{
-	//	LCD_Dislay_Printf((u8*)"SDV1 OK!");
-	//}
-	//else if(SD_Type == 0x01)
-	//{
-	//	LCD_Dislay_Printf((u8*)"MMC OK!");
-	//}
-	//
-	////LCD_Dislay_Printf("SD Card Size:");
-	//
-	////sd_size=SD_GetSectorCount;//得到扇区数
-	//
-	//printf(("SD Total Size:%ld MB\n"),(long)(SD_GetSectorCount()>>11));
-	//
+
+	
+	
   FSMC_SRAM_Init();
 	
 	printf("Initialize Sram!\n"); 
@@ -455,40 +443,11 @@ u8 SaveChannelData()
 }
 
 
-void Test_SD(void)
-{
-	 u32 i;
-	u8 u8Ret;
-	 memset(u8CLK , 0x55 ,1024);
-	
-	 printf("Start Write SD\n"); 
-	for(i = 0 ; i < 20000 ; i++)
-	{
-		u8Ret = SD_WriteDisk(u8CLK,i,1);
-		
-		if(u8Ret!=0)
-			printf("%d,%d!!\n",i,u8Ret);
-			
-	}
-	
-	printf("End Write SD\n"); 
-	
-	
-		printf("Start Read SD\n"); 
-		for(i = 0 ; i < 20000 ; i++)
-	{
-		u8Ret =SD_ReadDisk(u8CLK+1024,i,1);
-		
-		if(u8Ret!=0)
-			printf("%d,%d!!\n",i,u8Ret);
-		
-		if(memcmp(u8CLK+1024,u8CLK,512) != 0)
-			printf("%d^^\n",i);
-					
-	}
-	
-		printf("End Read SD\n"); 
-}
+
+//USB使能连接/断线
+//enable:0,断开
+//       1,允许连接	   
+
 
 int main(void)
 {
@@ -504,28 +463,45 @@ int main(void)
 	_SendBuf_Init();
 	_Command_Init();
 	
+	//my_mem_init(SRAMIN);		//初始化内部内存池
 	//SramOffset = 0;
 	//此处需要先读取当前各个端口状态,VCC RST IO
 	_Pre_Pin_Statue = GetPinValue();
 
-	Tim_Enable();			//同步开始计数
+
+
+
+
 	
- // Test_SD();
+
+	delay_ms(1800);
+	USB_Port_Set(0); 	//USB先断开
+	delay_ms(300);
+	USB_Port_Set(1);	//USB再次连接	   
+
+	printf("USB Connecting...\n");//提示正在建立连接 	 
+	
+	//USB配置
+	USB_Interrupts_Config();
+	Set_USBClock(); 
+	USB_Init();
+	printf("USB Finish...\n");//提示正在建立连接 	 
+	delay_ms(1800);
+
+	Tim_Enable();			//同步开始计数
+
+
 	printf("Start ...!\n"); 
 	while(1)
 	{	
-		//SendChannelData();
-
 		if(uSendCLKCOunt != uCLKCount)
 		{
-			//delay_us()
+
 			SaveChannelData();	
 		}
 		else if (DMA_GetFlagStatus(DMA1_FLAG_TC4) != 0)//判断通道4传输完成
 		{
-		//	printf("Enable USART IT\n"); 
 			USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-		//	USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 			DMA_ClearFlag(DMA1_FLAG_TC4);
 			
 		}

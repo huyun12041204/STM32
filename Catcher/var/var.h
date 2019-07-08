@@ -10,8 +10,9 @@
 
 //#define  _2Channel 
 #define __2Sram
+#define _USE_USB
 
-#define _MaxCLKCount 30000
+#define _MaxCLKCount 1000
 #define _MaxCommandLen 0x15
 
 #define _MaxSectorSize  512
@@ -92,5 +93,3 @@ extern  u8 _Cur_Pin_Statue;
 #endif
 
 
-extern u8  TIM5_CH1_CAPTURE_STA; //输入捕获状态 
-extern u16 TIM5_CH1_CAPTURE_VAL;//输入捕获值

@@ -11,10 +11,13 @@
 #include "sram.h"
 
 
-
+#include "usb_lib.h"
+#include "usb_istr.h"
 				
 
-
+#include "ff.h" 
+#include "fatfs_app.h"
+//#include "font_show.h"
 
 
 #define _MODE2 1
@@ -233,3 +236,134 @@ void PINx_Level_Conversion_Init(void)
 
 
 }
+
+
+
+#ifdef _USE_USB
+
+
+/**
+  * @brief  This function handles NMI exception.
+  * @param  None
+  * @retval None
+  */
+void NMI_Handler(void)
+{
+}
+
+/**
+  * @brief  This function handles Hard Fault exception.
+  * @param  None
+  * @retval None
+  */
+//void HardFault_Handler(void)
+//{
+//  /* Go to infinite loop when Hard Fault exception occurs */
+//  while (1)
+//  {
+//  }
+//}
+
+/**
+  * @brief  This function handles Memory Manage exception.
+  * @param  None
+  * @retval None
+  */
+void MemManage_Handler(void)
+{
+  /* Go to infinite loop when Memory Manage exception occurs */
+  while (1)
+  {
+  }
+}
+
+/**
+  * @brief  This function handles Bus Fault exception.
+  * @param  None
+  * @retval None
+  */
+void BusFault_Handler(void)
+{
+  /* Go to infinite loop when Bus Fault exception occurs */
+  while (1)
+  {
+  }
+}
+
+/**
+  * @brief  This function handles Usage Fault exception.
+  * @param  None
+  * @retval None
+  */
+void UsageFault_Handler(void)
+{
+  /* Go to infinite loop when Usage Fault exception occurs */
+  while (1)
+  {
+  }
+}
+
+/**
+  * @brief  This function handles SVCall exception.
+  * @param  None
+  * @retval None
+  */
+void SVC_Handler(void)
+{
+}
+
+/**
+  * @brief  This function handles Debug Monitor exception.
+  * @param  None
+  * @retval None
+  */
+void DebugMon_Handler(void)
+{
+}
+
+/**
+  * @brief  This function handles PendSVC exception.
+  * @param  None
+  * @retval None
+  */
+void PendSV_Handler(void)
+{
+}
+
+/**
+  * @brief  This function handles SysTick Handler.
+  * @param  None
+  * @retval None
+  */
+void SysTick_Handler(void)
+{
+}
+
+
+/*******************************************************************************
+* Function Name  : USB_HP_CAN_TX_IRQHandler
+* Description    : This function handles USB High Priority or CAN TX interrupts
+*                  requests.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USB_HP_CAN1_TX_IRQHandler(void)
+{
+  	CTR_HP();
+}
+
+/*******************************************************************************
+* Function Name  : USB_LP_CAN_RX0_IRQHandler
+* Description    : This function handles USB Low Priority or CAN RX0 interrupts
+*                  requests.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USB_LP_CAN1_RX0_IRQHandler(void)
+{
+  	USB_Istr();
+}
+
+#endif

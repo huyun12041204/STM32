@@ -77,7 +77,7 @@ void USART1_IRQHandler(void)                	//串口1中断服务程序
 	{
 
 			//if(DMA_GetFlagStatus(DMA1_FLAG_TC4)!=0)//判断通道4传输完成	
-			Install_Command(USART_ReceiveData(USART1));
+			//Install_Command(USART_ReceiveData(USART1));
 	} 
 
 } 	

@@ -143,7 +143,7 @@ void TIM5_Init()
 	TIM_ITConfig(TIM5, TIM_IT_CC1, DISABLE);
 
 	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM5_IRQn;  		   //配置中断优先级
-	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);

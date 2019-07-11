@@ -3,21 +3,19 @@
 #include "system.h"
 #include "SysTick.h"
 #include "tim.h"
-#include "button.h"
-#include "led.h"
+//#include "button.h"
+//#include "led.h"
 #include "stdio.h" 
 #include "var.h"
 
 #include "sram.h"
+#include "var.h"
 
 
-#include "usb_lib.h"
-#include "usb_istr.h"
+
 				
 
-#include "ff.h" 
-#include "fatfs_app.h"
-//#include "font_show.h"
+
 
 
 #define _MODE2 1
@@ -72,7 +70,7 @@ void EXTI4_IRQHandler(void)
 void SaveCurrentStatue(u8 _Pin)
 {
 	uint64_t u64CLKDiff;
-	u8 __ClkLen;
+	u8 __ClkLen,__Temp;
 	u8 ii;
 
 	u64CLKDiff = u64CurCLK - u64PreCLK;
@@ -83,47 +81,19 @@ void SaveCurrentStatue(u8 _Pin)
 		__ClkLen = Bits_Len2;
 	else if (u64CLKDiff < 0xFFFFFFFFFF)
 		__ClkLen = Bits_Len3;
-
-	if ((uCLKCount + 1) > _MaxCLKCount)
-		uCLKCount = 0;
-
-#ifdef __2Sram
-
-	u8CLK[uCLKCount] = _Pin + __ClkLen;
-	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount], SramOffset, 1);
-	uCLKCount += 1;
-	SramOffset += 1;
+	
+	__Temp = _Pin + __ClkLen;
+	FSMC_SRAM_WriteBuf(&__Temp, u32CLKLen, 1);
+	u32CLKLen += 1;
 
 	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
 	{
-		if ((uCLKCount + 1) > _MaxCLKCount)
-			uCLKCount = 0;
-		u8CLK[uCLKCount] = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);
-		FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount], SramOffset, 1);
-		uCLKCount += 1;
-		SramOffset += 1;
+		__Temp = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);		
+		FSMC_SRAM_WriteBuf(&__Temp, u32CLKLen, 1);
+		u32CLKLen += 1;
+		if(u32CLKLen==0x1000000)
+			u32CLKLen = 0;
 	}
-
-#else
-
-
-	u8CLK[uCLKCount] = _Pin + u16EXTI_Type + __ClkLen;
-	//	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset,1);
-	uCLKCount += 1;
-	//SramOffset += 1;
-
-	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
-	{
-		if ((uCLKCount + 1) > _MaxCLKCount)
-			uCLKCount = 0;
-		u8CLK[uCLKCount] = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);
-		//	FSMC_SRAM_WriteBuf(&u8CLK[uCLKCount],SramOffset,1);
-		uCLKCount += 1;
-		//	SramOffset += 1;
-	}
-
-
-#endif
 	u64PreCLK = u64CurCLK;
 
 }

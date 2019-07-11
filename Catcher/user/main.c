@@ -8,8 +8,8 @@
 #include "system.h"
 #include "SysTick.h"
 #include "usart.h"
-#include "led.h"
-#include "button.h"
+//#include "led.h"
+//#include "button.h"
 #include "tftlcd.h"
 #include "gui.h"
 #include "tim.h"
@@ -18,26 +18,22 @@
 #include "String.h"
 #include "malloc.h" 
 #include "sd.h"
-//#include "flash.h"
-//#include "ff.h" 
-//#include "fatfs_app.h"
-//#include "flash.h"
+
 #include "Command.h"
 #include "var.h"
 #include "dma.h"
 
+
+
 //移植USB时候的头文件
-#include "mass_mal.h"
+//#include "mass_mal.h"
 #include "usb_lib.h"
 #include "hw_config.h"
 #include "usb_pwr.h"
-#include "memory.h"	    
-#include "usb_bot.h"
 
 
-#include "flash.h"
-#include "ff.h" 
-#include "fatfs_app.h"
+#include "usbio.h"
+extern volatile uint32_t EP1_ReceivedCount;
 
 
 #if 0
@@ -79,7 +75,7 @@ void LCD_Dislay_Init()
 	LCD_Clear(BLACK);
 	FRONT_COLOR = RED;
 	lCurY = 10;
-  lCurX = 10;
+    lCurX = 10;
 }
 
 
@@ -91,7 +87,7 @@ void LCD_Dislay_Printf(u8 *p)
 
 	lCurY += 20;
 
-	if (lCurY > 380)
+	if (lCurY > 300)
 	{
 		lCurY = 10;
 	}
@@ -112,7 +108,7 @@ int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
 	{
 		lCurX  = 10;
 		lCurY += 20;
-		if (lCurY > 480)	
+		if (lCurY > 300)	
 			lCurY = 10;
 	}
 	else
@@ -186,24 +182,33 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 
 
 
+//USB使能连接/断线
+//enable:0,断开
+//       1,允许连接	   
 void USB_Port_Set(u8 enable)
 {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);    //使能PORTA时钟		 
-	if (enable)_SetCNTR(_GetCNTR()&(~(1 << 1)));//退出断电模式
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);    //使能PORTA时钟		 
+	if(enable)_SetCNTR(_GetCNTR()&(~(1<<1)));//退出断电模式
 	else
-	{
-		_SetCNTR(_GetCNTR() | (1 << 1));  // 断电模式
-		GPIOA->CRH &= 0XFFF00FFF;
-		GPIOA->CRH |= 0X00033000;
-		PAout(12) = 0;
+	{	  
+		_SetCNTR(_GetCNTR()|(1<<1));  // 断电模式
+		GPIOA->CRH&=0XFFF00FFF;
+		GPIOA->CRH|=0X00033000;
+		PAout(12)=0;	    		  
 	}
-}
-
+} 
 
 
 void  Initialize_Module(void)
 {
+		//FSMC_SRAM_Init();
 
+	
+//	u8 i=0;
+//	u32 free,total;
+//	u8 i = 0;
+//	u32 sd_size;
+//	u8 sd_buf[6];
 
 	//初始化时钟
 	SysTick_Init(72);
@@ -212,7 +217,7 @@ void  Initialize_Module(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组分2组
 
 	//USART1 115200
-	USART1_Init(864000);
+	//USART1_Init(864000);
 
 	//显示屏
 	LCD_Dislay_Init();
@@ -221,23 +226,22 @@ void  Initialize_Module(void)
 	
 
 	//初始化计时器
-	//Tim_Init();		
+	Tim_Init();		
 	LCD_Dislay_Printf("Initialize TIM finished!");
 
 	//IO口使用外部中断 , CLK 外部中断 
 	PINx_EXIT_Init();
 
 	LCD_Dislay_Printf("Initialize Exit IO finished!");
+	
+	
+
 
 	if (SD_Init())
 	{
 		LCD_Dislay_Printf("SD Card Error!");
 	}
 	LCD_Dislay_Printf("SD Card OK!");
-
-
-
-	
 	
   FSMC_SRAM_Init();
 	
@@ -246,39 +250,33 @@ void  Initialize_Module(void)
 	PINx_Level_Conversion_Init();
 
 	printf("Level conversion finish!\n");
+	
+	
+	delay_ms(100);
+	USB_Port_Set(0); 	//USB先断开
+	delay_ms(700);
+	USB_Port_Set(1);	//USB再次连接
+	USB_Interrupts_Config();
+	Set_USBClock();
+	USB_Init();
+
+	printf("USB Finish...\n");
+
 }
 
 void  Initialize_Global_variable(void)
 {
-	//设置CLK计数器0
 
-    uCLKCount     = 0 ;
-    uSendCLKCOunt = 0 ;
-
-#ifndef _2Channel
-	memset(u8CLK, 0, sizeof(u8CLK));
-#else
-	memset(u8CLKT, 0, sizeof(u8CLKT));
-	memset(uCount, 0, sizeof(uCount));
-	u8Channel = 0;
-#endif
+	//当前CLKNumber
+ u64CurCLK = 0;
+//之前CLKNumber
+ u64PreCLK = 0;
 	
+ u32CLKLen  = 0;
+ u32SendLen = 0;
 
-
-	//CLK总数
-	count = 0;
-
-	u16EXIT_Type    = EXIT_ALL;
-	u8Clk_EXIT_TYPE = CLK_EXITT_ALL;
-
-	u64CurCLK = 0;
-    u64PreCLK = 0;
-
-    u32SavedSector    = _Start_Sector;
-	u16Save2SDTempLen = 0;
-//	u32CurSDDataLen = 0;
-//	u32SaveSDLen    = 0;
-	
+//TIM2 的计数器
+ count = 0;
 	
 
 
@@ -286,226 +284,106 @@ void  Initialize_Global_variable(void)
 }
 
 
-u8 Save2SD(u8* u8Data,u32 uLen)
+
+u8 SendData_USB(uint8_t bEpNum,uint8_t *data,uint32_t dataNum)
 {
 
-	u8 SaveCount;
-	u8 u8Ret = 0;
-	u32 u32SavedLen = 0;
+	if(dataNum > 64)
+		dataNum = 64;
+
+	return USB_SendData(ENDP1,data,dataNum);
+}
 
 
-  // printf("%d",uLen);
-	//Ram内存在未存储到SD内的数据，需要先存储
 
-	if (u16Save2SDTempLen != 0) 
-	{
-		u32SavedLen = _MaxSectorSize - u16Save2SDTempLen;
-
-	    //如果现有数据和存储数据还是不够512 则放在SDTemp
-		if (uLen < u32SavedLen)
-		{
-			memcpy(SDTemp+ u16Save2SDTempLen, u8Data, uLen);
-			u16Save2SDTempLen = u16Save2SDTempLen + uLen;
-			return u8Ret;
-		}
-		//否则先存一个扇区
-		memcpy(SDTemp+ u16Save2SDTempLen, u8Data, u32SavedLen);
-		
-
-		u8Ret = SD_WriteDisk(SDTemp, u32SavedSector, 1);
-		if(u8Ret != 0) 
-				printf("L%d",u8Ret);
-			//printf("1%d",u8Ret);
-
-		
+u8 SendChannelData_USB()
+{
+	u32 u32CurCount = u32CLKLen;
 	
-		u32SavedSector += 1;
-	}
+	u32 u32WillSend;
 
-	SaveCount = (uLen - u32SavedLen) / _MaxSectorSize;
+	u8 u8Ret = 0;
+	if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
+		return 1;
+	
+	
 
-	if (SaveCount != 0)
+	if(u32SendLen > u32CurCount)
 	{	
-//		for(ii = 0 ; ii < 10 ; ii ++)
-//		{
-		  u8Ret = SD_WriteDisk(u8Data+ u32SavedLen, u32SavedSector, SaveCount);
-			if(u8Ret != 0) 
-				printf("2L%d",u8Ret);
-		//	u8Ret = SD_WriteDisk(u8Data+ u32SavedLen, u32SavedSector, SaveCount);
-				printf("2%d",u8Ret);
-		//}
-		u32SavedSector += SaveCount;
-	}
-
-
-	u32SavedLen       = u32SavedLen + SaveCount * _MaxSectorSize;
-	u16Save2SDTempLen = uLen - u32SavedLen;
-	memcpy(SDTemp , u8Data + u32SavedLen, u16Save2SDTempLen);
-
-
-
-	return u8Ret;
-
-}
-
-
-u8 SendChannelData()
-{
-	
-	u16 u16CurCLKCount;
-	u8 u8Ret = 0;
-	u16CurCLKCount = uCLKCount;
-
-
-	//如果send 大于 现有的 说明已经回滚了
-	if (uSendCLKCOunt > u16CurCLKCount)
-	{
-
-		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, _MaxCLKCount - uSendCLKCOunt);
-		if (u8Ret == 0)
-			u8Ret = Save2SD(u8CLK, u16CurCLKCount);
-
+		printf("over limit!");
+		u32WillSend = 0x1000000 - u32SendLen;
 	}
 	else
 	{
-		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, u16CurCLKCount - uSendCLKCOunt);
-	}
-
-
-	uSendCLKCOunt = u16CurCLKCount;
-
-	
-	return u8Ret;
-	
-	
-	
-}
-
-
-u8 SaveChannelData()
-{
-
-#ifndef _2Channel
-	u16 u16CurCLKCount;
-	u8 u8Ret = 0;
-	u16CurCLKCount = uCLKCount;
-
-
-	//如果send 大于 现有的 说明已经回滚了
-	if (uSendCLKCOunt > u16CurCLKCount)
-	{
-
-		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, _MaxCLKCount - uSendCLKCOunt);
-		if (u8Ret == 0)
-			u8Ret = Save2SD(u8CLK, u16CurCLKCount);
+		u32WillSend = u32CurCount - u32SendLen;
 
 	}
-	else
-	{
-		u8Ret = Save2SD(u8CLK + uSendCLKCOunt, u16CurCLKCount - uSendCLKCOunt);
-	}
+	if(u32WillSend > 64)
+		u32WillSend = 64;
 
+		FSMC_SRAM_ReadBuf(_USB_SendBuf, u32SendLen ,u32WillSend);		
+		u8Ret = SendData_USB(ENDP1,_USB_SendBuf,u32WillSend );
+		u32SendLen = u32SendLen+ u8Ret;
+	  if(u32SendLen == 0x1000000)
+			u32SendLen = 0;
+			
+	
 
-	uSendCLKCOunt = u16CurCLKCount;
-
-	//if(u8Ret == 0)
-	//	printf("Save Success\n");
-	//else
-	//	printf("Save Failed %d\n",u8Ret);
-
-	return u8Ret;
-
-#else
-	u8 u8Ret = 0;
-	u8 u8Cur = u8Channel;
-
-
-	if (uCount[u8Cur]!=0)
-	{
-		if (u8Channel == 0)
-			u8Channel = 1;
-		else
-			u8Channel = 0;
-		u8Ret = Save2SD(u8CLKT[u8Cur], uCount[u8Cur]);
-		uCount[u8Cur] = 0;
-	}
-
-
-
-
-	return u8Ret;
-
-#endif
-
-
-
+	return 0;
 
 }
-
-
-
-//USB使能连接/断线
-//enable:0,断开
-//       1,允许连接	   
-
 
 int main(void)
 {
-//	u8 SendEmpty = 0;
+	
+
+	u8 Sended = 0;
+	u8 USB_Res[2];
 
 	//初始化各个模块
 	Initialize_Module();
 
 	Initialize_Global_variable();
 	
-	DMA_Init_(DMA1_Channel4,(u32)&USART1->DR,(u32)u8UsartSendBuf,_MaxUsartSendSize);
-	
-	_SendBuf_Init();
-	_Command_Init();
-	
-	//my_mem_init(SRAMIN);		//初始化内部内存池
-	//SramOffset = 0;
 	//此处需要先读取当前各个端口状态,VCC RST IO
 	_Pre_Pin_Statue = GetPinValue();
 
-
-
-
-
-	
-
-	delay_ms(1800);
-	USB_Port_Set(0); 	//USB先断开
-	delay_ms(300);
-	USB_Port_Set(1);	//USB再次连接	   
-
-	printf("USB Connecting...\n");//提示正在建立连接 	 
-	
-	//USB配置
-	USB_Interrupts_Config();
-	Set_USBClock(); 
-	USB_Init();
-	printf("USB Finish...\n");//提示正在建立连接 	 
-	delay_ms(1800);
-
 	Tim_Enable();			//同步开始计数
-
-
+	
+ // Test_SD();
 	printf("Start ...!\n"); 
 	while(1)
 	{	
-		if(uSendCLKCOunt != uCLKCount)
+		//SendChannelData();
+		
+		//printf("-4-%d\n",iiii);
+		if(EP1_ReceivedCount!=0)
+		{
+			USB_GetData(ENDP1,USB_Res,2);
+			EP1_ReceivedCount = 0;  
+			Sended = 0;	
+		}
+		
+
+		if(u32SendLen != u32CLKLen)
 		{
 
-			SaveChannelData();	
-		}
-		else if (DMA_GetFlagStatus(DMA1_FLAG_TC4) != 0)//判断通道4传输完成
-		{
-			USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-			DMA_ClearFlag(DMA1_FLAG_TC4);
-			
-		}
+		
+			if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
+	    {
+				continue;
+			}
+			if(Sended == 0)
+			{		
+				if(	SendChannelData_USB() == 0)					
+				Sended = 1;	
 				
+			}
+			
+			
+
+		}
+
 
 	
 	}

@@ -153,29 +153,23 @@ void TIM5_Init()
 
 void TIM5_IRQHandler(void)
 {
-	//printf("TIM5!");
-	//if((TIM5_CH1_CAPTURE_STA&0x80)==0) //还未成功捕获
-	//{
-		//if(TIM_GetITStatus(TIM5,TIM_IT_Update)) //发生更新中断
-		//{
 
-		//	TIM5_CH1_CAPTURE_VAL ++ ;
-		//}
 		if(TIM_GetITStatus(TIM5,TIM_IT_CC1)) //发生捕获中断
 		{
 			u64CurCLK = GetCLKNumber();
+			
 			_Cur_Pin_Statue = GetPinValue();
 			
 			if((_Cur_Pin_Statue&Pin_IO) ==  Pin_IO)
 				TIM_OC1PolarityConfig(TIM5, TIM_ICPolarity_Falling); //设置下降沿捕获	
 			else
 				TIM_OC1PolarityConfig(TIM5, TIM_ICPolarity_Rising); //设置上升沿捕获
-			//_Cur_Pin_Statue = GetPinValue();
-			SaveCurrentStatue(_Cur_Pin_Statue);
+
+			SaveCurrentStatue(_Pre_Pin_Statue);
+			
 			_Pre_Pin_Statue = _Cur_Pin_Statue;
 		}
-	//}
-	//TIM_ClearITPendingBit(TIM5,TIM_IT_CC1|TIM_IT_Update);
+
 	TIM_ClearITPendingBit(TIM5, TIM_IT_CC1);
 }
 

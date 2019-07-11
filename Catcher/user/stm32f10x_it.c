@@ -45,7 +45,7 @@ void Excute_EXTI(u32 EXTI_Line, u8 u8Pin)
 	//printf("EXTI %X,Cur:%X,Pre%X\n", EXTI_Line, _Cur_Pin_Statue, _Pre_Pin_Statue);
 	if ((_Cur_Pin_Statue&u8Pin) != (_Pre_Pin_Statue&u8Pin))
 	{
-		SaveCurrentStatue(_Cur_Pin_Statue);
+		SaveCurrentStatue(_Pre_Pin_Statue);
 		_Pre_Pin_Statue = _Cur_Pin_Statue;
 	}
 }
@@ -176,12 +176,6 @@ u8 GetPinValue(void)
 		u8Ret = u8Ret | Pin_VCC;
 	if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0))
 		u8Ret = u8Ret | Pin_IO;
-	//if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4))
-	//	u8Ret = u8Ret | Pin_IO;
-	//if (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3))
-	//	u8Ret = u8Ret | Pin_GND;
-	//if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0))
-	//	u8Ret = u8Ret | Pin_CLK;
 
 	return u8Ret;
 }

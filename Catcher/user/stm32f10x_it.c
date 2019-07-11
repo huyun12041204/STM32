@@ -28,7 +28,7 @@
 
 int64_t GetCLKNumber()
 {
-	return  count * 0xFFFF + TIM_GetCounter(TIM3);
+	return  count*0x10000 + TIM_GetCounter(TIM3);
 }
 
 

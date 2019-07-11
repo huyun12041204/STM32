@@ -127,11 +127,11 @@ void TIM5_Init()
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
-	//TIM_TimeBaseInitStructure.TIM_Period= 0xFFFF;   //自动装载值
-	//TIM_TimeBaseInitStructure.TIM_Prescaler=71; //分频系数
-	//TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1;
-	//TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up; //设置向上计数模式
-	//TIM_TimeBaseInit(TIM5,&TIM_TimeBaseInitStructure);	
+	TIM_TimeBaseInitStructure.TIM_Period= 0xFFFF;   //自动装载值
+	TIM_TimeBaseInitStructure.TIM_Prescaler=71;  //分频系数
+	TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1;
+	TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up; //设置向上计数模式
+	TIM_TimeBaseInit(TIM5,&TIM_TimeBaseInitStructure);	
 	
 	TIM_ICInitStructure.TIM_Channel=TIM_Channel_1; //通道1
 	TIM_ICInitStructure.TIM_ICFilter=0x00;  //滤波
@@ -139,12 +139,12 @@ void TIM5_Init()
 	TIM_ICInitStructure.TIM_ICPrescaler=TIM_ICPSC_DIV1; //分频系数
 	TIM_ICInitStructure.TIM_ICSelection=TIM_ICSelection_DirectTI;//直接映射到TI1
 	TIM_ICInit(TIM5,&TIM_ICInitStructure);
-	//TIM_ITConfig(TIM5,TIM_IT_Update|TIM_IT_CC1,DISABLE);
-	TIM_ITConfig(TIM5, TIM_IT_CC1, DISABLE);
-
+	TIM_ITConfig(TIM5,TIM_IT_Update|TIM_IT_CC1,DISABLE);
+	
+	
 	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM5_IRQn;  		   //配置中断优先级
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 	TIM_Cmd(TIM5, DISABLE); //使能定时器
@@ -169,8 +169,13 @@ void TIM5_IRQHandler(void)
 			
 			_Pre_Pin_Statue = _Cur_Pin_Statue;
 		}
+		
+		if(TIM_GetITStatus(TIM5,TIM_IT_Update))
+		{
+			Tim5Count ++;	
+		}
 
-	TIM_ClearITPendingBit(TIM5, TIM_IT_CC1);
+	TIM_ClearITPendingBit(TIM5, TIM_IT_Update|TIM_IT_CC1);
 }
 
 
@@ -248,9 +253,32 @@ void Tim_Init(void)
 void Tim_Enable(void)
 {
 	TIM_Cmd(TIM3, ENABLE);
-	TIM_ITConfig(TIM5, TIM_IT_CC1, ENABLE);
+	TIM_ITConfig(TIM5, TIM_IT_CC1|TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM5, ENABLE);
+}
 
+
+void Clear_Tim5_Time(void)
+{
+	
+	TIM_ITConfig(TIM5, TIM_IT_Update, DISABLE);
+	TIM_SetCounter(TIM5,0);
+	Tim5Count = 0;
+	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
+	
+}
+//u8Uint =   0 :us
+//           1 :ms
+//           2 :s
+u32 Get_Tim5_Time(u8 u8Uint)
+{
+	u8 ii;
+	u32 u32time = Tim5Count*0x10000 + TIM_GetCounter(TIM5);;
+	
+	for(ii = 0 ; ii< u8Uint ; ii++)
+		u32time = u32time/1000;
+	
+	return u32time;
 }
 
 

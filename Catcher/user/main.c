@@ -278,6 +278,8 @@ void  Initialize_Global_variable(void)
 //TIM2 µÄ¼ÆÊýÆ÷
  count = 0;
 	
+	
+ Tim5Count = 0;
 
 
 

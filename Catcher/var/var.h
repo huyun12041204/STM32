@@ -25,6 +25,7 @@ extern uint64_t u64PreCLK;
 //TIM2 µÄ¼ÆÊýÆ÷
 extern uint32_t count;
 
+extern uint32_t Tim5Count;
 
 
 extern u32 u32CLKLen;

@@ -10,6 +10,7 @@ uint64_t u64PreCLK;
 //TIM2 的计数器
 uint32_t count;
 
+uint32_t Tim5Count;
 
 //通道
 

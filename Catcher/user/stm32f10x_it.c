@@ -26,9 +26,13 @@
 
 
 
-int64_t GetCLKNumber()
+uint64_t GetCLKNumber(void)
 {
-	return  count*0x10000 + TIM_GetCounter(TIM3);
+	
+	uint64_t temp = ((uint64_t)count*0x10000 + (uint64_t)TIM_GetCounter(TIM3));
+	if(temp< u64PreCLK)
+		temp = temp+0x10000;
+	return  temp;
 }
 
 
@@ -45,7 +49,7 @@ void Excute_EXTI(u32 EXTI_Line, u8 u8Pin)
 	//printf("EXTI %X,Cur:%X,Pre%X\n", EXTI_Line, _Cur_Pin_Statue, _Pre_Pin_Statue);
 	if ((_Cur_Pin_Statue&u8Pin) != (_Pre_Pin_Statue&u8Pin))
 	{
-		SaveCurrentStatue(_Pre_Pin_Statue);
+		SaveCurrentStatue(_Cur_Pin_Statue);
 		_Pre_Pin_Statue = _Cur_Pin_Statue;
 	}
 }
@@ -81,7 +85,13 @@ void SaveCurrentStatue(u8 _Pin)
 		__ClkLen = Bits_Len2;
 	else if (u64CLKDiff < 0xFFFFFFFFFF)
 		__ClkLen = Bits_Len3;
-	
+	else 
+	{
+		printf("ERROR in Save %lld\n",u64CLKDiff);
+		
+		printf("CurCLK %lld\n",u64CurCLK);
+		printf("PreCLK %lld\n",u64PreCLK);	
+	}
 	__Temp = _Pin + __ClkLen;
 	FSMC_SRAM_WriteBuf(&__Temp, u32CLKLen, 1);
 	u32CLKLen += 1;

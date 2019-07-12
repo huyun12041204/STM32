@@ -165,7 +165,7 @@ void TIM5_IRQHandler(void)
 			else
 				TIM_OC1PolarityConfig(TIM5, TIM_ICPolarity_Rising); //设置上升沿捕获
 
-			SaveCurrentStatue(_Pre_Pin_Statue);
+			SaveCurrentStatue(_Cur_Pin_Statue);
 			
 			_Pre_Pin_Statue = _Cur_Pin_Statue;
 		}

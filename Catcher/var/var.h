@@ -17,6 +17,8 @@
 #define _MaxSectorSize  512
 #define _MaxUsartSendSize 600
 
+#define  _MaxSram   0x800000
+
 //当前CLKNumber
 extern uint64_t u64CurCLK;
 //之前CLKNumber

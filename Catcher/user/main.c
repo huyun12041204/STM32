@@ -313,7 +313,7 @@ u8 SendChannelData_USB()
 	if(u32SendLen > u32CurCount)
 	{	
 		printf("over limit!");
-		u32WillSend = 0x1000000 - u32SendLen;
+		u32WillSend = _MaxSram - u32SendLen;
 	}
 	else
 	{
@@ -324,15 +324,60 @@ u8 SendChannelData_USB()
 		u32WillSend = 64;
 
 		FSMC_SRAM_ReadBuf(_USB_SendBuf, u32SendLen ,u32WillSend);		
+	
+	
+	  if(u32SendLen > 0x100)
+		{
+		if(((_USB_SendBuf[0] == 0xFF)&&(_USB_SendBuf[1] == 0xFF))||
+			((_USB_SendBuf[0] == 0x00)&&(_USB_SendBuf[1] == 0x00))||
+			((_USB_SendBuf[62] == 0xFF)&&(_USB_SendBuf[63] == 0xFF))||
+			((_USB_SendBuf[62] == 0x00)&&(_USB_SendBuf[63] == 0x00)))
+	   	printf("Error: %x - %d\n",u32SendLen,u32WillSend);
+	//		FSMC_SRAM_ReadBuf(_USB_SendBuf, u32SendLen ,u32WillSend);		
+		}
+	
+
+	
 		u8Ret = SendData_USB(ENDP1,_USB_SendBuf,u32WillSend );
 		u32SendLen = u32SendLen+ u8Ret;
-	  if(u32SendLen == 0x1000000)
+	  if(u32SendLen == _MaxSram)
 			u32SendLen = 0;
 			
 	
 
 	return 0;
 
+}
+
+
+
+void Test_Sram(void)
+
+{
+	u32 ii = 0;
+	u8 jj;
+	u8 Put[64];
+	u8 Inp[64];
+
+	for (ii = 0 ; ii < _MaxSram ; ii+=64)
+	{
+		memset(Put, 0x33, 64);
+		memset(Inp, 0x55, 64);
+		FSMC_SRAM_WriteBuf(Put, ii, 64);
+
+		FSMC_SRAM_ReadBuf(Inp, ii,64);
+		for(jj = 0 ; jj < 64 ; jj++)
+		{
+			if(Put[jj]!= Inp[jj])
+				printf("Error in : %x \n",ii);
+			
+		}
+
+    
+
+	}
+	
+		printf("Test finish!");
 }
 
 int main(void)
@@ -354,6 +399,8 @@ int main(void)
 	
  // Test_SD();
 	printf("Start ...!\n"); 
+	
+	//Test_Sram();
 	while(1)
 	{	
 		//SendChannelData();

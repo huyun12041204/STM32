@@ -56,7 +56,7 @@
 
 
 
-	 int64_t GetCLKNumber(void);
+	 uint64_t GetCLKNumber(void);
 	 void SaveCurrentStatue(u8 _Pin);
 	 void PINx_EXIT_Init(void);
 	 u8   GetPinValue(void);

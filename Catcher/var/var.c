@@ -12,6 +12,8 @@ uint32_t count;
 
 uint32_t Tim5Count;
 
+u32 IntervalClocks;
+
 //Í¨µÀ
 
 u32 u32CLKLen;

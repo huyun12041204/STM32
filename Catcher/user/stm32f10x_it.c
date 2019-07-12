@@ -88,7 +88,6 @@ void SaveCurrentStatue(u8 _Pin)
 	else 
 	{
 		printf("ERROR in Save %lld\n",u64CLKDiff);
-		
 		printf("CurCLK %lld\n",u64CurCLK);
 		printf("PreCLK %lld\n",u64PreCLK);	
 	}
@@ -101,7 +100,7 @@ void SaveCurrentStatue(u8 _Pin)
 		__Temp = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);		
 		FSMC_SRAM_WriteBuf(&__Temp, u32CLKLen, 1);
 		u32CLKLen += 1;
-		if(u32CLKLen==0x1000000)
+		if(u32CLKLen== _MaxSram)
 			u32CLKLen = 0;
 	}
 	u64PreCLK = u64CurCLK;

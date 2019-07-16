@@ -18,8 +18,12 @@ u32 IntervalClocks;
 
 u32 u32CLKLen;
 u32 u32SendLen;
+u32 u32SaveLen;
 
-u8 _USB_SendBuf[64];
+u8 _USB_SendBuf[512];
+u8 _SD_SaveBuf[0x2000];
+
+
 
 u8 _Pre_Pin_Statue;
 u8 _Cur_Pin_Statue;

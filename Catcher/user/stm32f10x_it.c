@@ -73,37 +73,68 @@ void EXTI4_IRQHandler(void)
 
 void SaveCurrentStatue(u8 _Pin)
 {
+	
+	
 	uint64_t u64CLKDiff;
-	u8 __ClkLen,__Temp;
-	u8 ii;
+	u8 __ClkLen = 0;
+	u8 __Temp;
+
 
 	u64CLKDiff = u64CurCLK - u64PreCLK;
+	
+	while(u64CLKDiff>0)
+	{	
+		__ClkLen +=1;
+		__Temp = u64CLKDiff&0xFF;
+		FSMC_SRAM_WriteBuffer(&__Temp, u32CLKLen+__ClkLen, 1);
 
-	if (u64CLKDiff < 0xFF)
-		__ClkLen = Bits_Len1;
-	else if (u64CLKDiff < 0xFFFFFF)
-		__ClkLen = Bits_Len2;
-	else if (u64CLKDiff < 0xFFFFFFFFFF)
-		__ClkLen = Bits_Len3;
-	else 
-	{
-		printf("ERROR in Save %lld\n",u64CLKDiff);
-		printf("CurCLK %lld\n",u64CurCLK);
-		printf("PreCLK %lld\n",u64PreCLK);	
+		u64CLKDiff = (u64CLKDiff>>8);
+		
 	}
+	
 	__Temp = _Pin + __ClkLen;
-	FSMC_SRAM_WriteBuf(&__Temp, u32CLKLen, 1);
-	u32CLKLen += 1;
-
-	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
-	{
-		__Temp = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);		
-		FSMC_SRAM_WriteBuf(&__Temp, u32CLKLen, 1);
-		u32CLKLen += 1;
-		if(u32CLKLen== _MaxSram)
-			u32CLKLen = 0;
-	}
+	FSMC_SRAM_WriteBuffer(&__Temp, u32CLKLen, 1);
+	u32CLKLen = u32CLKLen + 1 +__ClkLen;
 	u64PreCLK = u64CurCLK;
+	
+//	uint64_t u64CLKDiff;
+//	u8 __ClkLen,__Temp;
+//	u8 ii;
+
+//	u64CLKDiff = u64CurCLK - u64PreCLK;
+
+//	if (u64CLKDiff < 0x100)
+//		__ClkLen = Bits_Len1;
+//	else if (u64CLKDiff < 0x10000)
+//		__ClkLen = Bits_Len2;
+//	else if (u64CLKDiff < 0x10000000000)
+//		__ClkLen = Bits_Len3;
+//	else 
+//	{
+//		printf("ERROR in Save %lld\n",u64CLKDiff);
+//		printf("CurCLK %lld\n",u64CurCLK);
+//		printf("PreCLK %lld\n",u64PreCLK);	
+//	}
+//	__Temp = _Pin + __ClkLen;
+//	FSMC_SRAM_WriteBuffer(&__Temp, u32CLKLen, 1);
+//	u32CLKLen += 1;
+//	if(u32CLKLen>_MaxSram)
+//	{
+//		printf(" halt..");
+//		u32CLKLen = 0;
+//	}
+//	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
+//	{
+//		__Temp = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);		
+//		FSMC_SRAM_WriteBuffer(&__Temp, u32CLKLen, 1);
+//		u32CLKLen += 1;
+//		if(u32CLKLen>_MaxSram)
+//	  {
+//		  printf(" halt..");
+//		  u32CLKLen = 0;
+//	  }
+//	}
+//	u64PreCLK = u64CurCLK;
 
 }
 

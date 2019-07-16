@@ -16,13 +16,10 @@
 #include "stm32f10x_it.h"
 #include "sram.h" 
 #include "String.h"
-#include "malloc.h" 
+//#include "malloc.h" 
 #include "sd.h"
 
-#include "Command.h"
 #include "var.h"
-#include "dma.h"
-
 
 
 //移植USB时候的头文件
@@ -34,7 +31,7 @@
 
 #include "usbio.h"
 extern volatile uint32_t EP1_ReceivedCount;
-
+u8 SendIndex = 0;
 
 #if 0
 
@@ -274,6 +271,7 @@ void  Initialize_Global_variable(void)
 	
  u32CLKLen  = 0;
  u32SendLen = 0;
+ u32SaveLen = 0;
 
 //TIM2 的计数器
  count = 0;
@@ -298,7 +296,7 @@ u8 SendData_USB(uint8_t bEpNum,uint8_t *data,uint32_t dataNum)
 
 
 
-u8 SendChannelData_USB()
+u8 SendChannelData_USB(void)
 {
 	u32 u32CurCount = u32CLKLen;
 	
@@ -308,47 +306,88 @@ u8 SendChannelData_USB()
 	if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
 		return 1;
 	
+
+
+	u32WillSend = u32CurCount - u32SendLen;
 	
 
-	if(u32SendLen > u32CurCount)
-	{	
-		printf("over limit!");
-		u32WillSend = _MaxSram - u32SendLen;
-	}
-	else
-	{
-		u32WillSend = u32CurCount - u32SendLen;
-
-	}
 	if(u32WillSend > 64)
 		u32WillSend = 64;
+	
+	FSMC_SRAM_ReadBuffer(_USB_SendBuf, u32SendLen ,u32WillSend);		
+	
+	u8Ret = SendData_USB(ENDP1,_USB_SendBuf,u32WillSend );
 
-		FSMC_SRAM_ReadBuf(_USB_SendBuf, u32SendLen ,u32WillSend);		
-	
-	
-	  if(u32SendLen > 0x100)
-		{
-		if(((_USB_SendBuf[0] == 0xFF)&&(_USB_SendBuf[1] == 0xFF))||
-			((_USB_SendBuf[0] == 0x00)&&(_USB_SendBuf[1] == 0x00))||
-			((_USB_SendBuf[62] == 0xFF)&&(_USB_SendBuf[63] == 0xFF))||
-			((_USB_SendBuf[62] == 0x00)&&(_USB_SendBuf[63] == 0x00)))
-	   	printf("Error: %x - %d\n",u32SendLen,u32WillSend);
-	//		FSMC_SRAM_ReadBuf(_USB_SendBuf, u32SendLen ,u32WillSend);		
-		}
-	
+	u32SendLen = u32SendLen+ u8Ret;
 
-	
-		u8Ret = SendData_USB(ENDP1,_USB_SendBuf,u32WillSend );
-		u32SendLen = u32SendLen+ u8Ret;
-	  if(u32SendLen == _MaxSram)
-			u32SendLen = 0;
-			
-	
 
 	return 0;
 
 }
 
+
+u8 SendChannelData_SD_USB(void)
+{
+	u32 u32CurCount = u32SaveLen;
+	
+	u32 u32WillSend;
+	
+	u8 u8Ret = 0;
+	if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
+		return 1;
+	
+		
+	if(((u32SendLen%512) == 0)||((u32SendLen%64) != 0))
+		SD_ReadDisk(_USB_SendBuf,u32SendLen/512 +_StartSector,1);
+
+
+	u32WillSend = (u32SendLen/512+1)*512 - u32SendLen;
+	
+	if(u32WillSend>64)
+		u32WillSend = 64;
+
+	u8Ret = SendData_USB(ENDP1,_USB_SendBuf +u32SendLen%512 ,u32WillSend );
+
+	u32SendLen = u32SendLen+ u8Ret;
+
+
+	return 0;
+
+}
+
+
+
+
+u8 SaveChannelData_SD(void)
+{
+	u32 u32willSave;
+	u8 __Count;
+
+	u32willSave = u32CLKLen - u32SaveLen;
+	
+	if(u32willSave>0x2000)
+		__Count = 0x20;
+	else
+		__Count = u32willSave/512;
+	
+	u32willSave = __Count*512;
+
+	FSMC_SRAM_ReadBuffer(_SD_SaveBuf, u32SaveLen, u32willSave);
+	
+	if (SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count)!=0) 
+		SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count);
+
+	u32SaveLen += u32willSave;
+
+}
+
+
+//u8 ReadBufer_SD()
+//{
+//
+//
+//
+//}
 
 
 void Test_Sram(void)
@@ -358,24 +397,65 @@ void Test_Sram(void)
 	u8 jj;
 	u8 Put[64];
 	u8 Inp[64];
+	printf("Start Test Sram...!\n"); 
+	printf("Start Write Sram...!\n"); 
+//	for (ii = 0 ; ii < _MaxSram ; ii+=64)
+//	{
 
-	for (ii = 0 ; ii < _MaxSram ; ii+=64)
-	{
-		memset(Put, 0x33, 64);
-		memset(Inp, 0x55, 64);
-		FSMC_SRAM_WriteBuf(Put, ii, 64);
+//	  memset(Put,0x00,64);
+//		FSMC_SRAM_WriteBuffer(Put, ii, 64);
+//	}
+//	
+//		printf("Start Read Sram...!\n"); 
+//	for (ii = _MaxSram ; ii > 0 ; ii-=4)
+//	{
+//	
+//		Put[0] = (ii>>24)&0xFF;
+//		Put[1] = (ii>>16)&0xFF;
+//		Put[2] = (ii>>8)&0xFF;
+//    Put[3]= ii&0xFF;
+//		
+//		FSMC_SRAM_ReadBuf(Inp,ii-4,4);
+//		
+//		if((Put[0]!=Inp[0])  ||
+//			(Put[1]!=Inp[1])  ||
+//	   	(Put[2]!=Inp[2])  ||
+//		  (Put[03]!=Inp[3]) )
+//		{
+//			printf("Error in SRAM %x\n",ii);
+//			printf("Read  in SRAM %x\n",Inp[0]*0x1000000+Inp[1]*0x10000+Inp[2]*0x100+Inp[3]);
+//			printf("Read  in SRAM %x\n",Put[0]*0x1000000+Put[1]*0x10000+Put[2]*0x100+Put[3]);
+//			return;
+//		}
+//		
+//	}
 
-		FSMC_SRAM_ReadBuf(Inp, ii,64);
-		for(jj = 0 ; jj < 64 ; jj++)
-		{
-			if(Put[jj]!= Inp[jj])
-				printf("Error in : %x \n",ii);
-			
-		}
+//  for (ii = 0 ; ii < _MaxSram ; ii+=64)
+//	{
+//	  	memset(Put,64%19,64);
+//			FSMC_SRAM_WriteBuf(Put, ii, 64);	
+//	}
+//	
+  Put[0] = 0x55;
+  FSMC_SRAM_WriteBuffer(Put, 00, 1);	
+	
+	FSMC_SRAM_ReadBuffer(Inp, 1, 1);	
+	printf("  SRAM in %x\n",Inp[0]);	
+		FSMC_SRAM_ReadBuffer(Inp, 2, 1);	
+	printf("  SRAM in %x\n",Inp[0]);	
+		FSMC_SRAM_ReadBuffer(Inp, 3, 1);	
+	printf("  SRAM in %x\n",Inp[0]);	
+		FSMC_SRAM_ReadBuffer(Inp, 4, 1);	
+	printf("  SRAM in %x\n",Inp[0]);	
+	
+//	for (ii = 0 ; ii < _MaxSram ; ii += 1)
+//	{
+//		FSMC_SRAM_ReadBuffer(Inp, ii, 1);		
+//		if(Inp[0] == 0x55)
+//			printf("Error in SRAM %x\n",ii);
+//			
+//	}
 
-    
-
-	}
 	
 		printf("Test finish!");
 }
@@ -385,8 +465,10 @@ int main(void)
 	
 
 	u8 Sended = 0;
+    u8 SendInf = 0;
 	u8 USB_Res[2];
 
+	u32 u32Detal = 0;
 	//初始化各个模块
 	Initialize_Module();
 
@@ -396,44 +478,78 @@ int main(void)
 	_Pre_Pin_Statue = GetPinValue();
 
 	Tim_Enable();			//同步开始计数
+
 	
- // Test_SD();
 	printf("Start ...!\n"); 
 	
-	//Test_Sram();
+ 
 	while(1)
 	{	
-		//SendChannelData();
-		
-		//printf("-4-%d\n",iiii);
-		if(EP1_ReceivedCount!=0)
-		{
-			USB_GetData(ENDP1,USB_Res,2);
-			EP1_ReceivedCount = 0;  
-			Sended = 0;	
-		}
-		
 
-		if(u32SendLen != u32CLKLen)
-		{
+			
+		if((u32CLKLen - u32SaveLen )>512)
+			 SaveChannelData_SD();
 
-		
+		if(u32SendLen != u32SaveLen)
+		{
 			if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
-	    {
 				continue;
-			}
-			if(Sended == 0)
-			{		
-				if(	SendChannelData_USB() == 0)					
-				Sended = 1;	
-				
-			}
 			
-			
-
+	//		if((u32CLKLen-u32SendLen)>0x3F0000)
+	  	  SendChannelData_SD_USB();
+//			else
+//			  SendChannelData_USB();
+	
 		}
+		
 
+		
 
+//		if(u32SendLen != u32CLKLen)
+//		{
+//	
+//			if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
+//				continue;
+//			
+//		 	SendChannelData_USB();	
+//			
+//		
+//      if((u32CLKLen-u32SendLen)>u32Detal)
+//			{
+//				u32Detal = (u32CLKLen-u32SendLen);
+//				
+//			//	printf("Detal %x -\n",u32Detal);
+//			}
+//			
+//			if(u32Detal>0x3FFFFF)
+//			{
+//				printf("Detal %x -\n",u32Detal);
+//				printf("Size : %x \n",u32CLKLen);
+//			}
+//				
+//				
+////			if(SendInf < 4)
+////			{		
+////				  SendChannelData_USB();		
+////				   SendInf += 1;	
+////			}
+////			else if (SendInf == 0)
+////			{
+////				//printf("Send %x - %x\n",u32SendLen,u32CLKLen);
+////				printf("No Send: %x -\n",u32CLKLen-u32SendLen);
+////				SendInf = 1;
+////			}
+////			
+//			Sended = 0;
+//
+//		}
+//		else if(Sended == 0)
+//		{
+//				Sended = 1; 
+//				printf("Size : %x \n",u32CLKLen);
+//				printf("Detal %x -\n",u32Detal);
+//
+//		}
 	
 	}
 }

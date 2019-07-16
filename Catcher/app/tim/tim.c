@@ -132,27 +132,27 @@ void TIM5_Init()
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
-	//TIM_TimeBaseInitStructure.TIM_Period= 0xFFFF;   //自动装载值
-	//TIM_TimeBaseInitStructure.TIM_Prescaler=71;  //分频系数
-	//TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1;
-	//TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up; //设置向上计数模式
-	//TIM_TimeBaseInit(TIM5,&TIM_TimeBaseInitStructure);	
+	TIM_TimeBaseInitStructure.TIM_Period= 0xFFFF;   //自动装载值
+	TIM_TimeBaseInitStructure.TIM_Prescaler=71;  //分频系数
+	TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1;
+	TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up; //设置向上计数模式
+	TIM_TimeBaseInit(TIM5,&TIM_TimeBaseInitStructure);	
 	
 	TIM_ICInitStructure.TIM_Channel=TIM_Channel_1; //通道1
-	TIM_ICInitStructure.TIM_ICFilter=0x00;  //滤波
+	TIM_ICInitStructure.TIM_ICFilter=0x02;  //滤波
 	TIM_ICInitStructure.TIM_ICPolarity=TIM_ICPolarity_Rising;//捕获极性
 	TIM_ICInitStructure.TIM_ICPrescaler=TIM_ICPSC_DIV1; //分频系数
 	TIM_ICInitStructure.TIM_ICSelection=TIM_ICSelection_DirectTI;//直接映射到TI1
 	TIM_ICInit(TIM5,&TIM_ICInitStructure);
 
 	TIM_ICInitStructure.TIM_Channel = TIM_Channel_3; //通道3
-	TIM_ICInitStructure.TIM_ICFilter = 0x00;  //滤波
+	TIM_ICInitStructure.TIM_ICFilter = 0x02;  //滤波
 	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Falling;//捕获极性
 	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1; //分频系数
-	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;//直接映射到TI1
+	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;//直接映射到TI3
 	TIM_ICInit(TIM5, &TIM_ICInitStructure);
 
-	TIM_ITConfig(TIM5,TIM_IT_CC1| TIM_IT_CC3,DISABLE);
+	TIM_ITConfig(TIM5,TIM_IT_Update|TIM_IT_CC1| TIM_IT_CC3,DISABLE);
 	
 	
 	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM5_IRQn;  		   //配置中断优先级
@@ -169,27 +169,30 @@ void TIM5_IRQHandler(void)
 	u64CurCLK = GetCLKNumber();
 	if(TIM_GetITStatus(TIM5,TIM_IT_CC1)) //发生捕获中断
 	{
-		_Cur_Pin_Statue = GetPinValue();		
-		if (((_Cur_Pin_Statue&Pin_IO) == Pin_IO) ||
-		  	((_Pre_Pin_Statue&Pin_IO)== 0))
-		{
-				SaveCurrentStatue(_Cur_Pin_Statue);
-  		  TIM_ITConfig(TIM5, TIM_IT_CC1, DISABLE);
-	    	TIM_ITConfig(TIM5, TIM_IT_CC3, ENABLE);	
-		}
+		_Cur_Pin_Statue = GetPinValue()| Pin_IO_Rising;
+		SaveCurrentStatue(_Cur_Pin_Statue);
+		//if (((_Cur_Pin_Statue&Pin_IO) == Pin_IO) ||
+		//  	((_Pre_Pin_Statue&Pin_IO)== 0))
+		//{
+		//		SaveCurrentStatue(_Cur_Pin_Statue);
+  //		    TIM_ITConfig(TIM5, TIM_IT_CC1, DISABLE);
+	 //   	TIM_ITConfig(TIM5, TIM_IT_CC3, ENABLE);	
+		//}
 
 	}
 	if (TIM_GetITStatus(TIM5, TIM_IT_CC3)) //发生捕获中断
 	{
 
 		_Cur_Pin_Statue = GetPinValue();
-		if (((_Cur_Pin_Statue&Pin_IO) == 0) ||
-		  	((_Pre_Pin_Statue&Pin_IO)== Pin_IO))
-		{
-				SaveCurrentStatue(_Cur_Pin_Statue);
-  		  TIM_ITConfig(TIM5, TIM_IT_CC3, DISABLE);
-	    	TIM_ITConfig(TIM5, TIM_IT_CC1, ENABLE);	
-		}
+		_Cur_Pin_Statue = _Cur_Pin_Statue & Pin_IO_Falling;
+		SaveCurrentStatue(_Cur_Pin_Statue);
+		//if (((_Cur_Pin_Statue&Pin_IO) == 0) ||
+		//  	((_Pre_Pin_Statue&Pin_IO)== Pin_IO))
+		//{
+		//		SaveCurrentStatue(_Cur_Pin_Statue);
+  //		  TIM_ITConfig(TIM5, TIM_IT_CC3, DISABLE);
+	 //   	TIM_ITConfig(TIM5, TIM_IT_CC1, ENABLE);	
+		//}
 	}
 	_Pre_Pin_Statue = _Cur_Pin_Statue;
 	TIM_ClearITPendingBit(TIM5, TIM_IT_Update|TIM_IT_CC1|TIM_IT_CC3);

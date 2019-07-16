@@ -22,8 +22,8 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
-extern uint8_t USB_Receive_Buffer[EP_SIZE];
-extern uint8_t USB_Send_Buffer[EP_SIZE];
+extern uint8_t USB_Receive_Buffer[256];
+extern uint8_t USB_Send_Buffer[256];
 uint8_t g_dataSerialNumber;
 /* Private variables ---------------------------------------------------------*/
 

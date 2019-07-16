@@ -3,13 +3,14 @@
 
 #include "system.h"
 //#include "delay.h"
+#define Bank1_SRAM3_ADDR    ((u32)(0x68000000))	
 void FSMC_SRAM_Init(void);
-void FSMC_SRAM_WriteBuf(u8 *pbuf,u32 bufaddr,u32 len);
-void FSMC_SRAM_ReadBuf(u8 *pbuf,u32 readaddr,u32 len);
-void FSMC_SRAM_Test_Write(u8 dat,u32 wirte_addr);
-u8 FSMC_SRAM_Test_Read(u32 read_addr);
+void FSMC_SRAM_WriteBuffer(u8* pBuffer,u32 WriteAddr,u32 NumHalfwordToWrite);
+void FSMC_SRAM_ReadBuffer(u8* pBuffer,u32 ReadAddr,u32 NumHalfwordToRead);
 
 
-#define SRAM_ADDR ((u32)0x68000000)	 //FSMC_Bank1-3ÆðÊ¼µØÖ·
+
+
+
 
 #endif

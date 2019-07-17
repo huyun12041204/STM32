@@ -326,7 +326,7 @@ u8 SendChannelData_USB(void)
 }
 
 
-u8 SendChannelData_SD_USB(void)
+u8 SendChannelData_SD_USB(u8 bMustRead)
 {
 	u32 u32CurCount = u32SaveLen;
 	
@@ -337,11 +337,13 @@ u8 SendChannelData_SD_USB(void)
 		return 1;
 	
 		
-	if(((u32SendLen%512) == 0)||((u32SendLen%64) != 0))
-		SD_ReadDisk(_USB_SendBuf,u32SendLen/512 +_StartSector,1);
+	if(((u32SendLen%512) == 0)||
+		  ((u32SendLen%64) != 0)||
+	    (bMustRead == 1))
+	   	SD_ReadDisk(_USB_SendBuf,u32SendLen/512 +_StartSector,1);
 
 
-	u32WillSend = (u32SendLen/512+1)*512 - u32SendLen;
+	u32WillSend =  512 - u32SendLen%512;
 	
 	if(u32WillSend>64)
 		u32WillSend = 64;
@@ -366,7 +368,7 @@ u8 SaveChannelData_SD(void)
 	u32willSave = u32CLKLen - u32SaveLen;
 	
 	if(u32willSave>0x2000)
-		__Count = 0x20;
+		__Count = 0x10;
 	else
 		__Count = u32willSave/512;
 	
@@ -378,7 +380,8 @@ u8 SaveChannelData_SD(void)
 		SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count);
 
 	u32SaveLen += u32willSave;
-
+	
+	return 0;
 }
 
 
@@ -465,8 +468,10 @@ int main(void)
 	
 
 	u8 Sended = 0;
-    u8 SendInf = 0;
+  u8 SendInf = 0;
+	u8 bSwitch = 1;
 	u8 USB_Res[2];
+
 
 	u32 u32Detal = 0;
 	//初始化各个模块
@@ -490,15 +495,22 @@ int main(void)
 		if((u32CLKLen - u32SaveLen )>512)
 			 SaveChannelData_SD();
 
-		if(u32SendLen != u32SaveLen)
+		if(u32SendLen != u32CLKLen)
 		{
 			if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
 				continue;
 			
-	//		if((u32CLKLen-u32SendLen)>0x3F0000)
-	  	  SendChannelData_SD_USB();
-//			else
-//			  SendChannelData_USB();
+			if((u32CLKLen-u32SendLen)>0x10000)
+			{
+				//printf(".111");
+	  	  SendChannelData_SD_USB(bSwitch);
+				bSwitch = 0;
+			}
+			else
+			{
+				bSwitch = 1;
+			  SendChannelData_USB();
+			}
 	
 		}
 		

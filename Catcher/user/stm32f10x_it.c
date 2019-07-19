@@ -214,7 +214,7 @@ u8 GetPinValue(void)
 		u8Ret = u8Ret | Pin_RST;
 	if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3))
 		u8Ret = u8Ret | Pin_VCC;
-	if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0))
+	if (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_6))
 		u8Ret = u8Ret | Pin_IO;
 
 	return u8Ret;

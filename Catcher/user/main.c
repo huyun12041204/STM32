@@ -317,6 +317,8 @@ u8 SendChannelData_USB(void)
 	FSMC_SRAM_ReadBuffer(_USB_SendBuf, u32SendLen ,u32WillSend);		
 	
 	u8Ret = SendData_USB(ENDP1,_USB_SendBuf,u32WillSend );
+	
+	//u8Ret = USB_SendData_EndP1_Two(_USB_SendBuf,u32WillSend );
 
 	u32SendLen = u32SendLen+ u8Ret;
 
@@ -349,6 +351,8 @@ u8 SendChannelData_SD_USB(u8 bMustRead)
 		u32WillSend = 64;
 
 	u8Ret = SendData_USB(ENDP1,_USB_SendBuf +u32SendLen%512 ,u32WillSend );
+	
+	//u8Ret = USB_SendData_EndP1_Two(_USB_SendBuf +u32SendLen%512 ,u32WillSend );
 
 	u32SendLen = u32SendLen+ u8Ret;
 
@@ -502,7 +506,6 @@ int main(void)
 			
 			if((u32CLKLen-u32SendLen)>0x10000)
 			{
-				//printf(".111");
 	  	  SendChannelData_SD_USB(bSwitch);
 				bSwitch = 0;
 			}

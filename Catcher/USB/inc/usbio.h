@@ -21,5 +21,6 @@
 /* Exported Functions --------------------------------------------------------*/
 extern uint32_t USB_SendData(uint8_t bEpNum,uint8_t *data,uint32_t dataNum);
 extern uint32_t USB_GetData(uint8_t bEpNum,uint8_t *data,uint32_t dataNum);
+extern uint32_t USB_SendData_EndP1_Two(uint8_t *data,uint32_t dataNum);
 
 #endif //_USBIO_H_

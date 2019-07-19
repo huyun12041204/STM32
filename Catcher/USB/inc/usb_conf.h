@@ -48,9 +48,12 @@
 //EP1
 #define ENDP1_RXADDR        (0x98)
 #define ENDP1_TXADDR        (0x98+64)
-////EP2
-#define ENDP2_RXADDR        (0xA0+64+64)
-#define ENDP2_TXADDR        (0xA0+64+64+64)
+#define ENDP1_TXADDR0       (0x98+64)
+#define ENDP1_TXADDR1       (0x98+64+64)
+
+//////EP2
+#define ENDP2_RXADDR        (0xA0+64+64+64)
+#define ENDP2_TXADDR        (0xA0+64+64+64+64)
 /*-------------------------------------------------------------*/
 /* -------------------   ISTR events  -------------------------*/
 /*-------------------------------------------------------------*/

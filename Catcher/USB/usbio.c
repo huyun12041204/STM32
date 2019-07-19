@@ -68,5 +68,25 @@ uint32_t USB_GetData(uint8_t bEpNum,uint8_t *data,uint32_t dataNum)
     return dataNum;
 }
 
+uint32_t USB_SendData_EndP1_Two(uint8_t *data,uint32_t dataNum)
+{
+	
+	if (GetENDPOINT(ENDP1) & EP_DTOG_RX)
+	{
+		UserToPMABufferCopy(data, ENDP1_TXADDR0, dataNum);
+		SetEPDblBuf0Count(ENDP1, EP_DBUF_IN, dataNum);
+	}
+	else
+	{
+		UserToPMABufferCopy(data, ENDP1_TXADDR1, dataNum);
+		SetEPDblBuf1Count(ENDP1, EP_DBUF_IN, dataNum);
+	}
+	
+	FreeUserBuffer(ENDP1, EP_DBUF_IN);
+	return dataNum;
+
+}
+
+
 /*********************************END OF FILE**********************************/
 

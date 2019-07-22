@@ -264,20 +264,12 @@ void  Initialize_Module(void)
 void  Initialize_Global_variable(void)
 {
 
-	//当前CLKNumber
- u64CurCLK = 0;
-//之前CLKNumber
- u64PreCLK = 0;
-	
+
  u32CLKLen  = 0;
  u32SendLen = 0;
  u32SaveLen = 0;
 
-//TIM2 的计数器
- count = 0;
 	
-	
- Tim5Count = 0;
 
 
 
@@ -318,7 +310,6 @@ u8 SendChannelData_USB(void)
 	
 	u8Ret = SendData_USB(ENDP1,_USB_SendBuf,u32WillSend );
 	
-	//u8Ret = USB_SendData_EndP1_Two(_USB_SendBuf,u32WillSend );
 
 	u32SendLen = u32SendLen+ u8Ret;
 
@@ -364,15 +355,20 @@ u8 SendChannelData_SD_USB(u8 bMustRead)
 
 
 
-u8 SaveChannelData_SD(void)
+u8 
+(void)
 {
 	u32 u32willSave;
 	u8 __Count;
 
 	u32willSave = u32CLKLen - u32SaveLen;
+
 	
-	if(u32willSave>0x2000)
-		__Count = 0x10;
+	if(u32willSave>_Max_SD_Save)
+	{
+			printf("%d\n",u32willSave);
+		__Count = 0x20;
+	}
 	else
 		__Count = u32willSave/512;
 	
@@ -381,7 +377,10 @@ u8 SaveChannelData_SD(void)
 	FSMC_SRAM_ReadBuffer(_SD_SaveBuf, u32SaveLen, u32willSave);
 	
 	if (SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count)!=0) 
-		SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count);
+	{
+	  	SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count);
+	}
+	
 
 	u32SaveLen += u32willSave;
 	
@@ -499,13 +498,13 @@ int main(void)
 		if((u32CLKLen - u32SaveLen )>512)
 			 SaveChannelData_SD();
 
-		if(u32SendLen != u32CLKLen)
+		if(u32SendLen <= u32CLKLen)
 		{
 			if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
 				continue;
 			
-			if((u32CLKLen-u32SendLen)>0x10000)
-			{
+		  if(u32SendLen <= u32SaveLen)
+		  {
 	  	  SendChannelData_SD_USB(bSwitch);
 				bSwitch = 0;
 			}

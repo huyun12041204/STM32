@@ -81,7 +81,7 @@ void FSMC_SRAM_Init(void)
 //len：写入数据的长度
 void FSMC_SRAM_WriteBuffer(u8* pBuffer,u32 WriteAddr,u32 n)
 {
-	WriteAddr = WriteAddr&0x3FFFFF;
+//	WriteAddr = WriteAddr&0xFFFFFF;
 	for(;n!=0;n--)  
 	{
 		*(u8*)(Bank1_SRAM3_ADDR+WriteAddr)=*pBuffer++;	 		
@@ -95,7 +95,7 @@ void FSMC_SRAM_WriteBuffer(u8* pBuffer,u32 WriteAddr,u32 n)
 //len：读数据的长度
 void FSMC_SRAM_ReadBuffer(u8* pBuffer,u32 ReadAddr,u32 n)
 {
-	ReadAddr = ReadAddr&0x3FFFFF;
+//	ReadAddr = ReadAddr&0xFFFFFF;
 	for(;n!=0;n--)  
 	{
 		*pBuffer++=*(u8*)(Bank1_SRAM3_ADDR+ReadAddr);    

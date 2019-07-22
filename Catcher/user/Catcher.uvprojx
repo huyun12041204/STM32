@@ -608,16 +608,6 @@
               <FileType>1</FileType>
               <FilePath>..\app\spi\spi.c</FilePath>
             </File>
-            <File>
-              <FileName>dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\dma\dma.c</FilePath>
-            </File>
-            <File>
-              <FileName>malloc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\malloc\malloc.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

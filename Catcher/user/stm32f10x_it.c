@@ -23,25 +23,20 @@
 
 
 
-
-
-
-uint64_t GetCLKNumber(void)
+void GetClearTim3Count()
 {
+
+	TIM3CLK   = (TIM3->CNT)+1;
+	TIM3->CNT    = 0;
+//	TIM3Count    = 0; 
 	
-	uint64_t temp = ((uint64_t)count*0x10000 + (uint64_t)TIM_GetCounter(TIM3));
-	if(temp< u64PreCLK)
-		temp = temp+0x10000;
-	return  temp;
 }
-
-
 
 
 void Excute_EXTI(u32 EXTI_Line, u8 u8Pin)
 {
 
-	u64CurCLK = GetCLKNumber();
+	GetClearTim3Count();
 	EXTI_ClearITPendingBit(EXTI_Line);
 	_Cur_Pin_Statue = GetPinValue();
 
@@ -71,70 +66,59 @@ void EXTI4_IRQHandler(void)
 	Excute_EXTI(EXTI_Line4, Pin_IO);
 }
 
+void SaveLimitStatue(u8 _Pin)
+{
+	u32 u32TempLen = u32CLKLen;
+	u8 __Temp[4] = {0x02,0xFF,0xFF,0x00};
+	u8 __ClkLen=0;
+
+	
+	if(TIM3Count == 0)
+	{
+		u32CLKLen += 3;
+		
+    __Temp[0] = 	_Pin+ __Temp[0];
+	  __ClkLen+=1;
+	
+	 FSMC_SRAM_WriteBuffer(__Temp,u32TempLen,__ClkLen);
+	
+		//u32CLKLen += 3;
+		//u32NotSaveCLKLen = 0;
+	}
+
+
+  TIM3Count += 1;
+
+//	
+	
+}
+
 void SaveCurrentStatue(u8 _Pin)
 {
-	
-	
-	uint64_t u64CLKDiff;
-	u8 __ClkLen = 0;
-	u8 __Temp;
+	 u8 __Temp[4];
+	 u8 __ClkLen = 0;
+	 
+	  if(TIM3CLK<0x100)
+      __ClkLen = 1;
+    else 
+      __ClkLen = 2 		;
+    __Temp[0] = 	_Pin+ __ClkLen;
+		__Temp[1] = 	TIM3CLK&0xFF;
+		__Temp[2] = 	TIM3CLK>>8;
+	  __ClkLen+=1;
+////	if(TIM3Count > 0)
+////	{
+////		__Temp[3] = TIM3Count;
+////		__ClkLen+=1;
+////	
+	//}
 
-
-	u64CLKDiff = u64CurCLK - u64PreCLK;
-	
-	while(u64CLKDiff>0)
-	{	
-		__ClkLen +=1;
-		__Temp = u64CLKDiff&0xFF;
-		FSMC_SRAM_WriteBuffer(&__Temp, u32CLKLen+__ClkLen, 1);
-
-		u64CLKDiff = (u64CLKDiff>>8);
 		
-	}
-	
-	__Temp = _Pin + __ClkLen;
-	FSMC_SRAM_WriteBuffer(&__Temp, u32CLKLen, 1);
-	u32CLKLen = u32CLKLen + 1 +__ClkLen;
-	u64PreCLK = u64CurCLK;
-	
-//	uint64_t u64CLKDiff;
-//	u8 __ClkLen,__Temp;
-//	u8 ii;
+	 FSMC_SRAM_WriteBuffer(__Temp,u32CLKLen,__ClkLen);
 
-//	u64CLKDiff = u64CurCLK - u64PreCLK;
-
-//	if (u64CLKDiff < 0x100)
-//		__ClkLen = Bits_Len1;
-//	else if (u64CLKDiff < 0x10000)
-//		__ClkLen = Bits_Len2;
-//	else if (u64CLKDiff < 0x10000000000)
-//		__ClkLen = Bits_Len3;
-//	else 
-//	{
-//		printf("ERROR in Save %lld\n",u64CLKDiff);
-//		printf("CurCLK %lld\n",u64CurCLK);
-//		printf("PreCLK %lld\n",u64PreCLK);	
-//	}
-//	__Temp = _Pin + __ClkLen;
-//	FSMC_SRAM_WriteBuffer(&__Temp, u32CLKLen, 1);
-//	u32CLKLen += 1;
-//	if(u32CLKLen>_MaxSram)
-//	{
-//		printf(" halt..");
-//		u32CLKLen = 0;
-//	}
-//	for (ii = (__ClkLen * 2 - 1); ii > 0; ii -= 1)
-//	{
-//		__Temp = ((u64CLKDiff >> ((ii - 1) * 8)) & 0xFF);		
-//		FSMC_SRAM_WriteBuffer(&__Temp, u32CLKLen, 1);
-//		u32CLKLen += 1;
-//		if(u32CLKLen>_MaxSram)
-//	  {
-//		  printf(" halt..");
-//		  u32CLKLen = 0;
-//	  }
-//	}
-//	u64PreCLK = u64CurCLK;
+   u32CLKLen += 	__ClkLen;
+		
+//	 TIM3Count = 0;
 
 }
 

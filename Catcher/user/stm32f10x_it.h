@@ -59,11 +59,10 @@
 
 
 
-	 uint64_t GetCLKNumber(void);
+   void SaveLimitStatue(u8 _Pin);
 	 void SaveCurrentStatue(u8 _Pin);
 	 void PINx_EXIT_Init(void);
 	 u8   GetPinValue(void);
-	 u32 Get_Tim3_Clock(void);
 
 
 	 //************************************

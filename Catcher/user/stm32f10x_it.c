@@ -28,7 +28,7 @@ void GetClearTim3Count()
 
 	TIM3CLK   = (TIM3->CNT)+1;
 	TIM3->CNT    = 0;
-//	TIM3Count    = 0; 
+	TIM3Count    = 0; 
 	
 }
 
@@ -75,15 +75,10 @@ void SaveLimitStatue(u8 _Pin)
 	
 	if(TIM3Count == 0)
 	{
-		u32CLKLen += 3;
-		
+		u32CLKLen += 3;	
     __Temp[0] = 	_Pin+ __Temp[0];
-	  __ClkLen+=1;
-	
-	 FSMC_SRAM_WriteBuffer(__Temp,u32TempLen,__ClkLen);
-	
-		//u32CLKLen += 3;
-		//u32NotSaveCLKLen = 0;
+	 FSMC_SRAM_WriteBuffer(__Temp,u32TempLen,3);
+
 	}
 
 
@@ -106,19 +101,11 @@ void SaveCurrentStatue(u8 _Pin)
 		__Temp[1] = 	TIM3CLK&0xFF;
 		__Temp[2] = 	TIM3CLK>>8;
 	  __ClkLen+=1;
-////	if(TIM3Count > 0)
-////	{
-////		__Temp[3] = TIM3Count;
-////		__ClkLen+=1;
-////	
-	//}
-
 		
 	 FSMC_SRAM_WriteBuffer(__Temp,u32CLKLen,__ClkLen);
 
    u32CLKLen += 	__ClkLen;
-		
-//	 TIM3Count = 0;
+
 
 }
 

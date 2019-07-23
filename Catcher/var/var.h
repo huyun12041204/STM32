@@ -7,9 +7,9 @@
 
 #include "System.h"
 
-#define _StartSector 20
+#define _StartSector 1
 
-#define _Max_SD_Save 512*0x20
+#define _Max_SD_Save 0x2000
 
 
 

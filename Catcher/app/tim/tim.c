@@ -115,8 +115,10 @@ void TIM8_Init()
 
 void TIM8_CC_IRQHandler(void)
 {
+	u16 TEST2;
 
 	GetClearTim3Count();
+
 
 
 	if(TIM_GetITStatus(TIM8,TIM_IT_CC1)) //发生捕获中断
@@ -126,17 +128,17 @@ void TIM8_CC_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM8, TIM_IT_CC1);
 
 	}
-	else// if (TIM_GetITStatus(TIM8, TIM_IT_CC3)) //发生捕获中断
+	else if (TIM_GetITStatus(TIM8, TIM_IT_CC3)) //发生捕获中断
 	{
 
 		SaveCurrentStatue(GetPinValue());
 		TIM_ClearITPendingBit(TIM8, TIM_IT_CC3);
 	}
 
- 
+// TIM_ClearITPendingBit(TIM8, TIM_IT_CC1|TIM_IT_CC3);
 //	TEST2 = TIM3->CNT ;
-	
-	//printf("D--- %d \n",TEST2-0 );
+//	
+//	printf("D--- %d \n",TEST2-0 );
 	
 }
 

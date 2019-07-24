@@ -201,7 +201,7 @@ void  Initialize_Module(void)
 	//IO口使用外部中断 , CLK 外部中断 
 	
 	PINx_EXIT_Init();
-LCD_Dislay_Printf("Initialize Exit IO finished!");
+  LCD_Dislay_Printf("Initialize Exit IO finished!");
 	
 	
 
@@ -341,64 +341,41 @@ u8 SendChannelData_SD_USB_V2()
 	
 }
 
-u8 SendChannelData_SD_USB(u8 bMustRead)
+
+u8 SendChannelData_SD2_USB()
 {
-//	u32 u32CurCount = u32SaveLen;
-//	
-//	u32 u32WillSend;
-//	
-//	u8 u8Ret = 0;
-//	if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
-//		return 1;
-//	
-//		
-//	if(((u32SendLen%512) == 0)||
-//		  ((u32SendLen%64) != 0)||
-//	    (bMustRead == 1))
-//	   	SD_ReadDisk(_USB_SendBuf,u32SendLen/512 +_StartSector,1);
-
-
-//	u32WillSend =  512 - u32SendLen%512;
-//	
-//	if(u32WillSend>64)
-//		u32WillSend = 64;
-
-//	u8Ret = SendData_USB(ENDP1,_USB_SendBuf +u32SendLen%512 ,u32WillSend );
-//	
-//	//u8Ret = USB_SendData_EndP1_Two(_USB_SendBuf +u32SendLen%512 ,u32WillSend );
-
-//	u32SendLen = u32SendLen+ u8Ret;
-
-
-//	return 0;
-
 	u32 u32CurCount = u32SaveLen;
 	
-	u32 u32WillSend;
-	
-	u8 u8Ret = 0;
-	if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
-		return 1;
-	
-		
-	if((u32SendLen%512) == 0)
-	   	SD_ReadDisk(_USB_SendBuf,u32SendLen/512,1);
-
-
-	u32WillSend =  512 - u32SendLen%512;
+	u32 u32WillSend = u32SaveLen - u32SendLen;
 	
 	if(u32WillSend>64)
 		u32WillSend = 64;
-
-	u8Ret = SendData_USB(ENDP1,_USB_SendBuf +u32SendLen%512 ,u32WillSend );
 	
-	//u8Ret = USB_SendData_EndP1_Two(_USB_SendBuf +u32SendLen%512 ,u32WillSend );
+	//printf("SD_Read %d %d \n" ,u32SendLen,u32WillSend );
+	SD_Read(_USB_SendBuf,u32SendLen,u32WillSend); 
 
+	SendData_USB(ENDP1,_USB_SendBuf ,u32WillSend);
+	
 	u32SendLen = u32SendLen+ u32WillSend;
-
-
+	
 	return 0;
+	
+}
 
+u8 SaveChannelData_SD2(void)
+{
+	
+	u32 u32willSave = u32CLKLen - u32SaveLen;
+	if(u32willSave>0x1000)
+		u32willSave = 0x1000;
+	
+	FSMC_SRAM_ReadBuffer(_SD_SaveBuf, u32SaveLen, u32willSave);
+	
+	//printf("SD_WRITE %d %d" ,u32SaveLen,u32willSave );
+	SD_Write(_SD_SaveBuf,u32SaveLen,u32willSave);
+	
+	u32SaveLen += u32willSave;
+	
 }
 
 
@@ -436,25 +413,51 @@ u8 SaveChannelData_FLASH(void)
 	
 }
 
+
+
+u8 SendChannelData_SD_USB(u8 bMustRead)
+{
+	u32 u32CurCount = u32SaveLen;
+	
+	u32 u32WillSend;
+	
+	u8 u8Ret = 0;
+	if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
+		return 1;
+	
+		
+	if(((u32SendLen%512) == 0)||
+		  ((u32SendLen%64) != 0)||
+	    (bMustRead == 1))
+	   	SD_ReadDisk(_USB_SendBuf,u32SendLen/512 +_StartSector,1);
+
+
+	u32WillSend =  512 - u32SendLen%512;
+	
+	if(u32WillSend>64)
+		u32WillSend = 64;
+
+	u8Ret = SendData_USB(ENDP1,_USB_SendBuf +u32SendLen%512 ,u32WillSend );
+
+	u32SendLen = u32SendLen+ u8Ret;
+
+
+	return 0;
+
+}
+
+
+
+
 u8 SaveChannelData_SD(void)
 {
-	
-
-	
 	u32 u32willSave;
 	u8 __Count;
 
 	u32willSave = u32CLKLen - u32SaveLen;
 	
-
-	if(u32willSave<512)
-		return 1;
-
-	
 	if(u32willSave>0x2000)
-	{
 		__Count = 0x10;
-	}
 	else
 		__Count = u32willSave/512;
 	
@@ -462,50 +465,55 @@ u8 SaveChannelData_SD(void)
 
 	FSMC_SRAM_ReadBuffer(_SD_SaveBuf, u32SaveLen, u32willSave);
 	
-	if (SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512), __Count)!=0) 
-	{
-		 printf("Error %d\n",u32willSave);
-		
-	  SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512), __Count);
-	}
-	
+	if (SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count)!=0) 
+		SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count);
 
 	u32SaveLen += u32willSave;
-
 	
 	return 0;
 }
 
+
+
+
 void 	TEST__SD(void)
 {
-	u32 ii,jj;
+	u32 ii,kk,jj;
 	u32 u32Ser = 0;
 	printf("Start SD Test!\n");
-
-  for	(ii = 0 ; ii<0xFFFF; ii++)
+	
+	
+	for(ii = 0 ; ii<0x400; ii++)
 	{
-		
-		memset(_SD_SaveBuf,ii%7,512);
-		
-		
-		SD_WriteDisk(_SD_SaveBuf,ii, 1);
-		
-		//检查数据
-		
-		SD_ReadDisk(_SD_SaveBuf+512,ii,1);
-		
-	   printf("Compare sd  %x ,data %x !\n",ii,ii%7);
-		
-		for(jj = 0 ; jj<512; jj++)
+		for(kk = 1 ; kk< 0x400; kk++)
 		{
-			if(_SD_SaveBuf[jj]!= _SD_SaveBuf[jj+512])
-			{
-				printf("SD ERR In Ser:%x Number :%x \n", ii,jj);
-				return;
-			}
+			//printf("SD Test -- :%x Number :%x \n", ii,kk);
 			
+			memset(_SD_SaveBuf,kk+ii%101,kk);
+			
+			SD_WriteDisk(_SD_SaveBuf,ii, kk);
+			
+			SD_ReadDisk(_SD_SaveBuf+0x500,ii,1);
+			
+			for(jj = 0 ; jj<kk; jj++)
+	  	{
+			  if(_SD_SaveBuf[jj]!= _SD_SaveBuf[jj+0x500])
+		  	{
+				  printf("SD ERR In Ser:%x Number :%x \n", ii,jj);
+				  return;
+			  } 
+			
+		  }
+			
+			printf("add start:%x Length :%xx\n", ii,kk);
+			
+		
 		}
+		
+		
+		
 	}
+	
 	
 	printf("Finish SD Test!\n");
 	
@@ -523,30 +531,28 @@ void 	TEST__SD_V2(void)
 	u8 temp;
 	u8 Ret;
 
-  for	(ii = 1024 ; ii<0xFFFF; ii++)
+  for	(ii = 0 ; ii<0xFFFF; ii++)
 	{
 
-		temp = ii%13;
+		memset(_SD_SaveBuf,ii%0xFF,512);
+	
+		printf("Write SD! %d\n",ii);
+		SD_Write(_SD_SaveBuf,ii,512);
+			printf("Read SD! %d\n",ii);
+		SD_Read (_SD_SaveBuf+512,ii,512);
 		
-		printf("SD Write -- \n");			
-		SD_Write(&temp,ii,1);
-		printf("SD REad -- \n");		
-		SD_Read(&Ret,ii,1);
-		
-		if(temp != Ret)
-	    	printf("SD ERR In Ser:%x \n", ii);
-		else
-	      printf("SD Data :%x \n", temp);			
+		for(jj = 0 ; jj<512; jj++)
+		{
+			if(_SD_SaveBuf[jj]!= _SD_SaveBuf[jj+512])
+			{
+				printf("SD ERR In Ser:%x Number :%x \n", ii,jj);
+				return;
+			}
 			
-		
-		
+		}
+		printf("SD Test! %d\n",ii);
 	}
-	
 	printf("Finish SD Test!\n");
-	
-	
-	
-	
 }
 
 
@@ -555,14 +561,12 @@ void 	TEST__SD_V2(void)
 int main(void)
 {
 	
-  u32 MaxDisp = 0;
-	u8 Sended = 0;
-  u8 SendInf = 0;
+
 	u8 bSwitch = 1;
-	u8 USB_Res[2];
+	
+	
 
-
-	u32 u32Detal = 0;
+	u32 NewSend = 0;
 	//初始化各个模块
 	Initialize_Module();
 
@@ -575,7 +579,7 @@ int main(void)
 
 	
 	printf("Start ...!\n"); 
-	TEST__SD_V2();
+	//TEST__SD();
 	u32SendLen = 0;
 	u32CLKLen  = 0;
 	u32SaveLen = 0;
@@ -583,57 +587,40 @@ int main(void)
 	while(1)
 	{	
 
-//		if(MaxDisp < u32CLKLen)
-//		{
-//		  	MaxDisp = u32CLKLen;
-//				printf("%d -- \n",u32CLKLen);
-//		  	printf("%d save \n",u32SaveLen);
-//		
-//		}
-			
-//		if((u32CLKLen - u32SaveLen )>512)
-//			 SaveChannelData_SD();
-		
-		if(u32CLKLen != u32SaveLen )
-			 SaveChannelData_FLASH();
-		
-		
-		
-		
-		
+	
+		if((u32CLKLen - u32SaveLen )>512)
+			 SaveChannelData_SD();
 		
 
-		if(u32SendLen <  u32SaveLen)
+		if(u32SendLen != u32SaveLen)
 		{
 			if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
 				continue;
 			
-			
-			SendChannelData_FLASH_USB();
-			
-			// SendChannelData_USB();
-			 //SendChannelData_SD_USB(bSwitch);
-			  //SendChannelData_USB();
-			
-			//SendChannelData_SD_USB(1);
-			
-//			if((u32CLKLen-u32SendLen)>0x1000)
+//			if((u32CLKLen-u32SendLen)>0x10000)
 //			{
-//	  	  SendChannelData_SD_USB(bSwitch);
-//				bSwitch = 0;
+				//printf(".111");
+	  	  SendChannelData_SD_USB(bSwitch);
+			 
+				bSwitch = 0;
 //			}
 //			else
 //			{
 //				bSwitch = 1;
 //			  SendChannelData_USB();
 //			}
+			
 	
 		}
+		else if(	NewSend != u32SendLen)
+		{
+				printf("Data:%x.Save:%x,Send:%x\n",u32CLKLen,u32SaveLen,u32SendLen);
+		  	NewSend = u32SendLen;
 		
-
-		
+		}
 	
-
+	
+	
 	
 	}
 }

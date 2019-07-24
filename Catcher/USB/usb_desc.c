@@ -76,9 +76,9 @@ const uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
     0x00,         /* bInterfaceNumber: Number of Interface */
     0x00,         /* bAlternateSetting: Alternate setting */
     0x04,         /* bNumEndpoints */
-    0xDC,         /* bInterfaceClass: Class code = 0DCH */
-    0xA0,         /* bInterfaceSubClass : Subclass code = 0A0H */
-    0xB0,         /* nInterfaceProtocol : Protocol code = 0B0H */
+    0x00,         /* bInterfaceClass: Class code = 0DCH */
+    0x00,         /* bInterfaceSubClass : Subclass code = 0A0H */
+    0x00,         /* nInterfaceProtocol : Protocol code = 0B0H */
     0,            /* iInterface: Index of string descriptor */
     /******************** endpoint descriptor ********************/
     /* 18 */
@@ -133,7 +133,7 @@ const uint8_t CustomHID_StringProduct[CUSTOMHID_SIZ_STRING_PRODUCT] =
 {
     CUSTOMHID_SIZ_STRING_PRODUCT,          /* bLength */
     USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
-    'B', 0, 'y', 0, ' ', 0, 'e', 0, 'm', 0, 'b', 0,'e',0,'d',0,'-',0,'n',0,'e',0,'t',0
+    'S', 0, 'T', 0, ' ', 0, 'B', 0, 'U', 0, 'L', 0,'K',0,'-',0,'T',0,'E',0,'S',0,'T',0
 };
 uint8_t CustomHID_StringSerial[CUSTOMHID_SIZ_STRING_SERIAL] =
 {

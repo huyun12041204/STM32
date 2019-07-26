@@ -31,6 +31,38 @@
 
 
 #include "usbio.h"
+
+#define _Text_X  10
+
+#define _Windows_S_X  5
+#define _Windows_S_Y  5
+#define _Windows_E_X  230
+#define _Windows_E_Y  390
+
+#define _Title_E_Y (_Windows_S_Y+_Win_Height*5)
+
+//连接状态栏
+#define _Connect_E_Y (_Title_E_Y+_Win_Height*3)
+
+
+//当前连接类型
+#define _Connect_TYPE_E_Y (_Connect_E_Y)
+#define _Connect_TYPE_E_X (_Windows_S_X+120)
+
+#define _Text_X  10
+
+#define _Data_SS_E_Y (_Connect_E_Y+_Win_Height*4)
+
+#define _Output_Text_Y  _Data_SS_E_Y+5
+#define _Output_Text_X  _Text_X
+#define _Windows_Outpu_S_Y  _Data_SS_E_Y
+
+
+#define _Windows_Color  LGRAY
+#define _Windows_Sub_Color  LGRAYBLUE
+
+#define _Win_Height  18
+#define _Row_Height  16
 extern volatile uint32_t EP1_ReceivedCount;
 u8 SendIndex = 0;
 
@@ -38,6 +70,160 @@ u8 SendIndex = 0;
 
 u16 lCurY;
 u16 lCurX;
+
+
+
+
+
+void View_Init(void)
+{
+
+	LCD_DrawRectangleex( _Windows_S_X , _Windows_S_Y , _Windows_E_X , _Windows_E_Y ,_Windows_Color );
+	LCD_DrawRectangleex(_Windows_S_X+1,_Windows_S_Y+1,_Windows_E_X-1,_Windows_E_Y-1,_Windows_Sub_Color);
+
+	//标题栏
+	GUI_Line(_Windows_S_X,_Title_E_Y,_Windows_E_X,_Title_E_Y,_Windows_Color);	
+	
+	//连接状态
+	
+	//连接类型
+//	GUI_Line(_Connect_TYPE_E_X,_Title_E_Y,_Connect_TYPE_E_X,_Connect_TYPE_E_Y,_Windows_Color);
+	
+	GUI_Show12ASCII(_Text_X, _Title_E_Y+1,"Connect", FRONT_COLOR,  BLACK);
+	
+	GUI_Show12ASCII(_Text_X+60, _Title_E_Y+_Win_Height  ,"Type  :", FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+60, _Title_E_Y+_Win_Height*2,"Statue:", FRONT_COLOR,  BLACK);	
+	
+	GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height  ,"None", FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height*2,"Unknow", FRONT_COLOR,  BLACK);	
+	
+	GUI_Line(_Windows_S_X,_Connect_E_Y,_Windows_E_X,_Connect_E_Y,_Windows_Color);
+	
+	GUI_Show12ASCII(_Text_X, _Connect_E_Y+1,"Data", FRONT_COLOR,  BLACK);
+	
+	GUI_Show12ASCII(_Text_X+60, _Connect_E_Y+_Win_Height  ,"Get   :", FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+60, _Connect_E_Y+_Win_Height*2,"Save  :", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+60, _Connect_E_Y+_Win_Height*3,"Send  :", FRONT_COLOR,  BLACK);	
+	
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height  ,"0", FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height*2,"0", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height*3,"0", FRONT_COLOR,  BLACK);	
+	
+	GUI_Line(_Windows_S_X,_Data_SS_E_Y ,_Windows_E_X,_Data_SS_E_Y,_Windows_Color);
+	
+	
+//	GUI_Show12ASCII(_Text_X, _Title_E_Y+1,"Connect Type", FRONT_COLOR,  BLACK);
+	
+	//GUI_Line(_Windows_S_X,_Title_E_Y+_Win_Height,_Windows_E_X,_Title_E_Y+_Win_Height,_Windows_Color);	
+	
+//	GUI_Show12ASCII(_Text_X, _Title_E_Y+_Row_Height+1,"Connect Statue", FRONT_COLOR,  BLACK);	
+
+//	GUI_Line(_Windows_S_X,_Data_SS_E_Y,_Windows_E_X,_Data_SS_E_Y,_Windows_Color);	
+
+	
+	
+	
+	//GUI_Line(_Windows_S_X,_Windows_Outpu_S_Y,_Windows_E_X,_Windows_Outpu_S_Y,_Windows_Color);
+	
+}
+
+
+void View_Connect_Information(u8 u8Type,u8 u8Statue)
+{
+
+	if(u8Type == 0)
+		GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"None",FRONT_COLOR,  BLACK);
+	else if(u8Type == 1)
+	{
+		GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"USB", FRONT_COLOR,  BLACK);
+		if(u8Statue == 0)
+	  	GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height*2,"None",FRONT_COLOR,  BLACK);
+	  else if(u8Statue == 1)
+	  	GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height*2,"Connect", FRONT_COLOR,  BLACK);
+  	else if(u8Statue == 2)
+	  	GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height*2,"Diconect", FRONT_COLOR,  BLACK);
+	  else
+	  	GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height*2,"Other", FRONT_COLOR,  BLACK);
+	}
+	else if(u8Type == 2)
+	{
+		GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"COM", FRONT_COLOR,  BLACK);
+	  GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height+_Win_Height,"Unknow", FRONT_COLOR,  BLACK);	
+	}
+	else
+		GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"Other", FRONT_COLOR,  BLACK);
+}
+
+
+u8 u32Digit2Ascii(u32 u32Digit, u8* u8Ascii)
+{
+
+	u8 u8temp[10];
+	u32 TDigit = u32Digit;
+	int i;
+
+	for (i = 9; i >= 0; i--)
+	{
+		u8temp[i] = TDigit % 10 + 0x30;
+		TDigit = TDigit / 10;
+		if(TDigit == 0)
+			break;
+	}
+
+
+	memcpy(u8Ascii, u8temp+i, 10-i);
+	u8Ascii[10 - i] = '\0';
+	
+
+
+	return 10 - i;
+
+}
+
+void View_Data_Information(u32 u8Get,u32 u32Save,u32 u32Send)
+{
+	u8 u8temp[11];
+	
+	u32Digit2Ascii(u8Get,u8temp);
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height  ,u8temp, FRONT_COLOR,  BLACK);
+
+	u32Digit2Ascii(u32Save,u8temp);
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height*2,u8temp, FRONT_COLOR,  BLACK);	
+	
+	u32Digit2Ascii(u32Save,u8temp);
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height*3,u8temp, FRONT_COLOR,  BLACK);	
+	
+}
+
+void View_Data_Get_Information(u32 u8Get)
+{
+	u8 u8temp[11];
+	
+	u32Digit2Ascii(u8Get,u8temp);
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height  ,u8temp, FRONT_COLOR,  BLACK);
+
+	
+}
+
+void View_Data_Save_Information(u32 u32Save)
+{
+	u8 u8temp[11];
+
+
+	u32Digit2Ascii(u32Save,u8temp);
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height*2,u8temp, FRONT_COLOR,  BLACK);	
+
+	
+}
+
+void View_Data_Send_Information(u32 u32Send)
+{
+	u8 u8temp[11];
+
+	u32Digit2Ascii(u32Send,u8temp);
+	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height*3,u8temp, FRONT_COLOR,  BLACK);	
+	
+}
 
 void LCD_Dislay_Init()
 {
@@ -47,8 +233,13 @@ void LCD_Dislay_Init()
 //	FRONT_COLOR = YELLOW;
 	LCD_Clear(BLACK);
 	FRONT_COLOR = RED;
-	lCurY = 10;
-    lCurX = 10;
+	lCurY = _Output_Text_Y;
+  lCurX = _Output_Text_X;
+	
+	View_Init();
+	
+	
+	
 }
 
 
@@ -56,38 +247,34 @@ void LCD_Dislay_Init()
 void LCD_Dislay_Printf(u8 *p)
 {
 
-	GUI_Show12ASCII(10, lCurY, p, FRONT_COLOR, BLACK);
+	GUI_Show12ASCII(_Output_Text_X, lCurY, p, FRONT_COLOR, BLACK);
 
 	//GUI_Show12Char(10,lCurY,p,FRONT_COLOR, BLACK);
 
-	lCurY += 20;
+	lCurY += _Row_Height;
 
-	if (lCurY > 300)
-	{
-		lCurY = 10;
-	}
+	if (lCurY >= 374)	
+			lCurY = _Output_Text_Y;
 	
-	delay_ms(10);
-
 }
 
 int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
 {
 	u8 Empty[30] = {0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
 	0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
-	0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,};
+	0x20,0x20,0x20,0x20,0x20,0x20,0x20};
 
-	if(lCurX == 10)
+	if(lCurX == _Output_Text_X)
 		 GUI_Show12ASCII(lCurX, lCurY,Empty,FRONT_COLOR, BLACK);
 
  
 	
 	if(ch == '\n')
 	{
-		lCurX  = 10;
-		lCurY += 20;
-		if (lCurY > 300)	
-			lCurY = 10;
+		lCurX  = _Output_Text_X;
+		lCurY += _Row_Height;
+		if (lCurY >= 374)	
+			lCurY = _Output_Text_Y;
 	}
 	else
 	{
@@ -104,6 +291,9 @@ int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
 }
 
 
+
+
+/*
 
 u8 u8Digit2Ascii(u8 u8Digit,u8* u8Ascii)
 {
@@ -156,7 +346,7 @@ u8 u16Digit2Ascii(u16 u16Digit, u8* u8Ascii)
 
 }
 
-
+*/
 
 
 //USB使能连接/断线
@@ -191,17 +381,17 @@ void  Initialize_Module(void)
 	//显示屏
 	LCD_Dislay_Init();
 
-	LCD_Dislay_Printf("Initialize LCD finished!");
+	LCD_Dislay_Printf("LCD ok!");
 	
 
 	//初始化计时器
 	Tim_Init();		
-	LCD_Dislay_Printf("Initialize TIM finished!");
+	LCD_Dislay_Printf("TIM ok!");
 
 	//IO口使用外部中断 , CLK 外部中断 
 	
 	PINx_EXIT_Init();
-  LCD_Dislay_Printf("Initialize Exit IO finished!");
+  LCD_Dislay_Printf("Exit IO ok!");
 	
 	
 
@@ -216,11 +406,11 @@ void  Initialize_Module(void)
 	
 	if(EN25QXX_ReadID()!=EN25Q64)
 	{
-		LCD_Dislay_Printf("EN25QXX Error!          ");	
+		LCD_Dislay_Printf("EN25QXX Error! ");	
 		printf("%x \n",EN25QXX_ReadID());
 	}
 	else
-		LCD_Dislay_Printf("FLASH OK!          ");	
+		LCD_Dislay_Printf("FLASH OK! ");	
 	
   FSMC_SRAM_Init();
 	
@@ -228,7 +418,7 @@ void  Initialize_Module(void)
 
 	PINx_Level_Conversion_Init();
 
-	printf("Level conversion finish!\n");
+	printf("Level conversion ok!\n");
 	
 	
 	delay_ms(100);
@@ -239,6 +429,7 @@ void  Initialize_Module(void)
 	Set_USBClock();
 	USB_Init();
 
+  View_Connect_Information(1,1);
 	printf("USB Finish...\n");
 
 }
@@ -300,7 +491,7 @@ u8 SendChannelData_USB(void)
 
 }
 
-
+/*
 u8 SaveChannelData_SD_USB_V2(void)
 {
 	
@@ -413,11 +604,11 @@ u8 SaveChannelData_FLASH(void)
 	
 }
 
-
+*/
 
 u8 SendChannelData_SD_USB(u8 bMustRead)
 {
-	u32 u32CurCount = u32SaveLen;
+//	u32 u32CurCount = u32SaveLen;
 	
 	u32 u32WillSend;
 	
@@ -474,7 +665,7 @@ u8 SaveChannelData_SD(void)
 }
 
 
-
+/*
 
 void 	TEST__SD(void)
 {
@@ -555,7 +746,33 @@ void 	TEST__SD_V2(void)
 	printf("Finish SD Test!\n");
 }
 
+*/
 
+#define _Send_Busy 0x10
+#define _Send_Success 1
+#define _Send_Failed  0
+#define _Send_NoData  2
+u8 SendChannelData()
+{
+	if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
+		return _Send_Busy;
+	
+	
+	if(u32SendLen <u32SaveLen)
+	{
+		SendChannelData_SD_USB(bSramRead);
+		bSramRead = 0;
+	}else if(u32SendLen <u32CLKLen)
+	{
+		SendChannelData_USB();
+		bSramRead = 1; 
+	}
+	else 
+		return _Send_NoData;
+	
+	return _Send_Success;
+	
+}
 
 
 int main(void)
@@ -563,12 +780,16 @@ int main(void)
 	
 
 	u8 bSwitch = 1;
-	
+
 	
 
 	u32 NewSend = 0;
+	u32 NewSave = 0;
+	u32 NewGet  = 0;
+	
 	//初始化各个模块
 	Initialize_Module();
+	
 
 	Initialize_Global_variable();
 	
@@ -580,45 +801,42 @@ int main(void)
 	
 	printf("Start ...!\n"); 
 	//TEST__SD();
-	u32SendLen = 0;
-	u32CLKLen  = 0;
-	u32SaveLen = 0;
  
 	while(1)
 	{	
 
-	
+	  
+	//	View_Data_Get_Information(u32CLKLen);
+		
+		if(SendChannelData() != _Send_NoData)
+		{
+			if(NewSend!=u32SendLen)
+			{
+				View_Data_Send_Information(u32SendLen);
+		    NewSend = u32SendLen;	
+			//	printf("%d ,%d ,%d\n",u32CLKLen,u32SaveLen,u32SendLen);
+			}
+		}
+			
 		if((u32CLKLen - u32SaveLen )>512)
-			 SaveChannelData_SD();
-		
+		{
+			SaveChannelData_SD();
+			if(NewSave != u32SaveLen)
+			{		
+				NewSave = u32SaveLen;
+				View_Data_Get_Information(u32CLKLen);
+				View_Data_Save_Information(u32SaveLen);
+			}
+		}
+		else if(NewGet != u32CLKLen)
+		{
+			
+			NewGet = NewGet;
+			View_Data_Get_Information(u32CLKLen);
+		//	printf("%d ,%d ,%d\n",u32CLKLen,u32SaveLen,u32SendLen);
 
-		if(u32SendLen != u32SaveLen)
-		{
-			if (GetEPTxStatus(ENDP1) != EP_TX_NAK)
-				continue;
-			
-//			if((u32CLKLen-u32SendLen)>0x10000)
-//			{
-				//printf(".111");
-	  	  SendChannelData_SD_USB(bSwitch);
-			 
-				bSwitch = 0;
-//			}
-//			else
-//			{
-//				bSwitch = 1;
-//			  SendChannelData_USB();
-//			}
-			
-	
 		}
-		else if(	NewSend != u32SendLen)
-		{
-				printf("Data:%x.Save:%x,Send:%x\n",u32CLKLen,u32SaveLen,u32SendLen);
-		  	NewSend = u32SendLen;
-		
-		}
-	
+
 	
 	
 	

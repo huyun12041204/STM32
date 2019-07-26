@@ -29,6 +29,6 @@ extern u8 _Cur_Pin_Statue;
 
 extern u8 Sended ;
 
-
+extern u8 bSramRead;
 
 #endif

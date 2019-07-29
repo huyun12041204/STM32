@@ -4,7 +4,11 @@
 
 
 
+
 //
+
+u16 TIM2CLK;
+u16 TIM2Count;
 
 u16 TIM3CLK;
 u16 TIM3Count;
@@ -33,3 +37,5 @@ u8 Sended = 0;
 //确保发送正确，此处需要之前一条从何处读取
 u8 bSramRead = 1;
 
+
+SD_Error Status = SD_OK;

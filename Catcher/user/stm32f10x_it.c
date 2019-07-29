@@ -23,12 +23,16 @@
 
 
 
-void GetClearTim3Count()
+void GetClearTim2Count()
 {
 
-	TIM3CLK   = (TIM3->CNT)+1;
-	TIM3->CNT    = 0;
-	TIM3Count    = 0; 
+//	TIM3CLK   = (TIM3->CNT)+1;
+//	TIM3->CNT    = 0;
+//	TIM3Count    = 0; 
+	
+	TIM2CLK   = (TIM2->CNT)+1;
+	TIM2->CNT    = 0;
+	TIM2Count    = 0; 
 	
 }
 
@@ -36,7 +40,7 @@ void GetClearTim3Count()
 void Excute_EXTI(u32 EXTI_Line, u8 u8Pin)
 {
 
-	GetClearTim3Count();
+	GetClearTim2Count();
 	EXTI_ClearITPendingBit(EXTI_Line);
 	_Cur_Pin_Statue = GetPinValue();
 
@@ -73,7 +77,7 @@ void SaveLimitStatue(u8 _Pin)
 	u8 __ClkLen=0;
 
 	
-	if(TIM3Count == 0)
+	if(TIM2Count == 0)
 	{
 		u32CLKLen += 3;	
     __Temp[0] = 	_Pin+ __Temp[0];
@@ -82,7 +86,7 @@ void SaveLimitStatue(u8 _Pin)
 	}
 
 
-  TIM3Count += 1;
+  TIM2Count += 1;
 
 //	
 	
@@ -93,13 +97,13 @@ void SaveCurrentStatue(u8 _Pin)
 	 u8 __Temp[4];
 	 u8 __ClkLen = 0;
 	 
-	  if(TIM3CLK<0x100)
+	  if(TIM2CLK<0x100)
       __ClkLen = 1;
     else 
       __ClkLen = 2 		;
     __Temp[0] = 	_Pin+ __ClkLen;
-		__Temp[1] = 	TIM3CLK&0xFF;
-		__Temp[2] = 	TIM3CLK>>8;
+		__Temp[1] = 	TIM2CLK&0xFF;
+		__Temp[2] = 	TIM2CLK>>8;
 	  __ClkLen+=1;
 		
 	 FSMC_SRAM_WriteBuffer(__Temp,u32CLKLen,__ClkLen);
@@ -212,6 +216,16 @@ void PINx_Level_Conversion_Init(void)
 
 }
 
+
+
+
+
+
+void SDIO_IRQHandler(void) 
+{
+  /* Process All SDIO Interrupt Sources */
+  SD_ProcessIRQSrc();
+}
 
 
 #ifdef _USE_USB

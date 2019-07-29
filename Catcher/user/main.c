@@ -17,9 +17,9 @@
 #include "sram.h" 
 #include "String.h"
 #include "flash.h"
-#include "sd.h"
-#include "SD_OP.h"
-
+//#include "sd.h"
+//#include "SD_OP.h"
+#include "stm32_eval_sdio_sd.h"
 #include "var.h"
 
 
@@ -39,7 +39,7 @@
 #define _Windows_E_X  230
 #define _Windows_E_Y  390
 
-#define _Title_E_Y (_Windows_S_Y+_Win_Height*5)
+#define _Title_E_Y (_Windows_S_Y+_Win_Height*2)
 
 //连接状态栏
 #define _Connect_E_Y (_Title_E_Y+_Win_Height*3)
@@ -53,7 +53,9 @@
 
 #define _Data_SS_E_Y (_Connect_E_Y+_Win_Height*4)
 
-#define _Output_Text_Y  _Data_SS_E_Y+5
+#define _PIN_SS_E_Y (_Data_SS_E_Y+_Win_Height*4)
+
+#define _Output_Text_Y  _PIN_SS_E_Y+5
 #define _Output_Text_X  _Text_X
 #define _Windows_Outpu_S_Y  _Data_SS_E_Y
 
@@ -71,6 +73,43 @@ u8 SendIndex = 0;
 u16 lCurY;
 u16 lCurX;
 
+
+u8 tempbuff[512];
+
+
+
+/* Private typedef -----------------------------------------------------------*/
+typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
+
+/* Private define ------------------------------------------------------------*/
+#define BLOCK_SIZE            512 /* Block Size in Bytes */
+
+#define NUMBER_OF_BLOCKS      32  /* For Multi Blocks operation (Read/Write) */
+#define MULTI_BUFFER_SIZE    (BLOCK_SIZE * NUMBER_OF_BLOCKS)   //?????	 
+
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+uint8_t Buffer_Block_Tx[BLOCK_SIZE], Buffer_Block_Rx[BLOCK_SIZE];
+uint8_t readbuff[BLOCK_SIZE];
+uint8_t Buffer_MultiBlock_Tx[MULTI_BUFFER_SIZE], Buffer_MultiBlock_Rx[MULTI_BUFFER_SIZE];
+volatile TestStatus EraseStatus = FAILED, TransferStatus1 = FAILED, TransferStatus2 = FAILED;
+
+
+
+extern SD_CardInfo SDCardInfo;	
+
+
+int i;
+
+
+
+/* Private function prototypes -----------------------------------------------*/  
+void SD_EraseTest(void);
+void SD_SingleBlockTest(void);
+void SD_MultiBlockTest(void);
+void Fill_Buffer(uint8_t *pBuffer, uint32_t BufferLength, uint32_t Offset);
+TestStatus Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint32_t BufferLength);
+TestStatus eBuffercmp(uint8_t* pBuffer, uint32_t BufferLength);
 
 
 
@@ -112,6 +151,26 @@ void View_Init(void)
 	GUI_Line(_Windows_S_X,_Data_SS_E_Y ,_Windows_E_X,_Data_SS_E_Y,_Windows_Color);
 	
 	
+	GUI_Show12ASCII(_Text_X, _Data_SS_E_Y+1,"Pin", FRONT_COLOR,  BLACK);
+	
+	GUI_Show12ASCII(_Text_X, _Data_SS_E_Y+_Win_Height  ,"VCC:",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X, _Data_SS_E_Y+_Win_Height*2,"RST:", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X, _Data_SS_E_Y+_Win_Height*3,"GND:", FRONT_COLOR,  BLACK);	
+	
+	GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height  ,"----mv",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height*2,"XXXXmv", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height*3,"XXXXmv", FRONT_COLOR,  BLACK);	
+	
+	GUI_Show12ASCII(_Text_X+100, _Data_SS_E_Y+_Win_Height  ,"CLK:",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+100, _Data_SS_E_Y+_Win_Height*2,"I/O:", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+100, _Data_SS_E_Y+_Win_Height*3,"VDD:", FRONT_COLOR,  BLACK);	
+	
+	GUI_Show12ASCII(_Text_X+140, _Data_SS_E_Y+_Win_Height  ,"----khz",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+140, _Data_SS_E_Y+_Win_Height*2,"XXXXmv", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+140, _Data_SS_E_Y+_Win_Height*3,"XXXXmv", FRONT_COLOR,  BLACK);	
+
+	GUI_Line(_Windows_S_X,_PIN_SS_E_Y ,_Windows_E_X,_PIN_SS_E_Y,_Windows_Color);
+
 //	GUI_Show12ASCII(_Text_X, _Title_E_Y+1,"Connect Type", FRONT_COLOR,  BLACK);
 	
 	//GUI_Line(_Windows_S_X,_Title_E_Y+_Win_Height,_Windows_E_X,_Title_E_Y+_Win_Height,_Windows_Color);	
@@ -284,14 +343,79 @@ int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
 	
 
 	
-//     	USART_SendData(USART1,(u8)ch);	
-//	while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
+  //   	USART_SendData(USART1,(u8)ch);	
+	//while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET);
 
 	return ch;
 }
 
 
+#define _TEST
+#ifdef _TEST
 
+u8 SD_WriteDisk(u8*buf,u32 sector,u8 cnt)
+{
+	
+	if (Status != SD_OK)
+		return Status;
+	
+	if(cnt == 1)
+	{
+	
+    Status = SD_WriteBlock(buf, sector* 512, BLOCK_SIZE);
+    Status = SD_WaitWriteOperation();	   //??dma????
+    while(SD_GetStatus() != SD_TRANSFER_OK); //??sdio?sd?????
+		
+		
+		
+		
+		
+	}
+  else
+	{
+		
+    Status = SD_WriteMultiBlocks(buf, sector* 512, BLOCK_SIZE, cnt);
+    Status = SD_WaitWriteOperation();
+    while(SD_GetStatus() != SD_TRANSFER_OK);
+		
+		
+
+
+	}		
+	return 0;
+}
+
+
+
+u8 SD_ReadDisk(u8*buf,u32 sector,u8 cnt)
+{
+ if (Status != SD_OK)
+		return Status;
+
+	
+ printf("111");
+	if(cnt == 1)
+	{
+    Status = SD_ReadBlock(buf, sector*512, BLOCK_SIZE);//????
+    /* Check if the Transfer is finished */
+    Status = SD_WaitReadOperation();
+    while(SD_GetStatus() != SD_TRANSFER_OK);
+  printf("222");
+	}
+	
+	else
+	{
+    Status = SD_ReadMultiBlocks(buf, sector*512, BLOCK_SIZE, cnt);
+    Status = SD_WaitReadOperation();
+    while(SD_GetStatus() != SD_TRANSFER_OK);
+		
+	}
+		
+	Status = SD_OK;
+	return Status;
+	
+}
+#endif
 
 /*
 
@@ -375,13 +499,13 @@ void  Initialize_Module(void)
 	//定义中断优先级
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  //中断优先级分组分2组
 
-	//USART1 115200
-	//USART1_Init(864000);
+//	USART1 115200
+	//USART1_Init(115200);
 
 	//显示屏
 	LCD_Dislay_Init();
 
-	LCD_Dislay_Printf("LCD ok!");
+	//LCD_Dislay_Printf("LCD ok!");
 	
 
 	//初始化计时器
@@ -396,28 +520,89 @@ void  Initialize_Module(void)
 	
 
 
-	if (SD_Init())
-	{
-		LCD_Dislay_Printf("SD Card Error!");
-	}
-	LCD_Dislay_Printf("SD Card OK!");
+//	if (SD_Init())
+//	{
+//		LCD_Dislay_Printf("SD Card Error!");
+//	}
+//	LCD_Dislay_Printf("SD Card OK!");
 	
-	EN25QXX_Init();				//初始化EN25Qxx  
+//	EN25QXX_Init();				//初始化EN25Qxx  
+//	
+//	if(EN25QXX_ReadID()!=EN25Q64)
+//	{
+//		LCD_Dislay_Printf("EN25QXX Error! ");	
+//		printf("%x \n",EN25QXX_ReadID());
+//	}
+//	else
+//		LCD_Dislay_Printf("FLASH OK! ");	
 	
-	if(EN25QXX_ReadID()!=EN25Q64)
-	{
-		LCD_Dislay_Printf("EN25QXX Error! ");	
-		printf("%x \n",EN25QXX_ReadID());
-	}
-	else
-		LCD_Dislay_Printf("FLASH OK! ");	
+	
+	//TEST SD
+	Status = SD_Init();
+//delay_ms(0x10000);
+//	printf( "this is a microSD test\n " );
+  if(Status == SD_OK)
+	{    
+		printf("SD_Init OK\n" );	
+
+
+    Status = SD_ReadMultiBlocks(_SD_SaveBuf, 0x00, BLOCK_SIZE, 2);
+
+    /* Check if the Transfer is finished */
+    Status = SD_WaitReadOperation();  //????dma??????
+
+    /* Wait until end of DMA transfer */
+    while(SD_GetStatus() != SD_TRANSFER_OK);		
+ }
+  else
+  {
+	  	printf("SD_Init failed \n" );
+    	printf("failed status is: %d\n",Status );
+	}			  	
+	    
+	
+
+	//delay_ms(10000);
+ //	printf( "CardType is :%d \n", SDCardInfo.CardType );
+//	printf( "CardCapacity is :%d \n", SDCardInfo.CardCapacity );
+//	printf( "CardBlockSize is :%d \n", SDCardInfo.CardBlockSize );
+//	printf( "RCA is :%d \n", SDCardInfo.RCA);
+//	printf( "ManufacturerID is :%d \n", SDCardInfo.SD_cid.ManufacturerID );
+
+	
+
+	
+	
+//	while(1)
+//	{
+// 	printf( "CardType is :%d \n", SDCardInfo.CardType );
+//	printf( "CardCapacity is :%d \n", SDCardInfo.CardCapacity );
+//	printf( "CardBlockSize is :%d \n", SDCardInfo.CardBlockSize );
+//	printf( "RCA is :%d \n", SDCardInfo.RCA);
+//	printf( "ManufacturerID is :%d \n", SDCardInfo.SD_cid.ManufacturerID );
+
+//	
+//	printf("Erase Start!  \n" );
+//	SD_EraseTest();	   //????  
+//	printf("Erase finish!  \n" );
+//	
+//	
+//	printf("Single Block Test Start!\n" );
+//	SD_SingleBlockTest();  //??????
+//	printf("Single Block Test Start!\n" );
+
+// 	SD_MultiBlockTest();  //??????	
+//	}
+	
+	
+	
+	
 	
   FSMC_SRAM_Init();
 	
 	printf("Initialize Sram!\n"); 
 
 	PINx_Level_Conversion_Init();
-
 	printf("Level conversion ok!\n");
 	
 	
@@ -762,17 +947,22 @@ u8 SendChannelData()
 	{
 		SendChannelData_SD_USB(bSramRead);
 		bSramRead = 0;
-	}else if(u32SendLen <u32CLKLen)
-	{
-		SendChannelData_USB();
-		bSramRead = 1; 
 	}
+//	}else 
+//	if(u32SendLen <u32CLKLen)
+//	{
+//		SendChannelData_USB();
+//		bSramRead = 1; 
+//	}
 	else 
 		return _Send_NoData;
 	
 	return _Send_Success;
 	
 }
+
+
+
 
 
 int main(void)
@@ -795,6 +985,15 @@ int main(void)
 	
 	//此处需要先读取当前各个端口状态,VCC RST IO
 	_Pre_Pin_Statue = GetPinValue();
+	
+
+	
+	//SD_EraseTest();	   //????  
+
+//	SD_SingleBlockTest();  //??????
+
+ //	SD_MultiBlockTest();  //??????	
+
 
 	Tim_Enable();			//同步开始计数
 
@@ -814,7 +1013,7 @@ int main(void)
 			{
 				View_Data_Send_Information(u32SendLen);
 		    NewSend = u32SendLen;	
-			//	printf("%d ,%d ,%d\n",u32CLKLen,u32SaveLen,u32SendLen);
+
 			}
 		}
 			
@@ -833,8 +1032,7 @@ int main(void)
 			
 			NewGet = NewGet;
 			View_Data_Get_Information(u32CLKLen);
-		//	printf("%d ,%d ,%d\n",u32CLKLen,u32SaveLen,u32SendLen);
-
+	
 		}
 
 	
@@ -844,3 +1042,201 @@ int main(void)
 }
 
 
+/*
+ * ???:SD_EraseTest
+ * ??  :??????
+ * ??  :?
+ * ??  :?
+ */
+void SD_EraseTest(void)
+{
+  /*------------------- Block Erase ------------------------------------------*/
+//  if (Status == SD_OK)
+//  {
+//    /* Erase NumberOfBlocks Blocks of WRITE_BL_LEN(512 Bytes) */
+//    Status = SD_Erase(0x00, (BLOCK_SIZE * NUMBER_OF_BLOCKS));//????????????,????????????
+//  }
+
+//  if (Status == SD_OK)
+//  {			  //?????????
+//    Status = SD_ReadMultiBlocks(Buffer_MultiBlock_Rx, 0x00, BLOCK_SIZE, NUMBER_OF_BLOCKS);
+
+//    /* Check if the Transfer is finished */
+//    Status = SD_WaitReadOperation();  //????dma??????
+
+//    /* Wait until end of DMA transfer */
+//    while(SD_GetStatus() != SD_TRANSFER_OK);
+//  }
+
+//  /* Check the correctness of erased blocks */
+//  if (Status == SD_OK)
+//  {				  //??????????
+//    EraseStatus = eBuffercmp(Buffer_MultiBlock_Rx, MULTI_BUFFER_SIZE);
+//  }
+//  
+//  if(EraseStatus == PASSED)
+//  	printf("\r\n erase OK! " );
+// 
+//  else	  
+//  	printf("\r\n Erase failed! " );
+  
+}
+
+/*
+ * ???:SD_SingleBlockTest
+ * ??  :	?????????
+ * ??  :?
+ * ??  :?
+ */
+void SD_SingleBlockTest(void)
+{
+  /*------------------- Block Read/Write --------------------------*/
+  /* Fill the buffer to send */
+  Fill_Buffer(Buffer_Block_Tx, BLOCK_SIZE, 0x320F);
+
+  if (Status == SD_OK)
+  {
+    /* Write block of 512 bytes on address 0 */
+    Status = SD_WriteBlock(Buffer_Block_Tx, 0x00, BLOCK_SIZE);
+    /* Check if the Transfer is finished */
+    Status = SD_WaitWriteOperation();	   //??dma????
+    while(SD_GetStatus() != SD_TRANSFER_OK); //??sdio?sd?????
+  }
+
+  if (Status == SD_OK)
+  {
+    /* Read block of 512 bytes from address 0 */
+    Status = SD_ReadBlock(Buffer_Block_Rx, 0x00, BLOCK_SIZE);//????
+    /* Check if the Transfer is finished */
+    Status = SD_WaitReadOperation();
+    while(SD_GetStatus() != SD_TRANSFER_OK);
+  }
+
+  /* Check the correctness of written data */
+  if (Status == SD_OK)
+  {
+    TransferStatus1 = Buffercmp(Buffer_Block_Tx, Buffer_Block_Rx, BLOCK_SIZE);	//??
+  }
+  
+  if(TransferStatus1 == PASSED)
+    printf("\r\n single OK!" );
+ 
+  else  
+  	printf("\r\n single failed! " );  
+}
+
+/*
+ * ???:SD_MultiBlockTest
+ * ??  :	????????
+ * ??  :?
+ * ??  :?
+ */
+void SD_MultiBlockTest(void)
+{
+  /*--------------- Multiple Block Read/Write ---------------------*/
+  /* Fill the buffer to send */
+  Fill_Buffer(Buffer_MultiBlock_Tx, MULTI_BUFFER_SIZE, 0x0);
+
+  if (Status == SD_OK)
+  {
+    /* Write multiple block of many bytes on address 0 */
+    Status = SD_WriteMultiBlocks(Buffer_MultiBlock_Tx, 0x00, BLOCK_SIZE, NUMBER_OF_BLOCKS);
+    /* Check if the Transfer is finished */
+    Status = SD_WaitWriteOperation();
+    while(SD_GetStatus() != SD_TRANSFER_OK);
+  }
+
+  if (Status == SD_OK)
+  {
+    /* Read block of many bytes from address 0 */
+    Status = SD_ReadMultiBlocks(Buffer_MultiBlock_Rx, 0x00, BLOCK_SIZE, NUMBER_OF_BLOCKS);
+    /* Check if the Transfer is finished */
+    Status = SD_WaitReadOperation();
+    while(SD_GetStatus() != SD_TRANSFER_OK);
+  }
+
+  /* Check the correctness of written data */
+  if (Status == SD_OK)
+  {
+    TransferStatus2 = Buffercmp(Buffer_MultiBlock_Tx, Buffer_MultiBlock_Rx, MULTI_BUFFER_SIZE);
+  }
+  
+  if(TransferStatus2 == PASSED)	  
+  	printf("\r\n multi Ok! " );
+
+  else 
+  	printf("\r\n multi failed! " );  
+
+}
+
+
+
+
+/*
+ * ???:Buffercmp
+ * ??  :???????????????
+ * ??  :-pBuffer1, -pBuffer2 : ??????????
+ *         -BufferLength ?????
+ * ??  :-PASSED ??
+ *         -FAILED ??
+ */
+TestStatus Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint32_t BufferLength)
+{
+  while (BufferLength--)
+  {
+    if (*pBuffer1 != *pBuffer2)
+    {
+      return FAILED;
+    }
+
+    pBuffer1++;
+    pBuffer2++;
+  }
+
+  return PASSED;
+}
+
+
+/*
+ * ???:Fill_Buffer
+ * ??  :?????????
+ * ??  :-pBuffer ???????
+ *         -BufferLength ??????
+ *         -Offset ??????????
+ * ??  :? 
+ */
+void Fill_Buffer(uint8_t *pBuffer, uint32_t BufferLength, uint32_t Offset)
+{
+  uint16_t index = 0;
+
+  /* Put in global buffer same values */
+  for (index = 0; index < BufferLength; index++ )
+  {
+    pBuffer[index] = index + Offset;
+  }
+}
+
+
+/*
+ * ???:eBuffercmp
+ * ??  :???????????0
+ * ??  :-pBuffer ???????
+ *         -BufferLength ?????        
+ * ??  :PASSED ????????0
+ *         FAILED ?????????????0 
+ */
+TestStatus eBuffercmp(uint8_t* pBuffer, uint32_t BufferLength)
+{
+  while (BufferLength--)
+  {
+    /* In some SD Cards the erased state is 0xFF, in others it's 0x00 */
+    if ((*pBuffer != 0xFF) && (*pBuffer != 0x00))//????0xff?0x00
+    {
+      return FAILED;
+    }
+
+    pBuffer++;
+  }
+
+  return PASSED;
+}

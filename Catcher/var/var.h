@@ -6,12 +6,13 @@
 #define _USE_USB
 
 #include "System.h"
-
+#include "stm32_eval_sdio_sd.h"
 #define _StartSector 1
 
 #define _Max_SD_Save 0x2000
 
-
+extern u16 TIM2CLK;
+extern u16 TIM2Count;
 
 extern u16 TIM3CLK;
 extern u16 TIM3Count;
@@ -30,5 +31,7 @@ extern u8 _Cur_Pin_Statue;
 extern u8 Sended ;
 
 extern u8 bSramRead;
+
+extern SD_Error Status;
 
 #endif

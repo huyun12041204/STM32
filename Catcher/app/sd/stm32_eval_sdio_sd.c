@@ -1438,11 +1438,6 @@ SD_Error SD_WaitReadOperation(void)
   while ((SD_DMAEndOfTransferStatus() == RESET) && (TransferEnd == 0) && (TransferError == SD_OK))
   {
 	
-//		printf("11 end: %d \n",TransferEnd);
-//		printf("12 end: %d \n",TransferError);
-//		printf("13 STa: %d \n",SD_DMAEndOfTransferStatus());
-	
-	// printf("222\n");
 	}
 
   if (TransferError != SD_OK)
@@ -2609,8 +2604,8 @@ void SD_NVIC_Configuration(void)
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
   NVIC_InitStructure.NVIC_IRQChannel = SDIO_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 }

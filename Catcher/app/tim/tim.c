@@ -136,7 +136,7 @@ void TIM8_Init()
 	//TIM_ICInitStructure.TIM_ICMode = TIM_ICMode_ICAP;    
 	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
 	TIM_ICInitStructure.TIM_ICFilter = 0x04;
-	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_BothEdge;
 	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
 	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
 	TIM_ICInit(TIM8, &TIM_ICInitStructure);
@@ -177,14 +177,15 @@ void TIM8_CC_IRQHandler(void)
 
 		SaveCurrentStatue(GetPinValue());
 		TIM_ClearITPendingBit(TIM8, TIM_IT_CC1);
+		
 
 	}
-	else if (TIM_GetITStatus(TIM8, TIM_IT_CC2)) //发生捕获中断
-	{
+//	else if (TIM_GetITStatus(TIM8, TIM_IT_CC2)) //发生捕获中断
+//	{
 
-		SaveCurrentStatue(GetPinValue());
-		TIM_ClearITPendingBit(TIM8, TIM_IT_CC2);
-	}
+//		SaveCurrentStatue(GetPinValue());
+//		TIM_ClearITPendingBit(TIM8, TIM_IT_CC2);
+//	}
 
 	
 }

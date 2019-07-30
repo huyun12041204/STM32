@@ -599,11 +599,6 @@
               <FilePath>..\app\sram\sram.c</FilePath>
             </File>
             <File>
-              <FileName>sd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\sd\sd.c</FilePath>
-            </File>
-            <File>
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\spi\spi.c</FilePath>
@@ -614,9 +609,9 @@
               <FilePath>..\app\flash\flash.c</FilePath>
             </File>
             <File>
-              <FileName>SD_OP.c</FileName>
+              <FileName>stm32_eval_sdio_sd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\app\sd\SD_OP.c</FilePath>
+              <FilePath>..\app\sd\stm32_eval_sdio_sd.c</FilePath>
             </File>
           </Files>
         </Group>

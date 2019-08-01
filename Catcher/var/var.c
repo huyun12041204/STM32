@@ -6,9 +6,17 @@
 
 //
 
-u16 TIM3CLK;
+
 u16 TIM3Count;
 
+u16 CurTIM3CLK;
+u16 CurTIM3Count;
+
+u16 preTIM3CLK;
+u16 preTIM3Count;
+
+u16 DeltaTIM3CLK;
+u16 DeltaTIM3Count;
 
 
 //Í¨µÀ

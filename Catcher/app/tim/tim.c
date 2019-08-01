@@ -47,7 +47,12 @@ void TIM3_IRQHandler(void)
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update))
 	{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-		SaveLimitStatue(GetPinValue());
+		TIM3Count += 1;
+		
+		if((TIM3Count - preTIM3Count) == 2)
+			SaveLimitStatue(GetPinValue());
+		
+		//SaveLimitStatue(GetPinValue());
 		//TIM3Count +=1;
 
 	}
@@ -106,7 +111,7 @@ void TIM8_Init()
 	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 	
-	TIM_Cmd(TIM5, DISABLE); //使能定时器
+	TIM_Cmd(TIM8, DISABLE); //使能定时器
 
 
 
@@ -115,7 +120,6 @@ void TIM8_Init()
 
 void TIM8_CC_IRQHandler(void)
 {
-	u16 TEST2;
 
 	GetClearTim3Count();
 
@@ -142,6 +146,11 @@ void TIM8_CC_IRQHandler(void)
 	
 }
 
+
+//void TIM8_UP_IRQHandler(void)
+//{
+//	
+//}
 
 void Tim_Init(void)
 {

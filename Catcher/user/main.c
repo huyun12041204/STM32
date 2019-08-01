@@ -39,7 +39,7 @@
 #define _Windows_E_X  230
 #define _Windows_E_Y  390
 
-#define _Title_E_Y (_Windows_S_Y+_Win_Height*5)
+#define _Title_E_Y (_Windows_S_Y+_Win_Height*2)
 
 //连接状态栏
 #define _Connect_E_Y (_Title_E_Y+_Win_Height*3)
@@ -53,7 +53,9 @@
 
 #define _Data_SS_E_Y (_Connect_E_Y+_Win_Height*4)
 
-#define _Output_Text_Y  _Data_SS_E_Y+5
+#define _PIN_SS_E_Y  (_Data_SS_E_Y+_Win_Height*4)
+
+#define _Output_Text_Y  _PIN_SS_E_Y+5
 #define _Output_Text_X  _Text_X
 #define _Windows_Outpu_S_Y  _Data_SS_E_Y
 
@@ -63,7 +65,9 @@
 
 #define _Win_Height  18
 #define _Row_Height  16
+
 extern volatile uint32_t EP1_ReceivedCount;
+
 u8 SendIndex = 0;
 
 
@@ -111,20 +115,27 @@ void View_Init(void)
 	
 	GUI_Line(_Windows_S_X,_Data_SS_E_Y ,_Windows_E_X,_Data_SS_E_Y,_Windows_Color);
 	
+	GUI_Show12ASCII(_Text_X, _Data_SS_E_Y+1,"Pin", FRONT_COLOR,  BLACK);
 	
-//	GUI_Show12ASCII(_Text_X, _Title_E_Y+1,"Connect Type", FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X, _Data_SS_E_Y+_Win_Height  ,"VCC:",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X, _Data_SS_E_Y+_Win_Height*2,"RST:", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X, _Data_SS_E_Y+_Win_Height*3,"GND:", FRONT_COLOR,  BLACK);	
 	
-	//GUI_Line(_Windows_S_X,_Title_E_Y+_Win_Height,_Windows_E_X,_Title_E_Y+_Win_Height,_Windows_Color);	
+	GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height  ,"----mv",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height*2,"XXXXmv", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height*3,"XXXXmv", FRONT_COLOR,  BLACK);	
 	
-//	GUI_Show12ASCII(_Text_X, _Title_E_Y+_Row_Height+1,"Connect Statue", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+100, _Data_SS_E_Y+_Win_Height  ,"CLK:",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+100, _Data_SS_E_Y+_Win_Height*2,"I/O:", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+100, _Data_SS_E_Y+_Win_Height*3,"VDD:", FRONT_COLOR,  BLACK);	
+	
+	GUI_Show12ASCII(_Text_X+140, _Data_SS_E_Y+_Win_Height  ,"----khz",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+140, _Data_SS_E_Y+_Win_Height*2,"XXXXmv", FRONT_COLOR,  BLACK);	
+	GUI_Show12ASCII(_Text_X+140, _Data_SS_E_Y+_Win_Height*3,"XXXXmv", FRONT_COLOR,  BLACK);	
+	
+	GUI_Line(_Windows_S_X,_PIN_SS_E_Y ,_Windows_E_X,_PIN_SS_E_Y,_Windows_Color);
+	
 
-//	GUI_Line(_Windows_S_X,_Data_SS_E_Y,_Windows_E_X,_Data_SS_E_Y,_Windows_Color);	
-
-	
-	
-	
-	//GUI_Line(_Windows_S_X,_Windows_Outpu_S_Y,_Windows_E_X,_Windows_Outpu_S_Y,_Windows_Color);
-	
 }
 
 
@@ -223,6 +234,21 @@ void View_Data_Send_Information(u32 u32Send)
 	u32Digit2Ascii(u32Send,u8temp);
 	GUI_Show12ASCII(_Text_X+120, _Connect_E_Y+_Win_Height*3,u8temp, FRONT_COLOR,  BLACK);	
 	
+	
+}
+
+
+
+
+
+
+
+void View_Data_VCC(u16 u32Vcc)
+{
+	u8 u8temp[5];
+	u32Digit2Ascii(u32Vcc,u8temp);
+	GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height  ,"    ",FRONT_COLOR,  BLACK);
+	GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height  ,u8temp,FRONT_COLOR,  BLACK);
 }
 
 void LCD_Dislay_Init()
@@ -389,9 +415,9 @@ void  Initialize_Module(void)
 	LCD_Dislay_Printf("TIM ok!");
 
 	//IO口使用外部中断 , CLK 外部中断 
-	
 	PINx_EXIT_Init();
   LCD_Dislay_Printf("Exit IO ok!");
+
 	
 	
 
@@ -402,23 +428,27 @@ void  Initialize_Module(void)
 	}
 	LCD_Dislay_Printf("SD Card OK!");
 	
-	EN25QXX_Init();				//初始化EN25Qxx  
-	
-	if(EN25QXX_ReadID()!=EN25Q64)
-	{
-		LCD_Dislay_Printf("EN25QXX Error! ");	
-		printf("%x \n",EN25QXX_ReadID());
-	}
-	else
-		LCD_Dislay_Printf("FLASH OK! ");	
+//	EN25QXX_Init();				//初始化EN25Qxx  
+//	
+//	if(EN25QXX_ReadID()!=EN25Q64)
+//	{
+//		LCD_Dislay_Printf("EN25QXX Error! ");	
+//		printf("%x \n",EN25QXX_ReadID());
+//	}
+//	else
+//		LCD_Dislay_Printf("FLASH OK! ");	
 	
   FSMC_SRAM_Init();
 	
 	printf("Initialize Sram!\n"); 
 
-	PINx_Level_Conversion_Init();
+//	PINx_Level_Conversion_Init();
 
-	printf("Level conversion ok!\n");
+//	printf("Level conversion ok!\n");
+	
+	
+	 DMA1_Init();
+    Adc_Init();
 	
 	
 	delay_ms(100);
@@ -431,6 +461,8 @@ void  Initialize_Module(void)
 
   View_Connect_Information(1,1);
 	printf("USB Finish...\n");
+	
+
 
 }
 
@@ -441,11 +473,13 @@ void  Initialize_Global_variable(void)
  u32CLKLen  = 0;
  u32SendLen = 0;
  u32SaveLen = 0;
-
 	
+ preTIM3CLK     = 0;
+ preTIM3Count   = 0;
 
-
-
+ DeltaTIM3CLK   = 0;
+ DeltaTIM3Count = 0;
+	
 }
 
 
@@ -620,7 +654,7 @@ u8 SendChannelData_SD_USB(u8 bMustRead)
 	if(((u32SendLen%512) == 0)||
 		  ((u32SendLen%64) != 0)||
 	    (bMustRead == 1))
-	   	SD_ReadDisk(_USB_SendBuf,u32SendLen/512 +_StartSector,1);
+	     SD_ReadDisk(_USB_SendBuf,u32SendLen/512 +_StartSector,1);
 
 
 	u32WillSend =  512 - u32SendLen%512;
@@ -657,7 +691,9 @@ u8 SaveChannelData_SD(void)
 	FSMC_SRAM_ReadBuffer(_SD_SaveBuf, u32SaveLen, u32willSave);
 	
 	if (SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count)!=0) 
-		SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count);
+	{
+		  SD_WriteDisk(_SD_SaveBuf, (u32SaveLen / 512) +_StartSector, __Count);
+	}
 
 	u32SaveLen += u32willSave;
 	
@@ -777,9 +813,6 @@ u8 SendChannelData()
 
 int main(void)
 {
-	
-
-	u8 bSwitch = 1;
 
 	
 
@@ -808,8 +841,10 @@ int main(void)
 	  
 	//	View_Data_Get_Information(u32CLKLen);
 		
+		
 		if(SendChannelData() != _Send_NoData)
 		{
+			
 			if(NewSend!=u32SendLen)
 			{
 				View_Data_Send_Information(u32SendLen);
@@ -823,6 +858,7 @@ int main(void)
 			SaveChannelData_SD();
 			if(NewSave != u32SaveLen)
 			{		
+			  	ADC_SoftwareStartConvCmd(ADC1, ENABLE);	
 				NewSave = u32SaveLen;
 				View_Data_Get_Information(u32CLKLen);
 				View_Data_Save_Information(u32SaveLen);
@@ -837,7 +873,9 @@ int main(void)
 
 		}
 
+		
 	
+	 //	View_Data_VCC(Get_Vcc_Value());
 	
 	
 	}

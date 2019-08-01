@@ -7,7 +7,7 @@
 //#include "led.h"
 #include "stdio.h" 
 #include "var.h"
-
+#include "adc.h"
 #include "sram.h"
 #include "var.h"
 
@@ -26,9 +26,41 @@
 void GetClearTim3Count()
 {
 
-	TIM3CLK   = (TIM3->CNT)+1;
-	TIM3->CNT    = 0;
-	TIM3Count    = 0; 
+	
+	CurTIM3CLK   = (TIM3->CNT);
+	CurTIM3Count = TIM3Count;
+	
+	if(CurTIM3Count >= preTIM3Count)
+		DeltaTIM3Count = CurTIM3Count - preTIM3Count;
+	else
+	{
+		DeltaTIM3Count = 0;
+		CurTIM3Count = preTIM3Count;
+	}
+	
+	if(CurTIM3CLK < preTIM3CLK)
+	{
+		DeltaTIM3CLK = 0xFFFF - preTIM3CLK + CurTIM3CLK;
+		if(DeltaTIM3Count > 0)
+			DeltaTIM3Count -= 1 ;
+		else
+			CurTIM3Count +=1; 
+	}
+	else 
+		DeltaTIM3CLK = CurTIM3CLK - preTIM3CLK; 
+		
+	
+	
+	
+	
+	preTIM3CLK   = CurTIM3CLK;
+	preTIM3Count = CurTIM3Count;
+	
+//	 DeltaTIM3CLK;
+//   DeltaTIM3Count;
+//	TIM3CLK   = (TIM3->CNT)+1;
+//	TIM3->CNT    = 0;
+//	TIM3Count    = 0; 
 	
 }
 
@@ -49,22 +81,53 @@ void Excute_EXTI(u32 EXTI_Line, u8 u8Pin)
 	}
 }
 
+
+//RESET
+void EXTI0_IRQHandler(void)
+{
+
+	printf("In exit0 \n");
+//	Excute_EXTI(EXTI_Line2, Pin_RST);
+	EXTI_ClearITPendingBit(EXTI_Line0);
+}
+//VCC
+void EXTI1_IRQHandler(void)
+{
+	
+	
+	printf("In exit1 \n");
+	//Excute_EXTI(EXTI_Line3, Pin_VCC);
+	//ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+	EXTI_ClearITPendingBit(EXTI_Line1);
+}
+
 //RESET
 void EXTI2_IRQHandler(void)
 {
 
+	printf("In exit2 \n");
 	Excute_EXTI(EXTI_Line2, Pin_RST);
+	EXTI_ClearITPendingBit(EXTI_Line2);
 }
 //VCC
 void EXTI3_IRQHandler(void)
 {
+	
+	
+	printf("In exit3 \n");
 	Excute_EXTI(EXTI_Line3, Pin_VCC);
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+	EXTI_ClearITPendingBit(EXTI_Line3);
 }
 //IO
 void EXTI4_IRQHandler(void)
 {
+	EXTI_ClearITPendingBit(EXTI_Line4);
+	printf("In exit4 \n");
 	Excute_EXTI(EXTI_Line4, Pin_IO);
 }
+
+
 
 void SaveLimitStatue(u8 _Pin)
 {
@@ -73,16 +136,11 @@ void SaveLimitStatue(u8 _Pin)
 	u8 __ClkLen=0;
 
 	
-	if(TIM3Count == 0)
-	{
-		u32CLKLen += 3;	
-    __Temp[0] = 	_Pin+ __Temp[0];
-	 FSMC_SRAM_WriteBuffer(__Temp,u32TempLen,3);
 
-	}
+	u32CLKLen += 3;	
+  __Temp[0] = 	_Pin+ __Temp[0];
+	FSMC_SRAM_WriteBuffer(__Temp,u32TempLen,3);
 
-
-  TIM3Count += 1;
 
 //	
 	
@@ -93,21 +151,44 @@ void SaveCurrentStatue(u8 _Pin)
 	 u8 __Temp[4];
 	 u8 __ClkLen = 0;
 	 
-	  if(TIM3CLK<0x100)
-      __ClkLen = 1;
-    else 
-      __ClkLen = 2 		;
-    __Temp[0] = 	_Pin+ __ClkLen;
-		__Temp[1] = 	TIM3CLK&0xFF;
-		__Temp[2] = 	TIM3CLK>>8;
+//	  if(DeltaTIM3CLK<0x100)
+//      __ClkLen = 1;
+//    else 
+//      __ClkLen = 2 		;
+//		
+//    __Temp[0] = 	_Pin+ __ClkLen;
+		__Temp[1] = 	DeltaTIM3CLK&0xFF;
+		__Temp[2] = 	DeltaTIM3CLK>>8;
+	  __Temp[3] = 	DeltaTIM3Count;
+	
+	
+	  if(__Temp[3] > 0)
+			__ClkLen = 3;
+		else if(__Temp[2]>0)
+			__ClkLen = 2;
+		else 
+			__ClkLen = 1;
+		__Temp[0] = 	_Pin+ __ClkLen;	
+	  
+	
+//	  if(__Temp[2] )
+//		
+//		if(DeltaTIM3Count != 0)
+//		{	
+//			
+//		  __ClkLen+=1;
+//	
+//		}
+			
 	  __ClkLen+=1;
-		
+			
 	 FSMC_SRAM_WriteBuffer(__Temp,u32CLKLen,__ClkLen);
 
    u32CLKLen += 	__ClkLen;
 
 
 }
+
 
 void PINx_EXIT_Init(void)
 {
@@ -132,21 +213,21 @@ void PINx_EXIT_Init(void)
 	NVIC_InitTypeStruct.NVIC_IRQChannel = EXTI4_IRQn;
 	NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 2;
 	NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = DISABLE;
+	NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitTypeStruct);
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_3;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 
 	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_4;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 		//IO 口下沿中断
+	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_50MHz;		 
 	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOE, &GPIO_InitTypeStruct);
 
@@ -169,13 +250,14 @@ void PINx_EXIT_Init(void)
 	EXTI_InitTypeStruct.EXTI_Line = EXTI_Line4;
 	EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-	EXTI_InitTypeStruct.EXTI_LineCmd = DISABLE;
+	EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitTypeStruct);
 
 
 
 
 }
+
 
 u8 GetPinValue(void)
 {
@@ -193,22 +275,36 @@ u8 GetPinValue(void)
 
 void PINx_Level_Conversion_Init(void)
 {
-	GPIO_InitTypeDef   GPIO_InitTypeStruct;
+//	GPIO_InitTypeDef   GPIO_InitTypeStruct;
 
-	//OE ,电平转换器使能管脚, 0 为使能, 1 为不使能
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_2MHz;		 	
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOC, &GPIO_InitTypeStruct);
+//	//OE ,电平转换器使能管脚, 0 为使能, 1 为不使能
+//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_0;
+//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_2MHz;		 	
+//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+//	GPIO_Init(GPIOC, &GPIO_InitTypeStruct);
 
-	//DIR ,电平转换器方向管脚, 0 B->A, 1 A->B
-	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_1;
-	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_2MHz;		
-	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOC, &GPIO_InitTypeStruct);
+//	//DIR ,电平转换器方向管脚, 0 B->A, 1 A->B
+//	GPIO_InitTypeStruct.GPIO_Pin = GPIO_Pin_1;
+//	GPIO_InitTypeStruct.GPIO_Speed = GPIO_Speed_2MHz;		
+//	GPIO_InitTypeStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+//	GPIO_Init(GPIOC, &GPIO_InitTypeStruct);
 
-	GPIO_ResetBits(GPIOC, GPIO_Pin_0| GPIO_Pin_1);
+//	GPIO_ResetBits(GPIOC, GPIO_Pin_0| GPIO_Pin_1);
 
+
+}
+
+
+void DMA1_Channel1_IRQHandler(void)
+{
+	
+	//printf("in DMA1 ");
+	if(DMA_GetITStatus(DMA1_IT_TC1) != RESET) 
+	{
+	  DMA_ClearITPendingBit(DMA1_IT_TC1);
+		
+		View_Data_VCC(Get_Vcc_Value());
+	}
 
 }
 

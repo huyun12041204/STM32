@@ -365,7 +365,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\stm32f10x_fwlib\inc;..\Public;..\user;..\core;..\app\exti;..\app\iwdg;..\app\wwdg;..\app\tim;..\app\tpad;..\app\tftlcd;..\app\gui;..\USMART;..\app\rtc;..\app\wkup;..\app\adc;..\app\tsensor;..\app\dac;..\app\dma;..\app\spi;..\app\stm32_flash;..\app\sram;..\app\malloc;..\app\sd_card;..\app\Tetris;..\app\RTC_J;..\app\sd;..\Malloc;..\FATFS\FATFS_APP;..\app\flash;..\app\Command;..\var;..\USB\inc;..\STM32_USB-FS-Device_Driver\inc</IncludePath>
+              <IncludePath>..\stm32f10x_fwlib\inc;..\Public;..\user;..\core;..\app\exti;..\app\iwdg;..\app\wwdg;..\app\tim;..\app\tpad;..\app\tftlcd;..\app\gui;..\USMART;..\app\rtc;..\app\wkup;..\app\adc;..\app\tsensor;..\app\dac;..\app\dma;..\app\spi;..\app\stm32_flash;..\app\sram;..\app\malloc;..\app\sd_card;..\app\Tetris;..\app\RTC_J;..\app\sd;..\app\adc;..\FATFS\FATFS_APP;..\app\flash;..\app\Command;..\var;..\USB\inc;..\STM32_USB-FS-Device_Driver\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

@@ -7,15 +7,23 @@
 
 #include "System.h"
 
-#define _StartSector 1
+#define _StartSector 20
 
 #define _Max_SD_Save 0x2000
 
 
 
-extern u16 TIM3CLK;
+
 extern u16 TIM3Count;
 
+extern u16 CurTIM3CLK;
+extern u16 CurTIM3Count;
+
+extern u16 preTIM3CLK;
+extern u16 preTIM3Count;
+
+extern u16 DeltaTIM3CLK;
+extern u16 DeltaTIM3Count;
 
 extern u32 u32CLKLen;
 extern u32 u32SendLen;

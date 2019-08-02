@@ -10,9 +10,8 @@ extern u32 frequency;
 
 void Tim3_Init(void);
 //void Tim4_Init();
-void Tim_Init(void);
-void Tim_Enable(void);
-//u8 GetTIM4_Statue();
-void Enable_TIM4(FunctionalState NewState);
+void Collect_Init(void);
+void Collect_Enable(void);
+void Collect_Disable(void);
 
 #endif

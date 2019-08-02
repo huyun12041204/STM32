@@ -1,9 +1,20 @@
-/* 程序下载后D1指示灯闪烁表示程序正常运行，按键K_UP切换频率显示控制和电压控制调节，
-	K_DOWN按键减，K_RIGHT按键加，AD输入端口采用PA2，可以使用另外一块普中STM32开发板
-	下载里面配套的一个脉冲发生程序进去测试，脉冲通过PC1口发送出来通过导线直接输入到示波器
-	开发板上的PA2口即可检测到具体的波形，如果只有一块普中STM32开发板的朋友可以使用信号
-	发生器产生信号输入到PA2口。程序只是做了一个简单的采集和显示调节，采集的精度和准确度
-	还是比较高的。*/
+
+/* 
+使用PC1，PC2 连接 VCC  
+    PC3, PC4 连接 RST
+    以上为外部中断使用
+		
+		PC6 ，PC7 连接IO
+		使用 TIM8 输入捕获
+		
+		PD2 连接CLK
+		使用TIM3 记数
+		
+		PA2 连接IC VCC
+		使用AD1, Channel2 测量电压
+		
+		
+*/
 
 #include "system.h"
 #include "SysTick.h"
@@ -411,7 +422,7 @@ void  Initialize_Module(void)
 	
 
 	//初始化计时器
-	Tim_Init();		
+	Collect_Init();		
 	LCD_Dislay_Printf("TIM ok!");
 
 	//IO口使用外部中断 , CLK 外部中断 
@@ -448,7 +459,7 @@ void  Initialize_Module(void)
 	
 	
 	 DMA1_Init();
-    Adc_Init();
+   Adc_Init();
 	
 	
 	delay_ms(100);
@@ -827,14 +838,14 @@ int main(void)
 	Initialize_Global_variable();
 	
 	//此处需要先读取当前各个端口状态,VCC RST IO
-	_Pre_Pin_Statue = GetPinValue();
+	//GetPinValue();
 
-	Tim_Enable();			//同步开始计数
+	Collect_Enable();			//同步开始计数
 
 	
 	printf("Start ...!\n"); 
 	//TEST__SD();
- 
+  Collect_Enable();
 	while(1)
 	{	
 

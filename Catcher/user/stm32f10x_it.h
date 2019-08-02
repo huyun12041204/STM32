@@ -25,8 +25,9 @@
 
 #ifndef  Pin_ALL
 #define  Pin_ALL 0xF8
-#define  Pin_RST 0x10
+
 #define  Pin_VCC 0x20
+#define  Pin_RST 0x10
 #define  Pin_IO  0x40 
 #define  Pin_CLK 0x80 
 //#define  Pin_GND 0x08 

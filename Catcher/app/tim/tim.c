@@ -152,21 +152,58 @@ void TIM8_CC_IRQHandler(void)
 //	
 //}
 
-void Tim_Init(void)
+void Collect_Init(void)
 {
 	Tim3_Init();
 	TIM8_Init();
 }
-void Tim_Enable(void)
+
+
+
+void Collect_Enable(void)
 {
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM3, ENABLE);
 	TIM_ITConfig(TIM8, TIM_IT_CC1|TIM_IT_CC3, ENABLE);
 	TIM_Cmd(TIM8, ENABLE);
+	
+	
+	//修改TIM3状态标示，
+	TIMxStatue|= 0x04;
+	
+	//修改TIM8状态标示，
+	TIMxStatue|= 0x80;
+	
 }
 
 
+void Collect_Disable(void)
+{
+	TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
+	TIM_Cmd(TIM3, DISABLE);
+	
+	//清除TIM3的数据
+	TIM3->CNT = 0;
+	TIM3Count = 0;
+  CurTIM3CLK     =0;
+  CurTIM3Count   =0;
+  preTIM3CLK     =0;
+  preTIM3Count   =0;
 
+  DeltaTIM3CLK   =0;
+  DeltaTIM3Count =0;
+	
+	TIM_ITConfig(TIM8, TIM_IT_CC1|TIM_IT_CC3, DISABLE);
+	TIM_Cmd(TIM8, DISABLE);
+	
+	
+	//修改TIM3状态标示，
+	TIMxStatue&= 0xFB;
+	
+	//修改TIM8状态标示，
+	TIMxStatue&= 0x7F;
+	
+}
 
 
 

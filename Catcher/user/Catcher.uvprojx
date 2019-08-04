@@ -579,11 +579,6 @@
               <FilePath>..\app\adc\adc.c</FilePath>
             </File>
             <File>
-              <FileName>button.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\button\button.c</FilePath>
-            </File>
-            <File>
               <FileName>tim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\tim\tim.c</FilePath>
@@ -607,16 +602,6 @@
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\spi\spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\flash\flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>SD_OP.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\sd\SD_OP.c</FilePath>
             </File>
           </Files>
         </Group>

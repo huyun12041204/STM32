@@ -1,7 +1,7 @@
 #include "adc.h"
 
 u16 ADCConvertedValue[10];//用来存放ADC转换结果，
- 
+
 void DMA1_Init(void)
 {
 
@@ -18,21 +18,21 @@ void DMA1_Init(void)
     DMA_InitStructure.DMA_MemoryInc           = DMA_MemoryInc_Enable;           //用来设定内存地址寄存器递增与否,此处设为递增，Enable
     DMA_InitStructure.DMA_PeripheralDataSize  = DMA_PeripheralDataSize_HalfWord;//数据宽度为16位
     DMA_InitStructure.DMA_MemoryDataSize      = DMA_MemoryDataSize_HalfWord;    //数据宽度为16位
-	DMA_InitStructure.DMA_Mode                = DMA_Mode_Normal;                  //工作不在循环缓存模式
+    DMA_InitStructure.DMA_Mode                = DMA_Mode_Normal;                  //工作不在循环缓存模式
     DMA_InitStructure.DMA_Priority            = DMA_Priority_High;              //DMA通道拥有高优先级 分别4个等级 低、中、高、非常高
     DMA_InitStructure.DMA_M2M                 = DMA_M2M_Disable;                //使能DMA通道的内存到内存传输
-	
-	
+
+
     DMA_Init(DMA1_Channel1, &DMA_InitStructure);//根据DMA_InitStruct中指定的参数初始化DMA的通道
     DMA_Cmd(DMA1_Channel1, ENABLE);             //启动DMA通道一
 
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);   //中断分组1
-    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn; 
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2; 
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; 
+    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);          // Enable the DMA Interrupt 
+    NVIC_Init(&NVIC_InitStructure);          // Enable the DMA Interrupt
 
     DMA_ITConfig(DMA1_Channel1, DMA_IT_TC, ENABLE); //使能DMA传输完成中断
 }
@@ -45,7 +45,7 @@ void Adc_Init(void)
 //    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 //    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 //    GPIO_Init(GPIOA, &GPIO_InitStructure);
-//    
+//
 //    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
 //    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 //    GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -57,7 +57,7 @@ void Adc_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1|RCC_APB2Periph_GPIOA,ENABLE);
     RCC_ADCCLKConfig(RCC_PCLK2_Div6);
 
-	  ADC_DeInit(ADC1); 
+    ADC_DeInit(ADC1);
     ADC_InitStructure.ADC_Mode               = ADC_Mode_Independent;
     ADC_InitStructure.ADC_ScanConvMode       = DISABLE;
     ADC_InitStructure.ADC_ContinuousConvMode = DISABLE; //连续转换
@@ -65,12 +65,12 @@ void Adc_Init(void)
     ADC_InitStructure.ADC_DataAlign          = ADC_DataAlign_Right;
     ADC_InitStructure.ADC_NbrOfChannel       = 1;
     ADC_Init(ADC1, &ADC_InitStructure);
-    
-  // ADC_RegularChannelConfig(ADC1,ADC_Channel_0,1,ADC_SampleTime_1Cycles5);//通道一转换结果保存到ADCConvertedValue[0~10][0]
-  //	ADC_RegularChannelConfig(ADC1,ADC_Channel_1,2,ADC_SampleTime_1Cycles5););//通道二转换结果保存到ADCConvertedValue[0~10][1]
-  	ADC_RegularChannelConfig(ADC1,ADC_Channel_2,1,ADC_SampleTime_1Cycles5);//通道三转换结果保存到ADCConvertedValue[0~10][2]
 
-	  
+    // ADC_RegularChannelConfig(ADC1,ADC_Channel_0,1,ADC_SampleTime_1Cycles5);//通道一转换结果保存到ADCConvertedValue[0~10][0]
+    //	ADC_RegularChannelConfig(ADC1,ADC_Channel_1,2,ADC_SampleTime_1Cycles5););//通道二转换结果保存到ADCConvertedValue[0~10][1]
+    ADC_RegularChannelConfig(ADC1,ADC_Channel_2,1,ADC_SampleTime_1Cycles5);//通道三转换结果保存到ADCConvertedValue[0~10][2]
+
+
     ADC_DMACmd(ADC1, ENABLE);//开启ADC的DMA支持
     ADC_Cmd(ADC1, ENABLE);
 
@@ -83,12 +83,12 @@ void Adc_Init(void)
 
 u16 Get_Vcc_Value()
 {
-	u8 i;
-	u32 Vcc = 0;
-	for(i =0 ; i<10 ; i++ )
-	  Vcc += ADCConvertedValue[i];
-	Vcc = (Vcc*330)/4095;
-	return (u16)Vcc;
+    u8 i;
+    u32 Vcc = 0;
+    for(i =0 ; i<10 ; i++ )
+        Vcc += ADCConvertedValue[i];
+    Vcc = (Vcc*330)/4095;
+    return (u16)Vcc;
 }
 
 

@@ -30,7 +30,7 @@ ErrorStatus HSEStartUpStatus;
 
 /* Extern variables ----------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
+static void IntToUnicode (uint32_t value, uint8_t *pbuf, uint8_t len);
 /* Private functions ---------------------------------------------------------*/
 
 /*******************************************************************************
@@ -41,120 +41,120 @@ static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
 *******************************************************************************/
 void Set_System(void)
 {
-  GPIO_InitTypeDef  GPIO_InitStructure;
-  
-  /* SYSCLK, HCLK, PCLK2 and PCLK1 configuration -----------------------------*/   
-  /* RCC system reset(for debug purpose) */
-  RCC_DeInit();
+    GPIO_InitTypeDef  GPIO_InitStructure;
 
-  /* Enable HSE */
-  RCC_HSEConfig(RCC_HSE_ON);
+    /* SYSCLK, HCLK, PCLK2 and PCLK1 configuration -----------------------------*/
+    /* RCC system reset(for debug purpose) */
+    RCC_DeInit();
 
-  /* Wait till HSE is ready */
-  HSEStartUpStatus = RCC_WaitForHSEStartUp();
+    /* Enable HSE */
+    RCC_HSEConfig(RCC_HSE_ON);
 
-  if (HSEStartUpStatus == SUCCESS)
-  {
-    /* Enable Prefetch Buffer */
-    FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
+    /* Wait till HSE is ready */
+    HSEStartUpStatus = RCC_WaitForHSEStartUp();
 
-    /* Flash 2 wait state */
-    FLASH_SetLatency(FLASH_Latency_2);
- 
-    /* HCLK = SYSCLK */
-    RCC_HCLKConfig(RCC_SYSCLK_Div1); 
-  
-    /* PCLK2 = HCLK */
-    RCC_PCLK2Config(RCC_HCLK_Div1); 
+    if (HSEStartUpStatus == SUCCESS)
+    {
+        /* Enable Prefetch Buffer */
+        FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
 
-    /* PCLK1 = HCLK/2 */
-    RCC_PCLK1Config(RCC_HCLK_Div2);
+        /* Flash 2 wait state */
+        FLASH_SetLatency(FLASH_Latency_2);
+
+        /* HCLK = SYSCLK */
+        RCC_HCLKConfig(RCC_SYSCLK_Div1);
+
+        /* PCLK2 = HCLK */
+        RCC_PCLK2Config(RCC_HCLK_Div1);
+
+        /* PCLK1 = HCLK/2 */
+        RCC_PCLK1Config(RCC_HCLK_Div2);
 
 #ifdef STM32F10X_CL
-    /* Configure PLLs *********************************************************/
-    /* PLL2 configuration: PLL2CLK = (HSE / 2) * 10 = 40 MHz */
-    RCC_PREDIV2Config(RCC_PREDIV2_Div2);
-    RCC_PLL2Config(RCC_PLL2Mul_10);
+        /* Configure PLLs *********************************************************/
+        /* PLL2 configuration: PLL2CLK = (HSE / 2) * 10 = 40 MHz */
+        RCC_PREDIV2Config(RCC_PREDIV2_Div2);
+        RCC_PLL2Config(RCC_PLL2Mul_10);
 
-    /* Enable PLL2 */
-    RCC_PLL2Cmd(ENABLE);
+        /* Enable PLL2 */
+        RCC_PLL2Cmd(ENABLE);
 
-    /* Wait till PLL2 is ready */
-    while (RCC_GetFlagStatus(RCC_FLAG_PLL2RDY) == RESET)
-    {}
+        /* Wait till PLL2 is ready */
+        while (RCC_GetFlagStatus(RCC_FLAG_PLL2RDY) == RESET)
+        {}
 
-    /* PLL configuration: PLLCLK = (PLL2 / 5) * 9 = 72 MHz */ 
-    RCC_PREDIV1Config(RCC_PREDIV1_Source_PLL2, RCC_PREDIV1_Div5);
-    RCC_PLLConfig(RCC_PLLSource_PREDIV1, RCC_PLLMul_9);
+        /* PLL configuration: PLLCLK = (PLL2 / 5) * 9 = 72 MHz */
+        RCC_PREDIV1Config(RCC_PREDIV1_Source_PLL2, RCC_PREDIV1_Div5);
+        RCC_PLLConfig(RCC_PLLSource_PREDIV1, RCC_PLLMul_9);
 #else
-    /* PLLCLK = 8MHz * 9 = 72 MHz */
-    RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9);
+        /* PLLCLK = 8MHz * 9 = 72 MHz */
+        RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9);
 #endif
 
-    /* Enable PLL */ 
-    RCC_PLLCmd(ENABLE);
+        /* Enable PLL */
+        RCC_PLLCmd(ENABLE);
 
-    /* Wait till PLL is ready */
-    while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
-    {
+        /* Wait till PLL is ready */
+        while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
+        {
+        }
+
+        /* Select PLL as system clock source */
+        RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+
+        /* Wait till PLL is used as system clock source */
+        while(RCC_GetSYSCLKSource() != 0x08)
+        {
+        }
+    }
+    else
+    {   /* If HSE fails to start-up, the application will have wrong clock configuration.
+           User can add here some code to deal with this error */
+
+        /* Go to infinite loop */
+        while (1)
+        {
+        }
     }
 
-    /* Select PLL as system clock source */
-    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+    /* enable the PWR clock */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 
-    /* Wait till PLL is used as system clock source */
-    while(RCC_GetSYSCLKSource() != 0x08)
-    {
-    }
-  }
-  else
-  { /* If HSE fails to start-up, the application will have wrong clock configuration.
-       User can add here some code to deal with this error */    
-
-    /* Go to infinite loop */
-    while (1)
-    {
-    }
-  }
-  
-  /* enable the PWR clock */
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
-
-  /* Set all the GPIOs to AIN */
-  GPIO_AINConfig();
+    /* Set all the GPIOs to AIN */
+    GPIO_AINConfig();
 
 #ifndef STM32F10X_CL
-  	/* Enable the USB disconnect GPIO clock */
-  	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIO_DISCONNECT, ENABLE);
+    /* Enable the USB disconnect GPIO clock */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIO_DISCONNECT, ENABLE);
 
-  	/* USB_DISCONNECT used as USB pull-up */
-  	GPIO_InitStructure.GPIO_Pin = USB_DISCONNECT_PIN;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  	GPIO_Init(USB_DISCONNECT, &GPIO_InitStructure);
+    /* USB_DISCONNECT used as USB pull-up */
+    GPIO_InitStructure.GPIO_Pin = USB_DISCONNECT_PIN;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(USB_DISCONNECT, &GPIO_InitStructure);
 #else /* STM32F10X_CL */
-	/* Enable the USB disconnect GPIO clock */
-  	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIO_DISCONNECT , ENABLE); 	
+    /* Enable the USB disconnect GPIO clock */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIO_DISCONNECT, ENABLE);
 
-  	/* Configure the USB connect IO */
-  	GPIO_InitStructure.GPIO_Pin = USB_DISCONNECT_PIN;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  	GPIO_Init(USB_DISCONNECT, &GPIO_InitStructure);
-  	GPIO_ResetBits(USB_DISCONNECT,USB_DISCONNECT_PIN);
+    /* Configure the USB connect IO */
+    GPIO_InitStructure.GPIO_Pin = USB_DISCONNECT_PIN;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(USB_DISCONNECT, &GPIO_InitStructure);
+    GPIO_ResetBits(USB_DISCONNECT,USB_DISCONNECT_PIN);
 #endif
 
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE); 	
-  //GPIO_PinRemapConfig(GPIO_Remap2_CAN1, ENABLE);//使能改变串口一管脚的映射
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+    //GPIO_PinRemapConfig(GPIO_Remap2_CAN1, ENABLE);//使能改变串口一管脚的映射
 
-  /* Configure the LED IOs */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+    /* Configure the LED IOs */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
 /*******************************************************************************
@@ -167,17 +167,17 @@ void Set_System(void)
 void Set_USBClock(void)
 {
 #ifdef STM32F10X_CL
-  /* Select USBCLK source */
-  RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
+    /* Select USBCLK source */
+    RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
 
-  /* Enable the USB clock */ 
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, ENABLE) ;
+    /* Enable the USB clock */
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, ENABLE) ;
 #else
-  /* Select USBCLK source */
-  RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
-  
-  /* Enable the USB clock */
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
+    /* Select USBCLK source */
+    RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
+
+    /* Enable the USB clock */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
 #endif /* STM32F10X_CL */
 }
 
@@ -226,30 +226,30 @@ void Leave_LowPowerMode(void)
 *******************************************************************************/
 void USB_Interrupts_Config(void)
 {
-  NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
 
-  /* 2 bit for pre-emption priority, 2 bits for subpriority */
+    /* 2 bit for pre-emption priority, 2 bits for subpriority */
 //  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
 #ifdef STM32F10X_CL
-  /* Enable the USB Interrupts */
-  NVIC_InitStructure.NVIC_IRQChannel = OTG_FS_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+    /* Enable the USB Interrupts */
+    NVIC_InitStructure.NVIC_IRQChannel = OTG_FS_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
-  /* Enable the USB Wake-up interrupt */
-  NVIC_InitStructure.NVIC_IRQChannel = OTG_FS_WKUP_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
-  NVIC_Init(&NVIC_InitStructure);  
+    /* Enable the USB Wake-up interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = OTG_FS_WKUP_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+    NVIC_Init(&NVIC_InitStructure);
 #else
-  /* Enable the USB interrupt */
-  NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority =3;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+    /* Enable the USB interrupt */
+    NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority =3;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
 #endif /* STM32F10X_CL */
 
@@ -264,24 +264,24 @@ void USB_Interrupts_Config(void)
 *******************************************************************************/
 void USB_Cable_Config (FunctionalState NewState)
 {
-#ifdef STM32F10X_CL  
-  if (NewState != DISABLE)
-  {
-    USB_DevConnect();
-  }
-  else
-  {
-    USB_DevDisconnect();
-  }
+#ifdef STM32F10X_CL
+    if (NewState != DISABLE)
+    {
+        USB_DevConnect();
+    }
+    else
+    {
+        USB_DevDisconnect();
+    }
 #else /* USE_STM3210B_EVAL or USE_STM3210E_EVAL */
-  if (NewState != DISABLE)
-  {
-    GPIO_ResetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
-  }
-  else
-  {
-    GPIO_SetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
-  }
+    if (NewState != DISABLE)
+    {
+        GPIO_ResetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
+    }
+    else
+    {
+        GPIO_SetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
+    }
 #endif /* USE_STM3210C_EVAL */
 }
 
@@ -350,7 +350,7 @@ void USB_Cable_Config (FunctionalState NewState)
 //    case RIGHT:
 //      X += CURSOR_STEP;
 //      break;
-//	  
+//
 //    case UP:
 //      Y -= CURSOR_STEP;
 //      break;
@@ -358,7 +358,7 @@ void USB_Cable_Config (FunctionalState NewState)
 //    case DOWN:
 //      Y += CURSOR_STEP;
 //	  break;
-//	   
+//
 //	case LEFT_BUTTON:
 //      MouseButton = MouseButton|0x01;
 //      break;
@@ -375,7 +375,7 @@ void USB_Cable_Config (FunctionalState NewState)
 //  Mouse_Buffer[0] = MouseButton;
 //  Mouse_Buffer[1] = X;
 //  Mouse_Buffer[2] = Y;
-//  
+//
 //  /* Copy mouse position info in ENDP1 Tx Packet Memory Area*/
 //  USB_SIL_Write(EP1_IN, Mouse_Buffer, 4);
 //
@@ -384,14 +384,14 @@ void USB_Cable_Config (FunctionalState NewState)
 //    Mouse_Buffer[0] = 0;
 //    /* Copy mouse position info in ENDP1 Tx Packet Memory Area*/
 //    USB_SIL_Write(EP1_IN, Mouse_Buffer, 4);
-//  }   
+//  }
 //
 //#ifndef STM32F10X_CL
 //  /* Enable endpoint for transmission */
 //  SetEPTxValid(ENDP1);
 //#endif /* STM32F10X_CL */
-//  
-//  
+//
+//
 //}
 
 /*******************************************************************************
@@ -403,19 +403,19 @@ void USB_Cable_Config (FunctionalState NewState)
 *******************************************************************************/
 void Get_SerialNum(void)
 {
-  uint32_t Device_Serial0, Device_Serial1, Device_Serial2;
+    uint32_t Device_Serial0, Device_Serial1, Device_Serial2;
 
-  Device_Serial0 = *(__IO uint32_t*)(0x1FFFF7E8);
-  Device_Serial1 = *(__IO uint32_t*)(0x1FFFF7EC);
-  Device_Serial2 = *(__IO uint32_t*)(0x1FFFF7F0);
+    Device_Serial0 = *(__IO uint32_t*)(0x1FFFF7E8);
+    Device_Serial1 = *(__IO uint32_t*)(0x1FFFF7EC);
+    Device_Serial2 = *(__IO uint32_t*)(0x1FFFF7F0);
 
-  Device_Serial0 += Device_Serial2;
+    Device_Serial0 += Device_Serial2;
 
-  if (Device_Serial0 != 0)
-  {
-    IntToUnicode (Device_Serial0, &CustomHID_StringSerial[2] , 8);
-    IntToUnicode (Device_Serial1, &CustomHID_StringSerial[18], 4);
-  }
+    if (Device_Serial0 != 0)
+    {
+        IntToUnicode (Device_Serial0, &CustomHID_StringSerial[2], 8);
+        IntToUnicode (Device_Serial1, &CustomHID_StringSerial[18], 4);
+    }
 }
 
 /*******************************************************************************
@@ -425,25 +425,25 @@ void Get_SerialNum(void)
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
-static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len)
+static void IntToUnicode (uint32_t value, uint8_t *pbuf, uint8_t len)
 {
-  uint8_t idx = 0;
-  
-  for( idx = 0 ; idx < len ; idx ++)
-  {
-    if( ((value >> 28)) < 0xA )
+    uint8_t idx = 0;
+
+    for( idx = 0 ; idx < len ; idx ++)
     {
-      pbuf[ 2* idx] = (value >> 28) + '0';
+        if( ((value >> 28)) < 0xA )
+        {
+            pbuf[ 2* idx] = (value >> 28) + '0';
+        }
+        else
+        {
+            pbuf[2* idx] = (value >> 28) + 'A' - 10;
+        }
+
+        value = value << 4;
+
+        pbuf[ 2* idx + 1] = 0;
     }
-    else
-    {
-      pbuf[2* idx] = (value >> 28) + 'A' - 10; 
-    }
-    
-    value = value << 4;
-    
-    pbuf[ 2* idx + 1] = 0;
-  }
 }
 #ifdef STM32F10X_CL
 /*******************************************************************************
@@ -455,18 +455,18 @@ static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len)
 *******************************************************************************/
 void USB_OTG_BSP_uDelay (const uint32_t usec)
 {
-  RCC_ClocksTypeDef  RCC_Clocks;  
+    RCC_ClocksTypeDef  RCC_Clocks;
 
-  /* Configure HCLK clock as SysTick clock source */
-  SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
-  
-  RCC_GetClocksFreq(&RCC_Clocks);
-  
-  SysTick_Config(usec * (RCC_Clocks.HCLK_Frequency / 1000000));  
-  
-  SysTick->CTRL  &= ~SysTick_CTRL_TICKINT_Msk ;
-  
-  while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk));
+    /* Configure HCLK clock as SysTick clock source */
+    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
+
+    RCC_GetClocksFreq(&RCC_Clocks);
+
+    SysTick_Config(usec * (RCC_Clocks.HCLK_Frequency / 1000000));
+
+    SysTick->CTRL  &= ~SysTick_CTRL_TICKINT_Msk ;
+
+    while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk));
 }
 #endif
 /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/

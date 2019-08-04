@@ -67,7 +67,7 @@ const uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
     0x00,         /* iConfiguration: Index of string descriptor describing
                                  the configuration*/
     0xE0,         /* bmAttributes: Bus powered */
-                  /*Bus powered: 7th bit, Self Powered: 6th bit, Remote wakeup: 5th bit, reserved: 4..0 bits */
+    /*Bus powered: 7th bit, Self Powered: 6th bit, Remote wakeup: 5th bit, reserved: 4..0 bits */
     0xFA,         /* MaxPower 500 mA: this current is used for detecting Vbus */
     /************** Descriptor of Custom HID interface ****************/
     /* 09 */
@@ -95,14 +95,14 @@ const uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
     0x02,					/* bulk transfer = 02H */
     0x40,0x00,    /* endpoint max packet size = 0040H */
     0x00,         /* the value is invalid when bulk transfer */
-		
+
     0x07,         /* endpoint descriptor length = 07H */
     USB_ENDPOINT_DESCRIPTOR_TYPE, /* endpoint descriptor type = 05H */
     0x82,         /* endpoint 2 IN */
     0x02,					/* bulk transfer = 02H */
     0x40,0x00,    /* endpoint max packet size = 0040H */
     0x00,         /* the value is invalid when bulk transfer */
-		
+
     0x07,         /* endpoint descriptor length = 07H */
     USB_ENDPOINT_DESCRIPTOR_TYPE, /* endpoint descriptor type = 05H */
     0x02,         /* endpoint 2 OUT */
@@ -125,7 +125,7 @@ const uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR] =
 {
     CUSTOMHID_SIZ_STRING_VENDOR, /* Size of Vendor string */
     USB_STRING_DESCRIPTOR_TYPE,  /* bDescriptorType*/
-    // Manufacturer: "STMicroelectronics" 
+    // Manufacturer: "STMicroelectronics"
     'M', 0, 'y', 0, 'U', 0,'S', 0,'B', 0, '_', 0, 'H', 0,'I',0,'D',0
 };
 

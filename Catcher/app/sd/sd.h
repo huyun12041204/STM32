@@ -6,14 +6,14 @@
 
 #define SD_CS PGout(14)		  //SD_CS
 
-// SD卡类型定义  
+// SD卡类型定义
 #define SD_TYPE_ERR     0X00
 #define SD_TYPE_MMC     0X01
 #define SD_TYPE_V1      0X02
 #define SD_TYPE_V2      0X04
-#define SD_TYPE_V2HC    0X06	
-   
-// SD卡指令表  	   
+#define SD_TYPE_V2HC    0X06
+
+// SD卡指令表
 #define CMD0    0       //卡复位
 #define CMD1    1
 #define CMD8    8       //命令8 ，SEND_IF_COND
@@ -45,10 +45,10 @@
 #define MSD_ERASE_SEQUENCE_ERROR   0x10
 #define MSD_ADDRESS_ERROR          0x20
 #define MSD_PARAMETER_ERROR        0x40
-#define MSD_RESPONSE_FAILURE       0xFF 							   						 					    	  
+#define MSD_RESPONSE_FAILURE       0xFF
 
 extern u8 SD_Type;//SD卡的类型
-//函数申明区 
+//函数申明区
 u8 SD_SPI_ReadWriteByte(u8 data);
 void SD_SPI_SpeedLow(void);
 void SD_SPI_SpeedHigh(void);
@@ -60,6 +60,6 @@ u8 SD_WriteDisk(u8*buf,u32 sector,u8 cnt);		//写块
 u32 SD_GetSectorCount(void);   					//读扇区数
 u8 SD_GetCID(u8 *cid_data);                     //读SD卡CID
 u8 SD_GetCSD(u8 *csd_data);                     //读SD卡CSD
- 
+
 
 #endif

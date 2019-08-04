@@ -11,7 +11,7 @@
   *<h3><center>&copy; Copyright 2009-2012, ViewTool</center>
   *<center><a href="http:\\www.viewtool.com">http://www.viewtool.com</a></center>
   *<center>All Rights Reserved</center></h3>
-  * 
+  *
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
@@ -29,7 +29,7 @@ uint8_t g_dataSerialNumber;
 
 /* Private function prototypes -----------------------------------------------*/
 
-  
+
 /* Private functions ---------------------------------------------------------*/
 /**
   * @brief  通过USB发送数据
@@ -39,15 +39,15 @@ uint8_t g_dataSerialNumber;
   */
 uint32_t USB_SendData(uint8_t bEpNum,uint8_t *data,uint32_t dataNum)
 {
-	//将数据通过USB发送出去
-	if(bEpNum == ENDP1){
-		UserToPMABufferCopy(data, ENDP1_TXADDR, dataNum);
-	}else{
-		UserToPMABufferCopy(data, ENDP2_TXADDR, dataNum);
-	}
-	SetEPTxCount(bEpNum, dataNum);
-	SetEPTxValid(bEpNum);
-	return dataNum;  
+    //将数据通过USB发送出去
+    if(bEpNum == ENDP1) {
+        UserToPMABufferCopy(data, ENDP1_TXADDR, dataNum);
+    } else {
+        UserToPMABufferCopy(data, ENDP2_TXADDR, dataNum);
+    }
+    SetEPTxCount(bEpNum, dataNum);
+    SetEPTxValid(bEpNum);
+    return dataNum;
 }
 /**
   * @brief  接收从USB获取的数据
@@ -58,32 +58,32 @@ uint32_t USB_SendData(uint8_t bEpNum,uint8_t *data,uint32_t dataNum)
 uint32_t USB_GetData(uint8_t bEpNum,uint8_t *data,uint32_t dataNum)
 {
     uint32_t len=0;
-	if(dataNum>sizeof(USB_Receive_Buffer)){
-		dataNum = sizeof(USB_Receive_Buffer);
-	}
-	for(len=0;len<dataNum;len++){
-		*data=USB_Receive_Buffer[len];
-		data++;
-	}
+    if(dataNum>sizeof(USB_Receive_Buffer)) {
+        dataNum = sizeof(USB_Receive_Buffer);
+    }
+    for(len=0; len<dataNum; len++) {
+        *data=USB_Receive_Buffer[len];
+        data++;
+    }
     return dataNum;
 }
 
 uint32_t USB_SendData_EndP1_Two(uint8_t *data,uint32_t dataNum)
 {
-	
-	if (GetENDPOINT(ENDP1) & EP_DTOG_RX)
-	{
-		UserToPMABufferCopy(data, ENDP1_TXADDR0, dataNum);
-		SetEPDblBuf0Count(ENDP1, EP_DBUF_IN, dataNum);
-	}
-	else
-	{
-		UserToPMABufferCopy(data, ENDP1_TXADDR1, dataNum);
-		SetEPDblBuf1Count(ENDP1, EP_DBUF_IN, dataNum);
-	}
-	
-	FreeUserBuffer(ENDP1, EP_DBUF_IN);
-	return dataNum;
+
+    if (GetENDPOINT(ENDP1) & EP_DTOG_RX)
+    {
+        UserToPMABufferCopy(data, ENDP1_TXADDR0, dataNum);
+        SetEPDblBuf0Count(ENDP1, EP_DBUF_IN, dataNum);
+    }
+    else
+    {
+        UserToPMABufferCopy(data, ENDP1_TXADDR1, dataNum);
+        SetEPDblBuf1Count(ENDP1, EP_DBUF_IN, dataNum);
+    }
+
+    FreeUserBuffer(ENDP1, EP_DBUF_IN);
+    return dataNum;
 
 }
 

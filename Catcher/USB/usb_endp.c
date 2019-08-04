@@ -45,9 +45,9 @@ volatile uint32_t EP1_SendFlag = 0;
 *******************************************************************************/
 void EP1_IN_Callback(void)
 {
-	//SetEPTxStatus(ENDP1, EP_TX_STALL);
-	//printf("EP2_IN_Callback\n\r");
-	EP1_SendFlag = 0;
+    //SetEPTxStatus(ENDP1, EP_TX_STALL);
+    //printf("EP2_IN_Callback\n\r");
+    EP1_SendFlag = 0;
 }
 /*******************************************************************************
 * Function Name  : EP1_OUT_Callback.
@@ -58,9 +58,9 @@ void EP1_IN_Callback(void)
 *******************************************************************************/
 void EP1_OUT_Callback(void)
 {
-	EP1_ReceivedCount = GetEPRxCount(ENDP1);
-	PMAToUserBufferCopy(USB_Receive_Buffer, ENDP1_RXADDR, EP1_ReceivedCount);
-	SetEPRxStatus(ENDP1, EP_RX_VALID);
+    EP1_ReceivedCount = GetEPRxCount(ENDP1);
+    PMAToUserBufferCopy(USB_Receive_Buffer, ENDP1_RXADDR, EP1_ReceivedCount);
+    SetEPRxStatus(ENDP1, EP_RX_VALID);
 }
 /*******************************************************************************
 * Function Name  : EP2_IN_Callback.
@@ -71,8 +71,8 @@ void EP1_OUT_Callback(void)
 *******************************************************************************/
 void EP2_IN_Callback(void)
 {
-	//SetEPTxStatus(ENDP2, EP_TX_STALL);
-	//printf("EP2_IN_Callback\n\r");
+    //SetEPTxStatus(ENDP2, EP_TX_STALL);
+    //printf("EP2_IN_Callback\n\r");
 }
 
 /*******************************************************************************
@@ -84,9 +84,9 @@ void EP2_IN_Callback(void)
 *******************************************************************************/
 void EP2_OUT_Callback(void)
 {
-	EP2_ReceivedCount = GetEPRxCount(ENDP2);
-	PMAToUserBufferCopy(USB_Receive_Buffer, ENDP2_RXADDR, EP2_ReceivedCount);
-	SetEPRxStatus(ENDP2, EP_RX_VALID);
+    EP2_ReceivedCount = GetEPRxCount(ENDP2);
+    PMAToUserBufferCopy(USB_Receive_Buffer, ENDP2_RXADDR, EP2_ReceivedCount);
+    SetEPRxStatus(ENDP2, EP_RX_VALID);
 }
 /******************* (C) COPYRIGHT 2009 STMicroelectronics *****END OF FILE****/
 

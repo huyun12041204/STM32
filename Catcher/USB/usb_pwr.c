@@ -29,8 +29,8 @@ __IO bool fSuspendEnabled = TRUE;  /* true when suspend is possible */
 
 struct
 {
-  __IO RESUME_STATE eState;
-  __IO uint8_t bESOFcnt;
+    __IO RESUME_STATE eState;
+    __IO uint8_t bESOFcnt;
 }
 ResumeS;
 
@@ -49,26 +49,26 @@ ResumeS;
 RESULT PowerOn(void)
 {
 #ifndef STM32F10X_CL
-  u16 wRegVal;
+    u16 wRegVal;
 
-  /*** cable plugged-in ? ***/
-  USB_Cable_Config(ENABLE);
+    /*** cable plugged-in ? ***/
+    USB_Cable_Config(ENABLE);
 
-  /*** CNTR_PWDN = 0 ***/
-  wRegVal = CNTR_FRES;
-  _SetCNTR(wRegVal);
+    /*** CNTR_PWDN = 0 ***/
+    wRegVal = CNTR_FRES;
+    _SetCNTR(wRegVal);
 
-  /*** CNTR_FRES = 0 ***/
-  wInterrupt_Mask = 0;
-  _SetCNTR(wInterrupt_Mask);
-  /*** Clear pending interrupts ***/
-  _SetISTR(0);
-  /*** Set interrupt mask ***/
-  wInterrupt_Mask = CNTR_RESETM | CNTR_SUSPM | CNTR_WKUPM;
-  _SetCNTR(wInterrupt_Mask);
+    /*** CNTR_FRES = 0 ***/
+    wInterrupt_Mask = 0;
+    _SetCNTR(wInterrupt_Mask);
+    /*** Clear pending interrupts ***/
+    _SetISTR(0);
+    /*** Set interrupt mask ***/
+    wInterrupt_Mask = CNTR_RESETM | CNTR_SUSPM | CNTR_WKUPM;
+    _SetCNTR(wInterrupt_Mask);
 #endif /* STM32F10X_CL */
 
-  return USB_SUCCESS;
+    return USB_SUCCESS;
 }
 
 /*******************************************************************************
@@ -81,19 +81,19 @@ RESULT PowerOn(void)
 RESULT PowerOff()
 {
 #ifndef STM32F10X_CL
-  /* disable all ints and force USB reset */
-  _SetCNTR(CNTR_FRES);
-  /* clear interrupt status register */
-  _SetISTR(0);
-  /* Disable the Pull-Up*/
-  USB_Cable_Config(DISABLE);
-  /* switch-off device */
-  _SetCNTR(CNTR_FRES + CNTR_PDWN);
-  /* sw variables reset */
-  /* ... */
+    /* disable all ints and force USB reset */
+    _SetCNTR(CNTR_FRES);
+    /* clear interrupt status register */
+    _SetISTR(0);
+    /* Disable the Pull-Up*/
+    USB_Cable_Config(DISABLE);
+    /* switch-off device */
+    _SetCNTR(CNTR_FRES + CNTR_PDWN);
+    /* sw variables reset */
+    /* ... */
 #endif /* STM32F10X_CL */
 
-  return USB_SUCCESS;
+    return USB_SUCCESS;
 }
 
 /*******************************************************************************
@@ -106,34 +106,34 @@ RESULT PowerOff()
 void Suspend(void)
 {
 #ifndef STM32F10X_CL
-  u16 wCNTR;
-  /* suspend preparation */
-  /* ... */
+    u16 wCNTR;
+    /* suspend preparation */
+    /* ... */
 
-  /* macrocell enters suspend mode */
-  wCNTR = _GetCNTR();
-  wCNTR |= CNTR_FSUSP;
-  _SetCNTR(wCNTR);
+    /* macrocell enters suspend mode */
+    wCNTR = _GetCNTR();
+    wCNTR |= CNTR_FSUSP;
+    _SetCNTR(wCNTR);
 
-  /* ------------------ ONLY WITH BUS-POWERED DEVICES ---------------------- */
-  /* power reduction */
-  /* ... on connected devices */
+    /* ------------------ ONLY WITH BUS-POWERED DEVICES ---------------------- */
+    /* power reduction */
+    /* ... on connected devices */
 
 
-  /* force low-power mode in the macrocell */
-  wCNTR = _GetCNTR();
-  wCNTR |= CNTR_LPMODE;
-  _SetCNTR(wCNTR);
+    /* force low-power mode in the macrocell */
+    wCNTR = _GetCNTR();
+    wCNTR |= CNTR_LPMODE;
+    _SetCNTR(wCNTR);
 #endif /* STM32F10X_CL */
 
 #ifdef STM32F10X_CL
-  /* Gate the PHY and AHB USB clocks  */
-  _OTGD_FS_GATE_PHYCLK;
+    /* Gate the PHY and AHB USB clocks  */
+    _OTGD_FS_GATE_PHYCLK;
 #endif /* STM32F10X_CL */
 
-  /* switch-off the clocks */
-  /* ... */
-  Enter_LowPowerMode();
+    /* switch-off the clocks */
+    /* ... */
+    Enter_LowPowerMode();
 
 }
 
@@ -147,36 +147,36 @@ void Suspend(void)
 void Resume_Init(void)
 {
 #ifndef STM32F10X_CL
-  u16 wCNTR;
-#endif /* STM32F10X_CL */  
+    u16 wCNTR;
+#endif /* STM32F10X_CL */
 
-  /* ------------------ ONLY WITH BUS-POWERED DEVICES ---------------------- */
-  /* restart the clocks */
-  /* ...  */
+    /* ------------------ ONLY WITH BUS-POWERED DEVICES ---------------------- */
+    /* restart the clocks */
+    /* ...  */
 
 #ifndef STM32F10X_CL
-  /* CNTR_LPMODE = 0 */
-  wCNTR = _GetCNTR();
-  wCNTR &= (~CNTR_LPMODE);
-  _SetCNTR(wCNTR);
+    /* CNTR_LPMODE = 0 */
+    wCNTR = _GetCNTR();
+    wCNTR &= (~CNTR_LPMODE);
+    _SetCNTR(wCNTR);
 #endif /* STM32F10X_CL */
 
 #ifdef STM32F10X_CL
-  /* Ungate the PHY and AHB USB clocks  */
-  _OTGD_FS_UNGATE_PHYCLK;
-#endif /* STM32F10X_CL */    
-  
-  /* restore full power */
-  /* ... on connected devices */
-  Leave_LowPowerMode();
-
-#ifndef STM32F10X_CL
-  /* reset FSUSP bit */
-  _SetCNTR(IMR_MSK);
+    /* Ungate the PHY and AHB USB clocks  */
+    _OTGD_FS_UNGATE_PHYCLK;
 #endif /* STM32F10X_CL */
 
-  /* reverse suspend preparation */
-  /* ... */ 
+    /* restore full power */
+    /* ... on connected devices */
+    Leave_LowPowerMode();
+
+#ifndef STM32F10X_CL
+    /* reset FSUSP bit */
+    _SetCNTR(IMR_MSK);
+#endif /* STM32F10X_CL */
+
+    /* reverse suspend preparation */
+    /* ... */
 
 }
 
@@ -195,66 +195,66 @@ void Resume_Init(void)
 void Resume(RESUME_STATE eResumeSetVal)
 {
 #ifndef STM32F10X_CL
-  u16 wCNTR;
+    u16 wCNTR;
 #endif /* STM32F10X_CL */
 
-  if (eResumeSetVal != RESUME_ESOF)
-    ResumeS.eState = eResumeSetVal;
+    if (eResumeSetVal != RESUME_ESOF)
+        ResumeS.eState = eResumeSetVal;
 
-  switch (ResumeS.eState)
-  {
+    switch (ResumeS.eState)
+    {
     case RESUME_EXTERNAL:
-      Resume_Init();
-      ResumeS.eState = RESUME_OFF;
-      break;
-    case RESUME_INTERNAL:
-      Resume_Init();
-      ResumeS.eState = RESUME_START;
-      break;
-    case RESUME_LATER:
-      ResumeS.bESOFcnt = 2;
-      ResumeS.eState = RESUME_WAIT;
-      break;
-    case RESUME_WAIT:
-      ResumeS.bESOFcnt--;
-      if (ResumeS.bESOFcnt == 0)
-        ResumeS.eState = RESUME_START;
-      break;
-    case RESUME_START:
-     #ifdef STM32F10X_CL
-      OTGD_FS_SetRemoteWakeup();
-     #else 
-      wCNTR = _GetCNTR();
-      wCNTR |= CNTR_RESUME;
-      _SetCNTR(wCNTR);
-     #endif /* STM32F10X_CL */
-      ResumeS.eState = RESUME_ON;
-      ResumeS.bESOFcnt = 10;
-      break;
-    case RESUME_ON:
-    #ifndef STM32F10X_CL      
-      ResumeS.bESOFcnt--;
-      if (ResumeS.bESOFcnt == 0)
-      {
-     #endif /* STM32F10X_CL */    
-       #ifdef STM32F10X_CL
-        OTGD_FS_ResetRemoteWakeup();
-       #else
-        wCNTR = _GetCNTR();
-        wCNTR &= (~CNTR_RESUME);
-        _SetCNTR(wCNTR);
-       #endif /* STM32F10X_CL */
+        Resume_Init();
         ResumeS.eState = RESUME_OFF;
-     #ifndef STM32F10X_CL
-      }
-     #endif /* STM32F10X_CL */
-      break;
+        break;
+    case RESUME_INTERNAL:
+        Resume_Init();
+        ResumeS.eState = RESUME_START;
+        break;
+    case RESUME_LATER:
+        ResumeS.bESOFcnt = 2;
+        ResumeS.eState = RESUME_WAIT;
+        break;
+    case RESUME_WAIT:
+        ResumeS.bESOFcnt--;
+        if (ResumeS.bESOFcnt == 0)
+            ResumeS.eState = RESUME_START;
+        break;
+    case RESUME_START:
+#ifdef STM32F10X_CL
+        OTGD_FS_SetRemoteWakeup();
+#else
+        wCNTR = _GetCNTR();
+        wCNTR |= CNTR_RESUME;
+        _SetCNTR(wCNTR);
+#endif /* STM32F10X_CL */
+        ResumeS.eState = RESUME_ON;
+        ResumeS.bESOFcnt = 10;
+        break;
+    case RESUME_ON:
+#ifndef STM32F10X_CL
+        ResumeS.bESOFcnt--;
+        if (ResumeS.bESOFcnt == 0)
+        {
+#endif /* STM32F10X_CL */
+#ifdef STM32F10X_CL
+            OTGD_FS_ResetRemoteWakeup();
+#else
+            wCNTR = _GetCNTR();
+            wCNTR &= (~CNTR_RESUME);
+            _SetCNTR(wCNTR);
+#endif /* STM32F10X_CL */
+            ResumeS.eState = RESUME_OFF;
+#ifndef STM32F10X_CL
+        }
+#endif /* STM32F10X_CL */
+        break;
     case RESUME_OFF:
     case RESUME_ESOF:
     default:
-      ResumeS.eState = RESUME_OFF;
-      break;
-  }
+        ResumeS.eState = RESUME_OFF;
+        break;
+    }
 }
 
 /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/

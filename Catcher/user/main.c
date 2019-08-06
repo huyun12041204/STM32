@@ -86,7 +86,7 @@ u8 SendIndex = 0;
 u16 lCurY;
 u16 lCurX;
 
-
+extern u16 ADCConvertedValue[30];//????ADC????,
 
 
 
@@ -313,6 +313,7 @@ int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
         lCurY += _Row_Height;
         if (lCurY >= 374)
             lCurY = _Output_Text_Y;
+				delay_ms(20);
     }
     else
     {
@@ -459,8 +460,8 @@ void  Initialize_Module(void)
 //	printf("Level conversion ok!\n");
 
 
-    DMA1_Init();
-    Adc_Init();
+  //  DMA1_Init();
+ //   Adc_Init();
 
 
     delay_ms(100);
@@ -492,6 +493,8 @@ void  Initialize_Global_variable(void)
     DeltaTIM3CLK   = 0;
     DeltaTIM3Count = 0;
 
+	  GPIO_ResetBits(GPIOA, GPIO_Pin_2);
+	   
 }
 
 
@@ -826,7 +829,7 @@ u8 SendChannelData()
 int main(void)
 {
 
-
+    u8 ii;
 
     u32 NewSend = 0;
     u32 NewSave = 0;
@@ -840,19 +843,55 @@ int main(void)
 
     //此处需要先读取当前各个端口状态,VCC RST IO
     //GetPinValue();
+	// DMA1_Init();
 
+  
+	 
     Collect_Enable();			//同步开始计数
 
 
     printf("Start ...!\n");
-    //TEST__SD();
     Collect_Enable();
+
+		
+	//	Adc_Init(); 
+	//	
+	memset(ADCConvertedValue,0,10);
+	 // Tim1_Init();
+  	Adc_Init(); 
+  	DMA1_Init();
+		
+		for(ii = 0; ii<30 ; ii++)
+		{
+					ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+		delay_ms(10);
+		
+		}
+		
+
+ View_Data_VCC(Get_Vcc_Value());
+   
+
+	
     while(1)
     {
+//   		if(DMA_GetFlagStatus(DMA1_FLAG_TE1))
+//      {
+//		     DMA_ClearFlag(DMA1_FLAG_TE1);
+//				  View_Data_VCC(Get_Vcc_Value());
+//		   //  ADC_Get_Value();
+//	    }
 
 
         //	View_Data_Get_Information(u32CLKLen);
-
+			
+//			  if(!DMA_GetFlagStatus(DMA1_FLAG_TC2))
+//			  {
+//			    DMA1_Init();
+//	        Adc_Init();
+//	        ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+//					DMA_ClearFlag(DMA1_FLAG_TC2);
+//				}
 
         if(SendChannelData() != _Send_NoData)
         {
@@ -887,6 +926,7 @@ int main(void)
 
 
 
+          //View_Data_VCC(Get_Vcc_Value());
         //	View_Data_VCC(Get_Vcc_Value());
 
 

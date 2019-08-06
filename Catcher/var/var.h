@@ -14,16 +14,16 @@
 
 extern u8 TIMxStatue;
 
-extern u16 TIM3Count;
+extern u32 TIM3Count;
 
 extern u16 CurTIM3CLK;
-extern u16 CurTIM3Count;
+extern u32 CurTIM3Count;
 
 extern u16 preTIM3CLK;
-extern u16 preTIM3Count;
+extern u32 preTIM3Count;
 
 extern u16 DeltaTIM3CLK;
-extern u16 DeltaTIM3Count;
+extern u32 DeltaTIM3Count;
 
 extern u32 u32CLKLen;
 extern u32 u32SendLen;

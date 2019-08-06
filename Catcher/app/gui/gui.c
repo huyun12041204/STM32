@@ -333,6 +333,8 @@ void GUI_Show12ASCII(uint16_t x, uint16_t y, uint8_t *p,
             y += 16;
         }
     }
+		
+		
 }
 
 #else

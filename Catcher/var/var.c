@@ -10,16 +10,16 @@ u8 TIMxStatue = 0;
 
 
 //
-u16 TIM3Count;
+u32 TIM3Count;
 
 u16 CurTIM3CLK;
-u16 CurTIM3Count;
+u32 CurTIM3Count;
 
 u16 preTIM3CLK;
-u16 preTIM3Count;
+u32 preTIM3Count;
 
 u16 DeltaTIM3CLK;
-u16 DeltaTIM3Count;
+u32 DeltaTIM3Count;
 
 
 

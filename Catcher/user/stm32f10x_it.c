@@ -83,10 +83,10 @@ void Excute_EXTI(u32 EXTI_Line, u8 u8Pin,u8 u8Mode)
         SaveCurrentStatue(_Cur_Pin_Statue);
 
     }
-    else if(u8Mode == Pin_VCC)
-    {
-        Collect_Enable();
-    }
+//    else if(u8Mode == Pin_VCC)
+//    {
+//        Collect_Enable();
+//    }
 
 
 
@@ -102,12 +102,14 @@ void Excute_EXTI(u32 EXTI_Line, u8 u8Pin,u8 u8Mode)
 //VCC Raising
 void EXTI1_IRQHandler(void)
 {
-
+   // printf("EX1\n");
     Excute_EXTI(EXTI_Line1, Pin_VCC,Pin_VCC);
 	  NVIC_DisableIRQ(EXTI1_IRQn);
-
+  	NVIC_EnableIRQ(EXTI2_IRQn);
 	 
-//	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+
+	// printf("EEE\n");
+	 //View_Data_VCC(Get_Vcc_Value());
 
 }
 
@@ -116,12 +118,27 @@ void EXTI2_IRQHandler(void)
 {
 
     //printf("VCC Down!");
+  
+ 
+
+	if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_1) == 0)
+	{
+		Excute_EXTI(EXTI_Line2, Pin_VCC,0);
+	//	Collect_Disable();
+	  TIM3->CNT      = 0;
+    TIM3Count      = 0;
+    CurTIM3CLK     = 0;
+    CurTIM3Count   = 0;
+    preTIM3CLK     = 0;
+    preTIM3Count   = 0;
+
+    DeltaTIM3CLK   = 0;
+    DeltaTIM3Count = 0;
   	NVIC_EnableIRQ(EXTI1_IRQn);
-    Excute_EXTI(EXTI_Line2, Pin_VCC,0);
-
-//	if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_1) == 0)
-//		Collect_Disable();
-
+		NVIC_DisableIRQ(EXTI2_IRQn);
+	}
+	else
+		 EXTI_ClearITPendingBit(EXTI_Line2);
 
 
 
@@ -132,6 +149,8 @@ void EXTI3_IRQHandler(void)
 
 
     Excute_EXTI(EXTI_Line3, Pin_RST,Pin_RST);
+  	NVIC_DisableIRQ(EXTI3_IRQn);
+	  NVIC_EnableIRQ(EXTI4_IRQn);
 //	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
 }
@@ -139,6 +158,8 @@ void EXTI3_IRQHandler(void)
 void EXTI4_IRQHandler(void)
 {
     Excute_EXTI(EXTI_Line4, Pin_RST,0);
+	  NVIC_DisableIRQ(EXTI4_IRQn);
+	  NVIC_EnableIRQ (EXTI2_IRQn);
 }
 
 
@@ -162,17 +183,26 @@ void SaveLimitStatue(u8 _Pin)
 
 void SaveCurrentStatue(u8 _Pin)
 {
-    u8 __Temp[4];
+    u8 __Temp[6];
     u8 __ClkLen = 0;
 
     __Temp[1] = 	DeltaTIM3CLK&0xFF;
     __Temp[2] = 	DeltaTIM3CLK>>8;
-    __Temp[3] = 	DeltaTIM3Count;
+    __Temp[3] = 	DeltaTIM3Count&0xFF;
+	  __Temp[4] = 	(DeltaTIM3Count>>8)&0xFF;
+	  __Temp[5] = 	(DeltaTIM3Count>>16)&0xFF;
 
-
-    if(__Temp[3] > 0)
-        __ClkLen = 3;
-    else if(__Temp[2]>0)
+    if(DeltaTIM3Count > 0)
+		{
+      if( DeltaTIM3Count <0x100 )
+				__ClkLen = 3;
+			else if( DeltaTIM3Count < 0x10000 )
+				__ClkLen = 4;
+			else 
+				__ClkLen = 3;
+			
+    }
+		else if(__Temp[2]>0)
         __ClkLen = 2;
     else
         __ClkLen = 1;
@@ -187,6 +217,7 @@ void SaveCurrentStatue(u8 _Pin)
 
 
 }
+
 
 
 void PINx_EXIT_Init(void)
@@ -247,7 +278,7 @@ void PINx_EXIT_Init(void)
     EXTI_InitTypeStruct.EXTI_Line = EXTI_Line1;
     EXTI_InitTypeStruct.EXTI_Mode = EXTI_Mode_Interrupt;
     EXTI_InitTypeStruct.EXTI_Trigger = EXTI_Trigger_Rising;
-    EXTI_InitTypeStruct.EXTI_LineCmd = DISABLE;
+    EXTI_InitTypeStruct.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitTypeStruct);
 
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource2);
@@ -317,13 +348,14 @@ void PINx_Level_Conversion_Init(void)
 void DMA1_Channel1_IRQHandler(void)
 {
 
-    //printf("in DMA1 ");
+    printf("in DMA1 \n");
+	 
     if(DMA_GetITStatus(DMA1_IT_TC1) != RESET)
     {
-        DMA_ClearITPendingBit(DMA1_IT_TC1);
-
-        View_Data_VCC(Get_Vcc_Value());
+       View_Data_VCC(Get_Vcc_Value());
+			 	TIM_Cmd(TIM1,DISABLE);
     }
+		 DMA_ClearITPendingBit(DMA1_IT_TC1);
 
 }
 

@@ -1,6 +1,6 @@
 #include "adc.h"
 
-u16 ADCConvertedValue[10];//用来存放ADC转换结果，
+u16 ADCConvertedValue[30];//用来存放ADC转换结果，
 
 void DMA1_Init(void)
 {
@@ -10,10 +10,10 @@ void DMA1_Init(void)
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);//使能时钟
 
     DMA_DeInit(DMA1_Channel1);    //将通道一寄存器设为默认值
-    DMA_InitStructure.DMA_PeripheralBaseAddr  = (uint32_t)&(ADC1->DR);          //该参数用以定义DMA外设基地址
-    DMA_InitStructure.DMA_MemoryBaseAddr      = (uint32_t)&ADCConvertedValue;   //该参数用以定义DMA内存基地址(转换结果保存的地址)
+    DMA_InitStructure.DMA_PeripheralBaseAddr  = ((u32)0x4001244C);          //该参数用以定义DMA外设基地址
+    DMA_InitStructure.DMA_MemoryBaseAddr      = (u32)&ADCConvertedValue;   //该参数用以定义DMA内存基地址(转换结果保存的地址)
     DMA_InitStructure.DMA_DIR                 = DMA_DIR_PeripheralSRC;          //该参数规定了外设是作为数据传输的目的地还是来源，此处是作为来源
-    DMA_InitStructure.DMA_BufferSize          = 10;                             //定义指定DMA通道的DMA缓存的大小,单位为数据单位。这里也就是ADCConvertedValue的大小
+    DMA_InitStructure.DMA_BufferSize          = 30;                             //定义指定DMA通道的DMA缓存的大小,单位为数据单位。这里也就是ADCConvertedValue的大小
     DMA_InitStructure.DMA_PeripheralInc       = DMA_PeripheralInc_Disable;      //设定外设地址寄存器递增与否,此处设为不变 Disable
     DMA_InitStructure.DMA_MemoryInc           = DMA_MemoryInc_Enable;           //用来设定内存地址寄存器递增与否,此处设为递增，Enable
     DMA_InitStructure.DMA_PeripheralDataSize  = DMA_PeripheralDataSize_HalfWord;//数据宽度为16位
@@ -66,9 +66,10 @@ void Adc_Init(void)
     ADC_InitStructure.ADC_NbrOfChannel       = 1;
     ADC_Init(ADC1, &ADC_InitStructure);
 
+    ADC_ExternalTrigConvCmd(ADC1,ENABLE);	 
     // ADC_RegularChannelConfig(ADC1,ADC_Channel_0,1,ADC_SampleTime_1Cycles5);//通道一转换结果保存到ADCConvertedValue[0~10][0]
     //	ADC_RegularChannelConfig(ADC1,ADC_Channel_1,2,ADC_SampleTime_1Cycles5););//通道二转换结果保存到ADCConvertedValue[0~10][1]
-    ADC_RegularChannelConfig(ADC1,ADC_Channel_2,1,ADC_SampleTime_1Cycles5);//通道三转换结果保存到ADCConvertedValue[0~10][2]
+    ADC_RegularChannelConfig(ADC1,ADC_Channel_2,1,ADC_SampleTime_239Cycles5);//通道三转换结果保存到ADCConvertedValue[0~10][2]
 
 
     ADC_DMACmd(ADC1, ENABLE);//开启ADC的DMA支持
@@ -85,10 +86,21 @@ u16 Get_Vcc_Value()
 {
     u8 i;
     u32 Vcc = 0;
-    for(i =0 ; i<10 ; i++ )
-        Vcc += ADCConvertedValue[i];
-    Vcc = (Vcc*330)/4095;
-    return (u16)Vcc;
+	  u32 Min,Max;
+	  Min = ADCConvertedValue[0];
+  	Max = ADCConvertedValue[0];
+    for(i =0 ; i<30 ; i++ )
+	  {  
+			if(ADCConvertedValue[i] > Max)
+				Max = ADCConvertedValue[i];
+			if(ADCConvertedValue[i] < Min)
+				Min = ADCConvertedValue[i];
+			Vcc += ADCConvertedValue[i];
+		}
+		Vcc = Vcc -( Max + Min);
+    Vcc = (Vcc*3300)/4096;
+		Vcc = Vcc /28;
+    return (u16)Vcc/10*10;
 }
 
 

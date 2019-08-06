@@ -9,7 +9,8 @@ void Tim1_Init(void)
 {					 //用来触发ad转换，TIM1触发ADC
 	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;
 	TIM_OCInitTypeDef TIM_OCInitTypeStruct;		 
-
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);//使能TIM8时钟
+ 
 	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 71; //72分频
 	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up; //增计数
 	TIM_TimeBaseInitTypeStruct.TIM_Period =	1;	//自动重装值，1us触发一次						  
@@ -25,7 +26,42 @@ void Tim1_Init(void)
 
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);				  //这个是必须有的
 	
+	TIM_SetCounter(TIM1,0);	 
+	TIM_PrescalerConfig(TIM1,71,TIM_PSCReloadMode_Immediate);
+	TIM_SetCompare1(TIM1,   1);
+	TIM_SetAutoreload(TIM1, 1); 
+}
 
+
+
+void Tim2_Init(void)
+{				
+  NVIC_InitTypeDef           NVIC_InitTypeStruct;	
+	TIM_TimeBaseInitTypeDef    TIM_TimeBaseInitTypeStruct;		 
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	TIM_TimeBaseInitTypeStruct.TIM_Prescaler = 7199;  //tim2  72000000 100us
+	TIM_TimeBaseInitTypeStruct.TIM_CounterMode = TIM_CounterMode_Up;//Ôö¼ÆÊý
+	TIM_TimeBaseInitTypeStruct.TIM_Period =	9999+1;		//10000  1000ms					  
+	TIM_TimeBaseInitTypeStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseInitTypeStruct);	 		   
+
+	TIM_ITConfig(TIM2,TIM_IT_Update,DISABLE);	
+	TIM_Cmd(TIM2,DISABLE);
+	
+	NVIC_InitTypeStruct.NVIC_IRQChannel = TIM2_IRQn;  		   //配置中断优先级
+  NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority =1;
+  NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitTypeStruct);
+
+}
+
+
+void TIM2_IRQHandler(void)
+{
+	
+	u32Second ++;
+	
 }
 
 //TIM3:PD2 TIM3 ETR
@@ -58,8 +94,8 @@ void Tim3_Init()
     TIM_Cmd(TIM3, DISABLE);	  //失能
 
     NVIC_InitTypeStruct.NVIC_IRQChannel = TIM3_IRQn;  		   //配置中断优先级
-    NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitTypeStruct.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitTypeStruct.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitTypeStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitTypeStruct);
 
@@ -96,7 +132,7 @@ void TIM8_Init()
     GPIO_InitTypeDef  GPIO_InitStructure;
     NVIC_InitTypeDef  NVIC_InitTypeStruct;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8,ENABLE);//使能TIM5时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8,ENABLE);//使能TIM8时钟
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
 
@@ -180,6 +216,7 @@ void TIM8_CC_IRQHandler(void)
 void Collect_Init(void)
 {
 	  Tim1_Init();
+	  Tim2_Init();	
     Tim3_Init();
     TIM8_Init();
 }
@@ -188,8 +225,13 @@ void Collect_Init(void)
 
 void Collect_Enable(void)
 {
+	
+	  TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+    TIM_Cmd(TIM2, ENABLE);
+	
     TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
     TIM_Cmd(TIM3, ENABLE);
+	
     TIM_ITConfig(TIM8, TIM_IT_CC1|TIM_IT_CC3, ENABLE);
     TIM_Cmd(TIM8, ENABLE);
 

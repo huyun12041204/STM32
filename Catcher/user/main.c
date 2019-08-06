@@ -474,6 +474,8 @@ void  Initialize_Module(void)
 
     View_Connect_Information(1,1);
     printf("USB Finish...\n");
+		
+		Adc_Init(); 
 
 
 
@@ -492,6 +494,8 @@ void  Initialize_Global_variable(void)
 
     DeltaTIM3CLK   = 0;
     DeltaTIM3Count = 0;
+	
+	  u32Second = 0;
 
 	  GPIO_ResetBits(GPIOA, GPIO_Pin_2);
 	   
@@ -843,7 +847,7 @@ int main(void)
 
     //此处需要先读取当前各个端口状态,VCC RST IO
     //GetPinValue();
-	// DMA1_Init();
+	// 
 
   
 	 
@@ -852,24 +856,33 @@ int main(void)
 
     printf("Start ...!\n");
     Collect_Enable();
+		
+		DMA1_Init();
 
 		
-	//	Adc_Init(); 
-	//	
-	memset(ADCConvertedValue,0,10);
-	 // Tim1_Init();
-  	Adc_Init(); 
-  	DMA1_Init();
+		TIM_CMD(TIM1,ENABLE);
 		
-		for(ii = 0; ii<30 ; ii++)
-		{
-					ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-		delay_ms(10);
 		
-		}
+		
+	//	TIM_CMD(TIM1,ENABLE);
+
+		
+	//	View_Data_VCC(Get_Vcc_Value());
+//	//	
+//	memset(ADCConvertedValue,0,10);
+//	 // Tim1_Init();
+//  	Adc_Init(); 
+//  	DMA1_Init();
+//		
+//		for(ii = 0; ii<30 ; ii++)
+//		{
+//					ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+//		delay_ms(10);
+//		
+//		}
 		
 
- View_Data_VCC(Get_Vcc_Value());
+ 
    
 
 	

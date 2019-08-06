@@ -22,7 +22,11 @@
 #define _MODE2 1
 
 
-
+void GetTim2Second()
+{
+	
+	
+}
 
 void GetClearTim3Count()
 {
@@ -159,7 +163,7 @@ void EXTI4_IRQHandler(void)
 {
     Excute_EXTI(EXTI_Line4, Pin_RST,0);
 	  NVIC_DisableIRQ(EXTI4_IRQn);
-	  NVIC_EnableIRQ (EXTI2_IRQn);
+	  NVIC_EnableIRQ (EXTI3_IRQn);
 }
 
 
@@ -319,6 +323,8 @@ u8 GetPinValue(void)
         u8Ret = u8Ret | Pin_RST;
     if (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_6))
         u8Ret = u8Ret | Pin_IO;
+		if (GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_2))
+        u8Ret = u8Ret | Pin_CLK;
 
     return u8Ret;
 }

@@ -46,3 +46,4 @@ u8 _Cur_Pin_Statue;
 //确保发送正确，此处需要之前一条从何处读取
 u8 bSramRead = 1;
 
+u32 u32Second;

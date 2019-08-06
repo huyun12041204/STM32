@@ -40,4 +40,6 @@ extern u8 _Cur_Pin_Statue;
 
 extern u8 bSramRead;
 
+
+extern u32 u32Second;
 #endif

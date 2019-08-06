@@ -9,18 +9,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
 
-#ifndef EXIT_FALL
-#define EXIT_FALL  0x0
-#define EXIT_RAISE 0x8
-#define EXIT_ALL   0xF
-#endif
 
-
-#ifndef CLK_EXITT_ALL
-#define CLK_EXITT_FALL  0x1
-#define CLK_EXITT_RAISE  0x2
-#define CLK_EXITT_ALL   0x3
-#endif
 
 
 #ifndef  Pin_ALL
@@ -32,27 +21,11 @@ extern "C" {
 #define  Pin_CLK 0x80
 //#define  Pin_GND 0x08
 
+#define  _Time_ms 0x08
+
 
 #endif
 
-#ifndef  Pin_ALL
-#define  Pin_ALL 0x70
-#define  Pin_VCC 0x10
-#define  Pin_RES 0x20
-#define  Pin_CLK 0x30
-#define  Pin_IO  0x40
-#endif
-
-#ifndef Bits_Number
-#define Bits_Number 0x7
-#define Bits_Len1   0x1
-#define Bits_Len2   0x2
-#define Bits_Len3   0x3
-#define Bits_Len4   0x4
-#define Bits_Len5   0x5
-#define Bits_Len6   0x6
-#define Bits_Len7   0x7
-#endif
 
 
 

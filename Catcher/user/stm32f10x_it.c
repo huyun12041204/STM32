@@ -22,15 +22,10 @@
 #define _MODE2 1
 
 
-void GetTim2Second()
-{
-	
-	
-}
 
 void GetClearTim3Count()
 {
-
+/*
 
     CurTIM3CLK   = (TIM3->CNT);
     CurTIM3Count = TIM3Count;
@@ -60,6 +55,14 @@ void GetClearTim3Count()
 
     preTIM3CLK   = CurTIM3CLK;
     preTIM3Count = CurTIM3Count;
+		*/
+		
+		 DeltaTIM3CLK   = (TIM3->CNT);
+		 (TIM3->CNT) = 2;
+
+		 DeltaTIM3Count = TIM3Count;
+ 		 TIM3Count  = 0;
+
 
 //	 DeltaTIM3CLK;
 //   DeltaTIM3Count;
@@ -77,14 +80,13 @@ void Excute_EXTI(u32 EXTI_Line, u8 u8Pin,u8 u8Mode)
     // dang TIM8 和TIm3 为DISABLE 则表示没有开始捕获
     if((TIMxStatue&0x84) == 0x84)
     {
-
+			 _Cur_Pin_Statue = GetPinValue();
+		 // 判断是升还是就降,此处主要消除电压抖动
+			if((_Cur_Pin_Statue&u8Pin) == (u8Pin&u8Mode))
+			{
         GetClearTim3Count();
-
-        _Cur_Pin_Statue = GetPinValue();
-
-        // 判断是升还是就降,此处主要消除电压抖动
-        //if((_Cur_Pin_Statue&u8Pin) == (u8Pin&u8Mode))
         SaveCurrentStatue(_Cur_Pin_Statue);
+			}
 
     }
 //    else if(u8Mode == Pin_VCC)
@@ -106,12 +108,26 @@ void Excute_EXTI(u32 EXTI_Line, u8 u8Pin,u8 u8Mode)
 //VCC Raising
 void EXTI1_IRQHandler(void)
 {
+	
+	if((_Cur_Pin_Statue&Pin_VCC)!=0) 
+	{
+			 EXTI_ClearITPendingBit(EXTI_Line1);
+		   return;
+	}
+	
+	 
    // printf("EX1\n");
     Excute_EXTI(EXTI_Line1, Pin_VCC,Pin_VCC);
 	  NVIC_DisableIRQ(EXTI1_IRQn);
   	NVIC_EnableIRQ(EXTI2_IRQn);
-	 
-
+	  TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+    TIM_Cmd(TIM2, ENABLE);
+	  Adc_Init();
+		DMA1_Init();
+		TIM_Cmd(TIM1,ENABLE);
+	  u8FreTime = 0; 
+		//TIM_Cmd(TIM5,ENABLE); 
+		//TIM_ITConfig(TIM5,TIM_IT_Update|TIM_IT_CC1,ENABLE);
 	// printf("EEE\n");
 	 //View_Data_VCC(Get_Vcc_Value());
 
@@ -151,11 +167,15 @@ void EXTI2_IRQHandler(void)
 void EXTI3_IRQHandler(void)
 {
 
+	if((_Cur_Pin_Statue&Pin_RST)!=0) 
+	{
+			 EXTI_ClearITPendingBit(EXTI_Line3);
+		   return;
+	}
 
     Excute_EXTI(EXTI_Line3, Pin_RST,Pin_RST);
   	NVIC_DisableIRQ(EXTI3_IRQn);
 	  NVIC_EnableIRQ(EXTI4_IRQn);
-//	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
 }
 //RESET FALING
@@ -193,17 +213,22 @@ void SaveCurrentStatue(u8 _Pin)
     __Temp[1] = 	DeltaTIM3CLK&0xFF;
     __Temp[2] = 	DeltaTIM3CLK>>8;
     __Temp[3] = 	DeltaTIM3Count&0xFF;
-	  __Temp[4] = 	(DeltaTIM3Count>>8)&0xFF;
-	  __Temp[5] = 	(DeltaTIM3Count>>16)&0xFF;
+//	  __Temp[4] = 	(DeltaTIM3Count>>8)&0xFF;
+//	  __Temp[5] = 	(DeltaTIM3Count>>16)&0xFF;
 
     if(DeltaTIM3Count > 0)
 		{
-      if( DeltaTIM3Count <0x100 )
-				__ClkLen = 3;
-			else if( DeltaTIM3Count < 0x10000 )
-				__ClkLen = 4;
-			else 
-				__ClkLen = 3;
+//      if( DeltaTIM3Count <0x100 )
+//				__ClkLen = 3;
+//			else if( DeltaTIM3Count < 0x10000 )
+//				__ClkLen = 4;
+//			else 
+//				__ClkLen = 5;
+			
+			__ClkLen = 3;
+			if(DeltaTIM3Count>0xFF)
+				 __Temp[3] = 0xFF;
+				
 			
     }
 		else if(__Temp[2]>0)
@@ -218,6 +243,8 @@ void SaveCurrentStatue(u8 _Pin)
     FSMC_SRAM_WriteBuffer(__Temp,u32CLKLen,__ClkLen);
 
     u32CLKLen += 	__ClkLen;
+		
+		_Cur_Pin_Statue = _Pin;
 
 
 }
@@ -323,8 +350,8 @@ u8 GetPinValue(void)
         u8Ret = u8Ret | Pin_RST;
     if (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_6))
         u8Ret = u8Ret | Pin_IO;
-		if (GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_2))
-        u8Ret = u8Ret | Pin_CLK;
+//		if (GPIO_ReadInputDataBit(GPIOD, GPIO_Pin_2))
+//        u8Ret = u8Ret | Pin_CLK;
 
     return u8Ret;
 }
@@ -354,12 +381,13 @@ void PINx_Level_Conversion_Init(void)
 void DMA1_Channel1_IRQHandler(void)
 {
 
-    printf("in DMA1 \n");
+ //   printf("in DMA1 \n");
 	 
     if(DMA_GetITStatus(DMA1_IT_TC1) != RESET)
     {
-       View_Data_VCC(Get_Vcc_Value());
-			 	TIM_Cmd(TIM1,DISABLE);
+			 TIM_Cmd(TIM1,DISABLE);
+	    	u16Vol = Get_Vcc_Value();
+			
     }
 		 DMA_ClearITPendingBit(DMA1_IT_TC1);
 

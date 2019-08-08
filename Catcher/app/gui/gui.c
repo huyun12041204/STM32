@@ -334,7 +334,8 @@ void GUI_Show12ASCII(uint16_t x, uint16_t y, uint8_t *p,
         }
     }
 		
-		
+		//此处加一条是为了最后一个字符显示不会乱码
+		LCD_Set_Window(0, 0, 0,0);       
 }
 
 #else

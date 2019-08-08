@@ -157,7 +157,7 @@ void View_Connect_Information(u8 u8Type,u8 u8Statue)
         GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"None",FRONT_COLOR,  BLACK);
     else if(u8Type == 1)
     {
-        GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"USB", FRONT_COLOR,  BLACK);
+        GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"USB ", FRONT_COLOR,  BLACK);
         if(u8Statue == 0)
             GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height*2,"None",FRONT_COLOR,  BLACK);
         else if(u8Statue == 1)
@@ -169,7 +169,7 @@ void View_Connect_Information(u8 u8Type,u8 u8Statue)
     }
     else if(u8Type == 2)
     {
-        GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"COM", FRONT_COLOR,  BLACK);
+        GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height,"COM ", FRONT_COLOR,  BLACK);
         GUI_Show12ASCII(_Text_X+120, _Title_E_Y+_Win_Height+_Win_Height,"Unknow", FRONT_COLOR,  BLACK);
     }
     else
@@ -180,7 +180,7 @@ void View_Connect_Information(u8 u8Type,u8 u8Statue)
 u8 u32Digit2Ascii(u32 u32Digit, u8* u8Ascii)
 {
 
-    u8 u8temp[10];
+    u8 u8temp[10] = {'\0','\0','\0','\0','\0','\0','\0','\0','\0','\0'};
     u32 TDigit = u32Digit;
     int i;
 
@@ -254,13 +254,41 @@ void View_Data_Send_Information(u32 u32Send)
 
 
 
-void View_Data_VCC(u16 u32Vcc)
+void View_Data_VCC(u16 u16Vcc)
 {
-    u8 u8temp[5];
-    u32Digit2Ascii(u32Vcc,u8temp);
-    GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height,"    ",FRONT_COLOR,  BLACK);
+    u8 u8temp[5] = {0x20,0x20,0x20,0x20,'\0'};
+		u8 u8Off = u32Digit2Ascii(u16Vcc,u8temp);
+		if(u8Off < 4)
+     u8temp [u8Off] = 0x20 ;
+	
+  //  GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height,"    ",FRONT_COLOR,  BLACK);
+	
     GUI_Show12ASCII(_Text_X+40, _Data_SS_E_Y+_Win_Height,u8temp,FRONT_COLOR,  BLACK);
+	
+
 }
+
+void View_Data_CLK(u16 u16CLK)
+{
+    u8 u8temp[5] = {0x20,0x20,0x20,0x20,'\0'};
+		u8 u8Off = u32Digit2Ascii(u16CLK,u8temp);
+		if(u8Off < 4)
+     u8temp [u8Off] = 0x20 ;;
+	
+  //  GUI_Show12ASCII(_Text_X+140, _Data_SS_E_Y+_Win_Height,"    ",FRONT_COLOR,  BLACK);
+	
+    GUI_Show12ASCII(_Text_X+140, _Data_SS_E_Y+_Win_Height,u8temp,FRONT_COLOR,  BLACK);
+
+}
+
+
+
+
+
+
+
+
+
 
 void LCD_Dislay_Init()
 {
@@ -301,7 +329,7 @@ int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
                     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
                     0x20,0x20,0x20,0x20,0x20,0x20,0x20
                    };
-
+    //当为第一个字符时候,清除当前行;
     if(lCurX == _Output_Text_X)
         GUI_Show12ASCII(lCurX, lCurY,Empty,FRONT_COLOR, BLACK);
 
@@ -313,7 +341,6 @@ int fputc(int ch,FILE *p)  //函数默认的，在使用printf函数时自动调用
         lCurY += _Row_Height;
         if (lCurY >= 374)
             lCurY = _Output_Text_Y;
-				delay_ms(20);
     }
     else
     {
@@ -475,8 +502,8 @@ void  Initialize_Module(void)
     View_Connect_Information(1,1);
     printf("USB Finish...\n");
 		
-		Adc_Init(); 
-
+ 
+    Adc_Init();
 
 
 }
@@ -484,6 +511,8 @@ void  Initialize_Module(void)
 void  Initialize_Global_variable(void)
 {
 
+    PreTIM2CLK = 0;
+    CurTIM2CLK = 0;
 
     u32CLKLen  = 0;
     u32SendLen = 0;
@@ -496,6 +525,13 @@ void  Initialize_Global_variable(void)
     DeltaTIM3Count = 0;
 	
 	  u32Second = 0;
+	
+  	u8FreTime = 0;
+	  u16Vol = 0 ;
+    u16Fre = 0 ;
+
+    u16DisVol = 0 ;
+    u16DisFre = 0 ;
 
 	  GPIO_ResetBits(GPIOA, GPIO_Pin_2);
 	   
@@ -829,11 +865,33 @@ u8 SendChannelData()
 
 }
 
+u16 GetFre()
+{
+	u8 ii;
+	u16 Min,Max;
+	u32 Sum;
+	Min = u16TFre[0];
+	Max = u16TFre[0];
+	for(ii = 0 ; ii<10 ; ii++)
+	{
+		if(Min > u16TFre[ii])
+			Min = u16TFre[ii];
+		if(Max < u16TFre[ii])
+			Max = u16TFre[ii];
+		Sum +=u16TFre[ii]; 
+		
+	}
+	
+	Sum -= Min;
+	Sum -= Max;
+	//printf("%d \n",Sum/8);
+	return Sum/8;	
+}
+
 
 int main(void)
 {
 
-    u8 ii;
 
     u32 NewSend = 0;
     u32 NewSave = 0;
@@ -843,44 +901,12 @@ int main(void)
     Initialize_Module();
 
 
-    Initialize_Global_variable();
-
-    //此处需要先读取当前各个端口状态,VCC RST IO
-    //GetPinValue();
-	// 
-
-  
+    Initialize_Global_variable(); 
 	 
-    Collect_Enable();			//同步开始计数
-
-
     printf("Start ...!\n");
     Collect_Enable();
 		
-		DMA1_Init();
 
-		
-		TIM_CMD(TIM1,ENABLE);
-		
-		
-		
-	//	TIM_CMD(TIM1,ENABLE);
-
-		
-	//	View_Data_VCC(Get_Vcc_Value());
-//	//	
-//	memset(ADCConvertedValue,0,10);
-//	 // Tim1_Init();
-//  	Adc_Init(); 
-//  	DMA1_Init();
-//		
-//		for(ii = 0; ii<30 ; ii++)
-//		{
-//					ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-//		delay_ms(10);
-//		
-//		}
-		
 
  
    
@@ -888,23 +914,7 @@ int main(void)
 	
     while(1)
     {
-//   		if(DMA_GetFlagStatus(DMA1_FLAG_TE1))
-//      {
-//		     DMA_ClearFlag(DMA1_FLAG_TE1);
-//				  View_Data_VCC(Get_Vcc_Value());
-//		   //  ADC_Get_Value();
-//	    }
 
-
-        //	View_Data_Get_Information(u32CLKLen);
-			
-//			  if(!DMA_GetFlagStatus(DMA1_FLAG_TC2))
-//			  {
-//			    DMA1_Init();
-//	        Adc_Init();
-//	        ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-//					DMA_ClearFlag(DMA1_FLAG_TC2);
-//				}
 
         if(SendChannelData() != _Send_NoData)
         {
@@ -913,7 +923,7 @@ int main(void)
             {
                 View_Data_Send_Information(u32SendLen);
                 NewSend = u32SendLen;
-                //	printf("%d ,%d ,%d\n",u32CLKLen,u32SaveLen,u32SendLen);
+         
             }
         }
 
@@ -922,7 +932,6 @@ int main(void)
             SaveChannelData_SD();
             if(NewSave != u32SaveLen)
             {
-                ADC_SoftwareStartConvCmd(ADC1, ENABLE);
                 NewSave = u32SaveLen;
                 View_Data_Get_Information(u32CLKLen);
                 View_Data_Save_Information(u32SaveLen);
@@ -933,14 +942,29 @@ int main(void)
 
             NewGet = NewGet;
             View_Data_Get_Information(u32CLKLen);
-            //	printf("%d ,%d ,%d\n",u32CLKLen,u32SaveLen,u32SendLen);
-
+        
         }
+				
+				if(u16Vol != u16DisVol)
+				{
+					 u16DisVol = u16Vol;
+					 View_Data_VCC(u16DisVol);
+				}
+				
+				if((u8FreTime%10 ) == 0)
+				{
+				   u16Fre = GetFre();
+					 if(u16Fre != u16DisFre)
+					 {
+						 u16DisFre = u16Fre ;
+					   View_Data_CLK(u16DisFre);
+					 }
+								
+				}
+				
 
 
 
-          //View_Data_VCC(Get_Vcc_Value());
-        //	View_Data_VCC(Get_Vcc_Value());
 
 
     }

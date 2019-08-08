@@ -7,7 +7,8 @@
 //TIM 1- 8 的状态，
 u8 TIMxStatue = 0;
 
-
+u32 PreTIM2CLK;
+u32 CurTIM2CLK;
 
 //
 u32 TIM3Count;
@@ -22,6 +23,11 @@ u16 DeltaTIM3CLK;
 u32 DeltaTIM3Count;
 
 
+////用来计算频率
+//u16 TIM5Count;
+//u8  u8CC1; // 用来捕获接受中断此处
+//u32 u321st;
+//u32 u322nd;
 
 
 
@@ -47,3 +53,13 @@ u8 _Cur_Pin_Statue;
 u8 bSramRead = 1;
 
 u32 u32Second;
+
+u16 u16Vol;
+u16 u16Fre;
+u16 u16TFre[10];
+
+u16 u16DisVol;
+u16 u16DisFre;
+
+u8 u8FreTime;
+

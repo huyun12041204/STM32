@@ -11,3 +11,11 @@ u16 DeltaCLKLow;
 u32 DeltaCLKHigh;
 
 u32 uCLKHigh = 0;
+
+
+
+
+uint8_t USBD_RxCnt = 0;
+uint8_t USBD_RXBuffer[64];
+
+

@@ -18,5 +18,7 @@
 	void GetCLKNumber (u8 bReset);
 	void SaveCLkNumber(u8 __Pin);
 	u8   GetPinValue  (void);
+	
+	void _CLKBuff_Send(void);
 
 #endif

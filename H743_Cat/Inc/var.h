@@ -22,4 +22,9 @@ extern u32 DeltaCLKHigh;
 
 extern u32 uCLKHigh ;
 
+
+extern uint8_t USBD_RxCnt;
+extern uint8_t USBD_RXBuffer[64];
+
+
 #endif

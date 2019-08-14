@@ -106,7 +106,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM4_Init();
   MX_USART1_UART_Init();
- // MX_USB_DEVICE_Init();
+  MX_USB_DEVICE_Init();
 	delay_init(400);
 	
 	LCD_View_Init();	
@@ -128,14 +128,20 @@ int main(void)
 	
   HAL_TIM_Base_Start_IT(&htim1); //使能定时器1和定时器1更新中断：TIM_IT_UPDATE    	
 	HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_1);
+	HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_3);
+	
 	HAL_TIM_Base_Start_IT(&htim4); //使能定时器3和定时器3更新中断：TIM_IT_UPDATE    
+	
+	
+	 u32CLKLen  = 0;
+   u32SendLen = 0;
   while (1)
   {
 		
 		//LCD_ShowNum(10,50,TIM4->CNT,5,RED);
 		//LCD_ShowNum(10,70,uCLKHigh,5,RED);
 		
-		//printf("TEST 01 01 01 \n");
+		printf("%d \n",u32CLKLen);
 		delay_ms(100);
     /* USER CODE END WHILE */
 

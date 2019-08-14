@@ -4,6 +4,7 @@
 
 u8 u8CLKBuff[_Max_CLK_Buff];
 u32 u32CLKLen;
+u32 u32SendLen;
 
 
 u16 DeltaCLKLow;

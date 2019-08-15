@@ -21,8 +21,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "var.h"
-#include "lcd.h"
-#include "operation.h"
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -59,7 +57,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
+extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim4;
@@ -211,11 +209,14 @@ void TIM1_CC_IRQHandler(void)
   /* USER CODE BEGIN TIM1_CC_IRQn 0 */
 
   /* USER CODE END TIM1_CC_IRQn 0 */
-//	printf("TIM1 CC");
+//	GetCLKNumber(1);
+//	//printf("TIM1\n");
+//	SaveCLkNumber(GetPinValue()); 
+
+//	__HAL_TIM_CLEAR_IT(&htim1, TIM_IT_CC1);
+//	__HAL_TIM_CLEAR_IT(&htim1, TIM_IT_CC3);	
 	
-	GetCLKNumber(1);
-	SaveCLkNumber(GetPinValue());
-  HAL_TIM_IRQHandler(&htim1);
+	HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_CC_IRQn 1 */
 
   /* USER CODE END TIM1_CC_IRQn 1 */
@@ -229,10 +230,11 @@ void TIM2_IRQHandler(void)
   /* USER CODE BEGIN TIM2_IRQn 0 */
 
   /* USER CODE END TIM2_IRQn 0 */
-	
 	GetCLKNumber(1);
-	SaveCLkNumber(GetPinValue());
-  HAL_TIM_IRQHandler(&htim2);
+	
+	SaveCLkNumber(GetPinValue());  
+	
+	HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
   /* USER CODE END TIM2_IRQn 1 */
@@ -246,8 +248,8 @@ void TIM4_IRQHandler(void)
   /* USER CODE BEGIN TIM4_IRQn 0 */
 
   /* USER CODE END TIM4_IRQn 0 */
-
-	uCLKHigh ++;
+  
+	uCLKHigh++;
   HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
@@ -255,31 +257,17 @@ void TIM4_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USB On The Go FS wake-up interrupt through EXTI line 44.
+  * @brief This function handles USB On The Go HS global interrupt.
   */
-void OTG_FS_WKUP_IRQHandler(void)
+void OTG_HS_IRQHandler(void)
 {
-  /* USER CODE BEGIN OTG_FS_WKUP_IRQn 0 */
+  /* USER CODE BEGIN OTG_HS_IRQn 0 */
 
-  /* USER CODE END OTG_FS_WKUP_IRQn 0 */
-  HAL_PCD_IRQHandler(&hpcd_USB_OTG_FS);
-  /* USER CODE BEGIN OTG_FS_WKUP_IRQn 1 */
+  /* USER CODE END OTG_HS_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
+  /* USER CODE BEGIN OTG_HS_IRQn 1 */
 
-  /* USER CODE END OTG_FS_WKUP_IRQn 1 */
-}
-
-/**
-  * @brief This function handles USB On The Go FS global interrupt.
-  */
-void OTG_FS_IRQHandler(void)
-{
-  /* USER CODE BEGIN OTG_FS_IRQn 0 */
-
-  /* USER CODE END OTG_FS_IRQn 0 */
-  HAL_PCD_IRQHandler(&hpcd_USB_OTG_FS);
-  /* USER CODE BEGIN OTG_FS_IRQn 1 */
-
-  /* USER CODE END OTG_FS_IRQn 1 */
+  /* USER CODE END OTG_HS_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

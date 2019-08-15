@@ -20,11 +20,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "delay.h"
 #include "lcd.h"
-#include "var.h"
-#include "tim.h"
 #include "usb_device.h"
+#include "usbd_cdc.h"
+#include "var.h"
+#include "operation.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -50,7 +50,13 @@
 
 SD_HandleTypeDef hsd1;
 
+TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim4;
+
 UART_HandleTypeDef huart1;
+
+extern USBD_HandleTypeDef hUsbDeviceHS;
 
 /* USER CODE BEGIN PV */
 
@@ -60,6 +66,9 @@ UART_HandleTypeDef huart1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SDMMC1_SD_Init(void);
+static void MX_TIM1_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_TIM4_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -98,20 +107,13 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
- // MX_GPIO_Init();
-  //MX_SDMMC1_SD_Init();
-	
-	
+//  MX_GPIO_Init();
+//  MX_SDMMC1_SD_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM4_Init();
-  MX_USART1_UART_Init();
   MX_USB_DEVICE_Init();
-	
-	delay_init(400);
-	
-	LCD_View_Init();	
-
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -131,22 +133,42 @@ int main(void)
 	HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_3);
 	
+	
+	HAL_TIM_Base_Start_IT(&htim2); //使能定时器1和定时器1更新中断：TIM_IT_UPDATE    	
+	HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_1);
+	HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_2);
+	HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_3);
+	HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_4);
 	HAL_TIM_Base_Start_IT(&htim4); //使能定时器3和定时器3更新中断：TIM_IT_UPDATE    
 	
 	
 	 u32CLKLen  = 0;
-   u32SendLen = 0;
-	 
+//   u32SendLen = 0;
+	   LCD_View_Init();
   while (1)
   {
 		
 		//LCD_ShowNum(10,50,TIM4->CNT,5,RED);
 		//LCD_ShowNum(10,70,uCLKHigh,5,RED);
-		
+		 printf("----- \n");
+				  printf("%d \n",TIM4->CNT);
+			printf("%d \n",uCLKHigh);
+		// printf("CNT 1 %d\n",USBD_RxCnt1);
+		// printf(USBD_RXBuffer1);
+	
+	  // printf(USBD_RxCnt2);
+//		if(USBD_RxCnt > 2) {
+//     USBD_LL_Transmit(&hUsbDeviceHS,
+//                             CDC_IN_EP,
+//                             USBD_RXBuffer,
+//                             USBD_RxCnt);
+//            USBD_RxCnt = 0;
+//							}
 		if(u32CLKLen < u32SendLen)
 		{
 		
-		  printf("%d \n",u32CLKLen);
+		  printf("%d \n",TIM4->CNT);
+			printf("%d \n",uCLKHigh);
 		
 		 _CLKBuff_Send();
 		}
@@ -164,7 +186,7 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
@@ -176,13 +198,11 @@ RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
-  /** Macro to configure the PLL clock source 
-  */
-  __HAL_RCC_PLL_PLLSOURCE_CONFIG(RCC_PLLSOURCE_HSE);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 5;
@@ -216,17 +236,9 @@ RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_SDMMC
                               |RCC_PERIPHCLK_USB;
-  PeriphClkInitStruct.PLL3.PLL3M = 5;
-  PeriphClkInitStruct.PLL3.PLL3N = 48;
-  PeriphClkInitStruct.PLL3.PLL3P = 2;
-  PeriphClkInitStruct.PLL3.PLL3Q = 5;
-  PeriphClkInitStruct.PLL3.PLL3R = 2;
-  PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_2;
-  PeriphClkInitStruct.PLL3.PLL3VCOSEL = RCC_PLL3VCOWIDE;
-  PeriphClkInitStruct.PLL3.PLL3FRACN = 0;
   PeriphClkInitStruct.SdmmcClockSelection = RCC_SDMMCCLKSOURCE_PLL;
   PeriphClkInitStruct.Usart16ClockSelection = RCC_USART16CLKSOURCE_D2PCLK2;
-  PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLL3;
+  PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -264,6 +276,175 @@ static void MX_SDMMC1_SD_Init(void)
   /* USER CODE BEGIN SDMMC1_Init 2 */
 
   /* USER CODE END SDMMC1_Init 2 */
+
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+/* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 0;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 0;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_IC_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+	sConfigIC.ICPolarity  = TIM_INPUTCHANNELPOLARITY_FALLING;
+  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+   /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 0;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+	sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+}
+
+/**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+ /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 0;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 0xFFFF;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_ETRMODE2;
+  sClockSourceConfig.ClockPolarity = TIM_CLOCKPOLARITY_NONINVERTED;
+  sClockSourceConfig.ClockPrescaler = TIM_CLOCKPRESCALER_DIV1;
+  sClockSourceConfig.ClockFilter = 0;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+	//此处莫名其妙需要先清除标志为
+//	 __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
 
 }
 

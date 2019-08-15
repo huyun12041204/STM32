@@ -78,6 +78,8 @@
 #define CDC_SET_CONTROL_LINE_STATE                  0x22U
 #define CDC_SEND_BREAK                              0x23U
 
+extern uint8_t USBD_RxCnt;
+extern uint8_t USBD_RXBuffer[64];
 /**
   * @}
   */

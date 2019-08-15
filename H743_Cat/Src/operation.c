@@ -2,13 +2,9 @@
 #include "var.h"
 
 #include "usb_device.h"
-/* USER CODE BEGIN Includes */
-#include "usbd_conf.h"
 #include "usbd_cdc.h"
-#include "usbd_desc.h"
-#include "usbd_ctlreq.h"
+extern USBD_HandleTypeDef hUsbDeviceHS;
 
-extern USBD_HandleTypeDef hUsbDeviceFS;
 
 	void GetCLKNumber (u8 bReset)
 	{
@@ -77,7 +73,7 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 	void USB_Send(u8* __buff,u32 __Len)
 	{
 
-		  USBD_LL_Transmit(&hUsbDeviceFS,
+		  USBD_LL_Transmit(&hUsbDeviceHS,
                              CDC_IN_EP,
                              __buff,
                              __Len);

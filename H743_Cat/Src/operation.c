@@ -1,5 +1,5 @@
 #include "operation.h"
-#include "var.h"
+
 
 #include "usb_device.h"
 #include "usbd_cdc.h"
@@ -93,6 +93,5 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 		
 	  u32SendLen += __Len;
 	}
-	
 	
 	

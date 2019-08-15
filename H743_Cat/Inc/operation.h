@@ -1,7 +1,8 @@
 #ifndef _OPERATION_H
 #define _OPERATION_H
 #include "sys.h"
-
+#include "var.h"
+#include "lcd.h"
 
 #ifndef  Pin_ALL
 #define  Pin_ALL 0xF8

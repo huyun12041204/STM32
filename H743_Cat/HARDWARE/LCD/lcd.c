@@ -408,7 +408,7 @@ void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2,u16 color)
 void Draw_Circle(u16 x0,u16 y0,u8 r,u16 color)
 {
 	int a,b;
-	int di;
+//	int di;
 	a=0;b=r;	  
 	while(a<=b)
 	{
@@ -544,7 +544,7 @@ void LCD_ShowNum(u16 x,u16 y,u16 num,u8 len,u16 color)
 void LCD_ShowNum1(u16 x,u16 y,float num,u8 len,u16 color)
 {         	
 	u8 t,temp;
-	u8 enshow=0;
+//	u8 enshow=0;
 	u16 num1;
 	num1=num*100;
 	for(t=0;t<len;t++)

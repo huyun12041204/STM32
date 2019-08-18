@@ -63,8 +63,8 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 	{   u8 __Pin = 0;
 		
 		 if( HAL_GPIO_ReadPin(GPIOE ,GPIO_PIN_9))__Pin |= Pin_IO;
-		 if( HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_1))__Pin |= Pin_VCC;
-		 if( HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_3))__Pin |= Pin_RST;
+		 if( HAL_GPIO_ReadPin(GPIOA ,GPIO_PIN_15))__Pin |= Pin_VCC;
+		 if( HAL_GPIO_ReadPin(GPIOB ,GPIO_PIN_4))__Pin |= Pin_RST;
 		
 		return __Pin;		
 	}

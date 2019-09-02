@@ -110,9 +110,9 @@ int main(void)
   MX_SDMMC1_SD_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USB_DEVICE_Init();
-  MX_TIM3_Init();
   MX_USART1_UART_Init();
 
   /* Initialize interrupts */
@@ -123,14 +123,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	
-//			LCD_ShowChinese(10,0,0,32,RED);   //中
-//			LCD_ShowChinese(45,0,1,32,RED);   //景
-//			LCD_ShowChinese(80,0,2,32,RED);   //园
-//			LCD_ShowChinese(115,0,3,32,RED);  //电
-//			LCD_ShowChinese(150,0,4,32,RED);  //子
-			
-			//LCD_ShowString(10,20,"Hello World",BLUE);
 	
 	
   HAL_TIM_Base_Start_IT(&htim1); //使能定时器1和定时器1更新中断：TIM_IT_UPDATE    	
@@ -145,7 +137,6 @@ int main(void)
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_2);
 	
-
 	HAL_TIM_Base_Start_IT(&htim4); //使能定时器3和定时器4更新中断：TIM_IT_UPDATE    
 	
 	
@@ -157,9 +148,9 @@ int main(void)
 		
 		//LCD_ShowNum(10,50,TIM4->CNT,5,RED);
 		//LCD_ShowNum(10,70,uCLKHigh,5,RED);
-		 printf("----- \n");
-				  printf("%d \n",TIM4->CNT);
-			printf("%d \n",uCLKHigh);
+		// printf("----- \n");
+		// printf("%d \n",TIM4->CNT);
+	 // 	printf("%d \n",uCLKHigh);
 		// printf("CNT 1 %d\n",USBD_RxCnt1);
 		// printf(USBD_RXBuffer1);
 	
@@ -171,11 +162,11 @@ int main(void)
 //                             USBD_RxCnt);
 //            USBD_RxCnt = 0;
 //							}
-		if(u32CLKLen < u32SendLen)
+		if(u32CLKLen > u32SendLen)
 		{
 		
-		  printf("%d \n",TIM4->CNT);
-			printf("%d \n",uCLKHigh);
+		 // printf("%d \n",TIM4->CNT);
+			//printf("%d \n",uCLKHigh);
 		
 		 _CLKBuff_Send();
 		}

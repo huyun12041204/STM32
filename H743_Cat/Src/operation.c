@@ -14,7 +14,8 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 		
 		if(bReset)
 		{
-			TIM4->CNT = 0;
+			//此处是2的原因是 尝试很多次,发现初始化过程基本都差2
+			TIM4->CNT = 2;
 			uCLKHigh  = 0;
 		}
 		
@@ -29,8 +30,9 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 
 	void SaveCLkNumber(u8 __Pin)
 	{
+	    u8 __ClkLen  = 0;
 
-	   u8 __ClkLen  = 0;
+
 
 		
 		 if(DeltaCLKHigh == 0)
@@ -57,6 +59,19 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 		
 	}
 	
+	void SaveEmptyCLK(void)
+	{
+	 	u8 __Pin = GetPinValue();
+	  u32 u32Ori = u32CLKLen; 
+				
+		u32CLKLen += 3;	
+
+		SetCLKBuff(u32CLKLen|02,u32Ori);
+		SetCLKBuff(0xFF,u32Ori+1);
+		SetCLKBuff(0xFF,u32Ori+2);
+
+	}
+	
 	
 	
 	u8   GetPinValue  (void)
@@ -69,19 +84,7 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 		return __Pin;		
 	}
 	
-	
-	void USB_Send(u8* __buff,u32 __Len)
-	{
 
-		  USBD_LL_Transmit(&hUsbDeviceHS,
-                             CDC_IN_EP,
-                             __buff,
-                             __Len);
-		 
-
-		
-	}
-	
 	
 	void _CLKBuff_Send()
 	{
@@ -89,9 +92,10 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 		u32 __Len = u32CLKLen - u32SendLen;
 		if(__Len >64) __Len = 64;
 		
-		USB_Send(u8CLKBuff+u32SendLen,__Len);
 		
-	  u32SendLen += __Len;
+		if(USBD_LL_Transmit(&hUsbDeviceHS,CDC_IN_EP, u8CLKBuff+u32SendLen, __Len)== USBD_OK)
+			 u32SendLen += __Len;
+		 
 	}
 	
 	

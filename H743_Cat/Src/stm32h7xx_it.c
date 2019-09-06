@@ -277,16 +277,10 @@ void TIM4_IRQHandler(void)
 //此处不掉回调函数,
 	
 	if(uCLKHigh == 0)
-	{
-		 SaveEmptyCLK();
-		
-	}
-	
-	
-	uCLKHigh++;
-	
-	
-	
+		 SaveEmptyCLK();		
+
+	else
+	   uCLKHigh++;
 	__HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
  // HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM4_IRQn 1 */

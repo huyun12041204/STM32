@@ -23,6 +23,7 @@
 #include "usb_device.h"
 #include "lcd.h"
 #include "var.h"
+#include "operation.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -92,6 +93,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  Cache_Enable();                 //打开L1-Cache
   HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -124,16 +126,17 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
-	
-  HAL_TIM_Base_Start_IT(&htim1); //使能定时器1和定时器1更新中断：TIM_IT_UPDATE    	
+
+
+    HAL_TIM_Base_Start(&htim1); //使能定时器1
 	HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_2);
 	
-	HAL_TIM_Base_Start_IT(&htim2); //使能定时器1和定时器2更新中断：TIM_IT_UPDATE    	
+	HAL_TIM_Base_Start(&htim2); //使能定时器1  	
 	HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_2);
 	
-	HAL_TIM_Base_Start_IT(&htim3); //使能定时器1和定时器3更新中断：TIM_IT_UPDATE    	
+	HAL_TIM_Base_Start(&htim3); //使能定时器1
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_2);
 	
@@ -142,31 +145,16 @@ int main(void)
 	
 	 u32CLKLen  = 0;
 //   u32SendLen = 0;
-	   LCD_View_Init();
+
+  LCD_View_Init();
+	
+	PrintfSDInformation();
   while (1)
   {
 		
-		//LCD_ShowNum(10,50,TIM4->CNT,5,RED);
-		//LCD_ShowNum(10,70,uCLKHigh,5,RED);
-		// printf("----- \n");
-		// printf("%d \n",TIM4->CNT);
-	 // 	printf("%d \n",uCLKHigh);
-		// printf("CNT 1 %d\n",USBD_RxCnt1);
-		// printf(USBD_RXBuffer1);
-	
-	  // printf(USBD_RxCnt2);
-//		if(USBD_RxCnt > 2) {
-//     USBD_LL_Transmit(&hUsbDeviceHS,
-//                             CDC_IN_EP,
-//                             USBD_RXBuffer,
-//                             USBD_RxCnt);
-//            USBD_RxCnt = 0;
-//							}
+
 		if(u32CLKLen > u32SendLen)
 		{
-		
-		 // printf("%d \n",TIM4->CNT);
-			//printf("%d \n",uCLKHigh);
 		
 		 _CLKBuff_Send();
 		}
@@ -253,7 +241,7 @@ void SystemClock_Config(void)
 static void MX_NVIC_Init(void)
 {
   /* OTG_HS_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(OTG_HS_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(OTG_HS_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(OTG_HS_IRQn);
   /* TIM1_CC_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM1_CC_IRQn, 1, 0);
@@ -312,30 +300,30 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 0 */
 
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
+//  TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_IC_InitTypeDef sConfigIC = {0};
 
   /* USER CODE BEGIN TIM1_Init 1 */
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
-  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 0xFFFF;
-  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim1.Init.RepetitionCounter = 0;
-  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+//  htim1.Init.Prescaler = 0;
+//  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+//  htim1.Init.Period = 0xFFFF;
+//  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+//  htim1.Init.RepetitionCounter = 0;
+//  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_IC_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
+//  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+//  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+//  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+//  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
   sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
@@ -364,32 +352,34 @@ static void MX_TIM1_Init(void)
 static void MX_TIM2_Init(void)
 {
 
-  /* USER CODE BEGIN TIM2_Init 0 */
+/* USER CODE BEGIN TIM2_Init 0 */
 
   /* USER CODE END TIM2_Init 0 */
 
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
+//  TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_IC_InitTypeDef sConfigIC = {0};
 
   /* USER CODE BEGIN TIM2_Init 1 */
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 0;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+//  htim2.Init.Prescaler = 0;
+//  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+//  htim2.Init.Period = 0xFFFF;
+//  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+//  htim2.Init.RepetitionCounter = 0;
+//  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
   {
     Error_Handler();
   }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
+//  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+//  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+//  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+//  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
   sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
@@ -398,8 +388,8 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
   sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
-  sConfigIC.ICFilter = 0;
   if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
@@ -407,6 +397,7 @@ static void MX_TIM2_Init(void)
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
+
 
 }
 
@@ -418,32 +409,34 @@ static void MX_TIM2_Init(void)
 static void MX_TIM3_Init(void)
 {
 
-  /* USER CODE BEGIN TIM3_Init 0 */
+ /* USER CODE BEGIN TIM3_Init 0 */
 
   /* USER CODE END TIM3_Init 0 */
 
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
+//  TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_IC_InitTypeDef sConfigIC = {0};
 
   /* USER CODE BEGIN TIM3_Init 1 */
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 0;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+//  htim3.Init.Prescaler = 0;
+//  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+//  htim3.Init.Period = 0xFFFF;
+//  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+//  htim3.Init.RepetitionCounter = 0;
+//  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_IC_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
   }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
+//  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+//  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+//  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+//  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
   sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
@@ -454,14 +447,14 @@ static void MX_TIM3_Init(void)
   }
   sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
   sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
-  sConfigIC.ICFilter = 0;
-  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
+
 
 }
 

@@ -62,6 +62,7 @@
 
 extern uint8_t USBD_RxCnt;
 extern uint8_t USBD_RXBuffer[64];
+USBD_CDC_HandleTypeDef _ClassData;
 
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
@@ -206,8 +207,8 @@ __ALIGN_BEGIN uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END = 
     USB_DESC_TYPE_ENDPOINT,      /* bDescriptorType: Endpoint */
     CDC_OUT_EP,                        /* bEndpointAddress */
     0x02,                              /* bmAttributes: Bulk */
-    LOBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
-    HIBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),
+    LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
+    HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
     0x00,                              /* bInterval: ignore for Bulk transfer */
 
     /*Endpoint IN Descriptor*/
@@ -215,8 +216,8 @@ __ALIGN_BEGIN uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END = 
     USB_DESC_TYPE_ENDPOINT,      /* bDescriptorType: Endpoint */
     CDC_IN_EP,                         /* bEndpointAddress */
     0x02,                              /* bmAttributes: Bulk */
-    LOBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
-    HIBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),
+    LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
+    HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
     0x00                               /* bInterval: ignore for Bulk transfer */
 
 } ;
@@ -257,8 +258,8 @@ __ALIGN_BEGIN uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END = 
     USB_DESC_TYPE_ENDPOINT,      /* bDescriptorType: Endpoint */
     CDC_OUT_EP,                        /* bEndpointAddress */
     0x02,                              /* bmAttributes: Bulk */
-    LOBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
-    HIBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),
+    LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
+    HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
     0x00,                              /* bInterval: ignore for Bulk transfer */
 
     /*Endpoint IN Descriptor*/
@@ -266,8 +267,8 @@ __ALIGN_BEGIN uint8_t USBD_CDC_CfgFSDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END = 
     USB_DESC_TYPE_ENDPOINT,      /* bDescriptorType: Endpoint */
     CDC_IN_EP,                         /* bEndpointAddress */
     0x02,                              /* bmAttributes: Bulk */
-    LOBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
-    HIBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),
+    LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
+    HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
     0x00
 } ;
 
@@ -292,7 +293,7 @@ __ALIGN_BEGIN uint8_t USBD_CDC_OtherSpeedCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIG
     USB_DESC_TYPE_INTERFACE,  /* bDescriptorType: Interface */
     /* Interface descriptor type */
     0x00,   /* bInterfaceNumber: Number of Interface */
-    0x00,   /* bAlternateSetting: Alternate settinf
+    0x00,   /* bAlternateSetting: Alternate settinf*/
     0xDC,   /* bInterfaceClass: Communication Interface Class */
     0xA0,   /* bInterfaceSubClass: Abstract Control Model */
     0xB0,   /* bInterfaceProtocol: Common AT commands */
@@ -303,8 +304,8 @@ __ALIGN_BEGIN uint8_t USBD_CDC_OtherSpeedCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIG
     USB_DESC_TYPE_ENDPOINT,      /* bDescriptorType: Endpoint */
     CDC_OUT_EP,                        /* bEndpointAddress */
     0x02,                              /* bmAttributes: Bulk */
-    LOBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
-    HIBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),
+    LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
+    HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
     0x00,                              /* bInterval: ignore for Bulk transfer */
 
     /*Endpoint IN Descriptor*/
@@ -312,8 +313,8 @@ __ALIGN_BEGIN uint8_t USBD_CDC_OtherSpeedCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIG
     USB_DESC_TYPE_ENDPOINT,      /* bDescriptorType: Endpoint */
     CDC_IN_EP,                         /* bEndpointAddress */
     0x02,                              /* bmAttributes: Bulk */
-    LOBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
-    HIBYTE(CDC_DATA_HS_MAX_PACKET_SIZE),
+    LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),  /* wMaxPacketSize: */
+    HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
     0x00
 };
 
@@ -335,24 +336,46 @@ __ALIGN_BEGIN uint8_t USBD_CDC_OtherSpeedCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIG
 static uint8_t  USBD_CDC_Init (USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
 	
-	
+	USBD_CDC_HandleTypeDef   *hcdc;
     /* Open EP IN */
     USBD_LL_OpenEP(pdev,
                    CDC_IN_EP,
                    USBD_EP_TYPE_BULK,
-                   CDC_DATA_HS_IN_PACKET_SIZE);
+                   CDC_DATA_FS_IN_PACKET_SIZE);
 
     /* Open EP OUT */
     USBD_LL_OpenEP(pdev,
                    CDC_OUT_EP,
                    USBD_EP_TYPE_BULK,
-                   CDC_DATA_HS_OUT_PACKET_SIZE);
+                   CDC_DATA_FS_OUT_PACKET_SIZE);
 
-    /* Prepare Out endpoint to receive next packet */
-    USBD_LL_PrepareReceive(pdev,
-                           CDC_OUT_EP,
-                           USBD_RXBuffer,
-                           CDC_DATA_FS_OUT_PACKET_SIZE);
+    ///* Prepare Out endpoint to receive next packet */
+//    USBD_LL_PrepareReceive(pdev,
+//                           CDC_OUT_EP,
+//                           USBD_RXBuffer,
+//                           CDC_DATA_FS_OUT_PACKET_SIZE);
+
+	pdev->pClassData = &_ClassData;
+
+	if(pdev->pClassData != NULL)
+	{
+
+	    hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+
+	    /* Init  physical Interface components */
+	    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Init();
+
+	    /* Init Xfer states */
+	    hcdc->TxState = 0U;
+	    hcdc->RxState = 0U;
+
+
+	    /* Prepare Out endpoint to receive next packet */
+	    USBD_LL_PrepareReceive(pdev, 
+			CDC_OUT_EP, 
+			hcdc->RxBuffer,                    
+			CDC_DATA_FS_OUT_PACKET_SIZE);
+	}
 
     return USBD_OK;
 //  uint8_t ret = 0U;
@@ -561,12 +584,15 @@ static uint8_t  USBD_CDC_Setup (USBD_HandleTypeDef *pdev,
   */
 static uint8_t  USBD_CDC_DataIn (USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
+
+	//extern u8 _Tx_Statue = 0;
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)pdev->pClassData;
   PCD_HandleTypeDef *hpcd = pdev->pData;
 
   if(pdev->pClassData != NULL)
   {
-    if((pdev->ep_in[epnum].total_length > 0U) && ((pdev->ep_in[epnum].total_length % hpcd->IN_ep[epnum].maxpacket) == 0U))
+    if((pdev->ep_in[epnum].total_length > 0U) && 
+		((pdev->ep_in[epnum].total_length % hpcd->IN_ep[epnum].maxpacket) == 0U))
     {
       /* Update the packet total length */
       pdev->ep_in[epnum].total_length = 0U;
@@ -596,33 +622,33 @@ static uint8_t  USBD_CDC_DataIn (USBD_HandleTypeDef *pdev, uint8_t epnum)
 static uint8_t  USBD_CDC_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
 
-    /* Get the received data length */
-    USBD_RxCnt = USBD_LL_GetRxDataSize (pdev, epnum);
+    ///* Get the received data length */
+    //USBD_RxCnt = USBD_LL_GetRxDataSize (pdev, epnum);
 
-    /* USB data will be immediately processed, this allow next USB traffic being
-    NAKed till the end of the application Xfer */
-    USBD_LL_PrepareReceive(pdev,
-                           CDC_OUT_EP,
-                           USBD_RXBuffer,
-                           CDC_DATA_FS_OUT_PACKET_SIZE);
+    ///* USB data will be immediately processed, this allow next USB traffic being
+    //NAKed till the end of the application Xfer */
+    //USBD_LL_PrepareReceive(pdev,
+    //                       CDC_OUT_EP,
+    //                       USBD_RXBuffer,
+    //                       CDC_DATA_FS_OUT_PACKET_SIZE);
+    //return USBD_OK;
+  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
+
+  /* Get the received data length */
+  hcdc->RxLength = USBD_LL_GetRxDataSize (pdev, epnum);
+
+  /* USB data will be immediately processed, this allow next USB traffic being
+  NAKed till the end of the application Xfer */
+  if(pdev->pClassData != NULL)
+  {
+    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Receive(hcdc->RxBuffer, &hcdc->RxLength);
+
     return USBD_OK;
-//  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef*) pdev->pClassData;
-
-//  /* Get the received data length */
-//  hcdc->RxLength = USBD_LL_GetRxDataSize (pdev, epnum);
-
-//  /* USB data will be immediately processed, this allow next USB traffic being
-//  NAKed till the end of the application Xfer */
-//  if(pdev->pClassData != NULL)
-//  {
-//    ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Receive(hcdc->RxBuffer, &hcdc->RxLength);
-
-//    return USBD_OK;
-//  }
-//  else
-//  {
-//    return USBD_FAIL;
-//  }
+  }
+  else
+  {
+    return USBD_FAIL;
+  }
 }
 
 /**

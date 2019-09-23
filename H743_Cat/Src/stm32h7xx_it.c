@@ -195,6 +195,34 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 1 */
 }
 
+//************************************
+// Method:    __Handle_TIM_CC
+// FullName:  处理计时器,包含对应的ENABLE 和DISABLE 计时器中断,和清除TIM Interrupt 状态
+// Access:    public 
+// Returns:   void
+// Qualifier:
+// Parameter: TIM_HandleTypeDef * __TIMHandle
+//************************************
+void __TIM_CC_Handler(TIM_HandleTypeDef* __TIMHandle)
+{
+	if (__HAL_TIM_GET_FLAG(__TIMHandle, TIM_FLAG_CC1) != RESET)
+
+	{
+		__HAL_TIM_DISABLE_IT(__TIMHandle, TIM_IT_CC1);
+		__HAL_TIM_ENABLE_IT(__TIMHandle, TIM_IT_CC2);
+		__HAL_TIM_CLEAR_IT(__TIMHandle, TIM_IT_CC1);
+
+	}
+	else  if (__HAL_TIM_GET_FLAG(__TIMHandle, TIM_FLAG_CC2) != RESET)
+	{	
+		__HAL_TIM_DISABLE_IT(__TIMHandle, TIM_IT_CC2);
+		__HAL_TIM_ENABLE_IT(__TIMHandle, TIM_IT_CC1);
+		__HAL_TIM_CLEAR_IT(__TIMHandle, TIM_IT_CC2);
+	}
+	else
+		HAL_TIM_IRQHandler(__TIMHandle);
+
+}
 /******************************************************************************/
 /* STM32H7xx Peripheral Interrupt Handlers                                    */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
@@ -207,34 +235,11 @@ void SysTick_Handler(void)
   */
 void TIM1_CC_IRQHandler(void)
 {
-  /* USER CODE BEGIN TIM1_CC_IRQn 0 */
 
-  /* USER CODE END TIM1_CC_IRQn 0 */
-	
 	GetCLKNumber(1);
-	SaveCLkNumber(GetPinValue());
-  if (__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_CC1) != RESET)
-  {
-		
-			HAL_TIM_IC_Stop_IT(&htim1,TIM_CHANNEL_1);
-    	HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_2);
-		
-		 __HAL_TIM_CLEAR_IT(&htim1, TIM_IT_CC1);
-		
-	}
-	else  if (__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_CC2) != RESET)
-  {
-		
-			HAL_TIM_IC_Stop_IT(&htim1,TIM_CHANNEL_2);
-    	HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_1);
-		
-		 __HAL_TIM_CLEAR_IT(&htim1, TIM_IT_CC2);
-	}
-	
-  //HAL_TIM_IRQHandler(&htim1);
-  /* USER CODE BEGIN TIM1_CC_IRQn 1 */
+	SaveCLkNumber( GetPinValue());
+	__TIM_CC_Handler(&htim1);
 
-  /* USER CODE END TIM1_CC_IRQn 1 */
 }
 
 /**
@@ -245,7 +250,10 @@ void TIM2_IRQHandler(void)
   /* USER CODE BEGIN TIM2_IRQn 0 */
 
   /* USER CODE END TIM2_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim2);
+  //HAL_TIM_IRQHandler(&htim2);
+	GetCLKNumber(1);
+	SaveCLkNumber( GetPinValue());
+	__TIM_CC_Handler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
   /* USER CODE END TIM2_IRQn 1 */
@@ -259,7 +267,11 @@ void TIM3_IRQHandler(void)
   /* USER CODE BEGIN TIM3_IRQn 0 */
 
   /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
+
+	GetCLKNumber(1);
+	SaveCLkNumber( GetPinValue());
+	__TIM_CC_Handler(&htim3);
+
   /* USER CODE BEGIN TIM3_IRQn 1 */
 
   /* USER CODE END TIM3_IRQn 1 */
@@ -273,16 +285,11 @@ void TIM4_IRQHandler(void)
   /* USER CODE BEGIN TIM4_IRQn 0 */
 
   /* USER CODE END TIM4_IRQn 0 */
-	
-//此处不掉回调函数,
-	
-	if(uCLKHigh == 0)
-		 SaveEmptyCLK();		
 
-	else
-	   uCLKHigh++;
-	__HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
- // HAL_TIM_IRQHandler(&htim4);
+	//当如果第一次为0需要保存FFFF 作为停留状态的上发
+	if(uCLKHigh == 0)SaveEmptyCLK();
+	uCLKHigh++;
+	__HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);	
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
   /* USER CODE END TIM4_IRQn 1 */

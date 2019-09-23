@@ -10,7 +10,7 @@
 
 
 
-#define _Max_CLK_Buff 1024*256
+#define _Max_CLK_Buff 0x3FFFF
 
 extern u8 u8CLKBuff[_Max_CLK_Buff];
 extern u32 u32CLKLen;
@@ -22,7 +22,7 @@ extern u32 DeltaCLKHigh;
 
 extern u32 uCLKHigh ;
 
-
+extern uint8_t _Tx_Statue;
 extern uint8_t USBD_RxCnt;
 extern uint8_t USBD_RXBuffer[64];
 

@@ -14,7 +14,7 @@ u32 uCLKHigh = 0;
 
 
 
-
+u8 _Tx_Statue = 0;
 uint8_t USBD_RxCnt = 0;
 uint8_t USBD_RXBuffer[64];
 

@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "USE_HAL_DRIVER" /D "STM32H743xx"  /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "../Inc" /I " ../Drivers/STM32H7xx_HAL_Driver/Inc" /I " ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy" /I " ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc" /I " ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc" /I " ../Drivers/CMSIS/Device/ST/STM32H7xx/Include" /I " ../Drivers/CMSIS/Include" /I " ../HARDWARE/LCD" /I " ../SYSTEM/delay" /I " ../SYSTEM/sys" /I " ..\SYSTEM\sys" /I "C:\STM32\H743_Cat\MDK-ARM"  /D "USE_HAL_DRIVER" /D "STM32H743xx"  /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "../Inc" /I "../Drivers/STM32H7xx_HAL_Driver/Inc" /I "../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy" /I "../Middlewares/Third_Party/FatFs/src" /I "../Middlewares/ST/STM32_USB_Device_Library/Core/Inc" /I "../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc" /I "../Drivers/CMSIS/Device/ST/STM32H7xx/Include" /I "../Drivers/CMSIS/Include" /I "../HARDWARE/LCD" /I "../SYSTEM/delay" /I "../SYSTEM/sys" /I "C:\Keil Project\H743_Cat\MDK-ARM"  /D "USE_HAL_DRIVER" /D "STM32H743xx"  /YX /FD /c
 # ADD BASE RSC /l 0x804 /d "NDEBUG"
 # ADD RSC /l 0x804 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "USE_HAL_DRIVER" /D "STM32H743xx"  /YX /FD /GZ  /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "../Inc" /I " ../Drivers/STM32H7xx_HAL_Driver/Inc" /I " ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy" /I " ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc" /I " ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc" /I " ../Drivers/CMSIS/Device/ST/STM32H7xx/Include" /I " ../Drivers/CMSIS/Include" /I " ../HARDWARE/LCD" /I " ../SYSTEM/delay" /I " ../SYSTEM/sys" /I " ..\SYSTEM\sys" /I "C:\STM32\H743_Cat\MDK-ARM"  /D "USE_HAL_DRIVER" /D "STM32H743xx"  /YX /FD /GZ  /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "../Inc" /I "../Drivers/STM32H7xx_HAL_Driver/Inc" /I "../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy" /I "../Middlewares/Third_Party/FatFs/src" /I "../Middlewares/ST/STM32_USB_Device_Library/Core/Inc" /I "../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc" /I "../Drivers/CMSIS/Device/ST/STM32H7xx/Include" /I "../Drivers/CMSIS/Include" /I "../HARDWARE/LCD" /I "../SYSTEM/delay" /I "../SYSTEM/sys" /I "C:\Keil Project\H743_Cat\MDK-ARM"  /D "USE_HAL_DRIVER" /D "STM32H743xx"  /YX /FD /GZ  /c
 # ADD BASE RSC /l 0x804 /d "_DEBUG"
 # ADD RSC /l 0x804 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -107,6 +107,10 @@ SOURCE="..\SYSTEM\sys\sys.c"
 
 SOURCE="..\SYSTEM\delay\delay.c"
 # End Source File
+# Begin Source File
+
+SOURCE="..\SYSTEM\usart\usart_if.c"
+# End Source File
 # End Group
 # Begin Group "Application/User"
 
@@ -122,10 +126,6 @@ SOURCE="..\Src\var.c"
 # Begin Source File
 
 SOURCE="..\Src\operation.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\SYSTEM\usart\usart.c"
 # End Source File
 # Begin Source File
 
@@ -150,6 +150,38 @@ SOURCE="../Src/stm32h7xx_it.c"
 # Begin Source File
 
 SOURCE="../Src/stm32h7xx_hal_msp.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Src\bsp_driver_sd.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Src\sd_diskio.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Src\sdmmc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Src\fatfs.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Src\gpio.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Src\tim.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Src\usart.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Src\rtc.c"
 # End Source File
 # End Group
 # Begin Group "Drivers/STM32H7xx_HAL_Driver"
@@ -259,6 +291,14 @@ SOURCE="../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c"
 
 SOURCE="../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c"
 # End Source File
+# Begin Source File
+
+SOURCE="..\Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_rtc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_rtc_ex.c"
+# End Source File
 # End Group
 # Begin Group "Drivers/CMSIS"
 
@@ -286,6 +326,30 @@ SOURCE="../Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c"
 # Begin Source File
 
 SOURCE="../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c"
+# End Source File
+# End Group
+# Begin Group "Middlewares/FatFs"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE="..\Middlewares\Third_Party\FatFs\src\diskio.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Middlewares\Third_Party\FatFs\src\ff.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Middlewares\Third_Party\FatFs\src\ff_gen_drv.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Middlewares\Third_Party\FatFs\src\option\syscall.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\Middlewares\Third_Party\FatFs\src\option\cc936.c"
 # End Source File
 # End Group
 # Begin Group "::CMSIS"

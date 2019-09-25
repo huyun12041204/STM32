@@ -23,6 +23,8 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#define __USE_FATFS 0
+
 #ifdef __cplusplus
 extern "C" {
 #endif

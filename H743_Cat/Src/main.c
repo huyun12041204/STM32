@@ -25,8 +25,6 @@
 #include "var.h"
 #include "operation.h"
 #include "usart.h"
-#include "fatfs.h"
-#include "rtc.h"
 #include "sdmmc.h"
 #include "tim.h"
 #include "gpio.h"
@@ -62,14 +60,6 @@ extern TIM_HandleTypeDef htim4;
 extern UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
-FATFS fs;                 // Work area (file system object) for logical drive 
-FIL fil;                  // file objects 
-uint32_t byteswritten;                /* File write counts */ 
-uint32_t bytesread;                   /* File read counts */ 
-uint8_t wtext[] = "This is STM32 working with FatFs"; /* File write buffer */ 
-uint8_t rtext[100];                     /* File read buffers */ 
-char filename[] = "STM32.txt"; 
 
 /* USER CODE END PV */
 
@@ -122,81 +112,29 @@ int main(void)
   MX_TIM4_Init();
   MX_USB_DEVICE_Init();
   MX_USART1_UART_Init();
-	MX_RTC_Init();
+	//MX_RTC_Init();
 	
-  MX_FATFS_Init();
+//  
   /* Initialize interrupts */
   MX_NVIC_Init();
 	
-	LCD_View_Init();
+
 	
-	PrintfSDInformation();
+	//PrintfSDInformation();
   /* USER CODE BEGIN 2 */
 	
+		LCD_View_Init();
+	
 
-    printf("\n ****** FatFs Example ******\n"); 
-    /*##-1- Register the file system object to the FatFs module ##############*/ 
-    retSD = f_mount(&fs, "", 0); 
-    if(retSD) 
-    { 
-        printf(" mount error : %d \n",retSD); 
-        Error_Handler(); 
-    } 
-    else 
-        printf(" mount sucess!!! \n"); 
-    /*##-2- Create and Open new text file objects with write access ######*/ 
-    retSD = f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE); 
-    if(retSD) 
-        printf(" open file error : %d\n",retSD); 
-    else 
-        printf(" open file sucess!!! \n"); 
-    /*##-3- Write data to the text files ###############################*/ 
-    retSD = f_write(&fil, wtext, sizeof(wtext), (void *)&byteswritten); 
-    if(retSD) 
-        printf(" write file error : %d \n",retSD);  
-    else 
-    { 
-        printf(" write file sucess!!! \n"); 
-        printf(" write Data : %s\n",wtext); 
-    } 
+#if __USE_FATFS
+    MX_FATFS_Init();
+		FileStatue = SDIsReadForSave();
 
-    /*##-4- Close the open text files ################################*/ 
-    retSD = f_close(&fil); 
+#ifdef __Test_FATFS
+	 Test_FATFS1();
+#endif
 
-    if(retSD) 
-        printf(" close error : %d\n",retSD); 
-    else 
-        printf(" close sucess!!! \n"); 
-
-    /*##-5- Open the text files object with read access ##############*/ 
-    retSD = f_open(&fil, filename, FA_READ); 
-
-    if(retSD) 
-        printf(" open file error : %d\n",retSD); 
-    else 
- printf(" open file sucess!!! \n"); 
-
-    /*##-6- Read data from the text files ##########################*/ 
-    retSD = f_read(&fil, rtext, sizeof(rtext), (UINT*)&bytesread); 
-    if(retSD) 
-        printf(" read error!!! %d\n",retSD); 
-    else 
-    { 
-        printf(" read sucess!!! \n"); 
-        printf(" read Data : %s\n",rtext); 
-
-    } 
-
-    /*##-7- Close the open text files ############################*/ 
-
-    retSD = f_close(&fil); 
-    if(retSD)   
-        printf(" close error!!! %d\n",retSD); 
-    else 
-        printf(" close sucess!!! \n"); 
-    /*##-8- Compare read data with the expected data ############*/ 
-    if(bytesread == byteswritten) 
-        printf(" FatFs is working well!!!\n"); 
+#endif
 
 
   /* USER CODE END 2 */
@@ -225,17 +163,24 @@ int main(void)
 //   u32SendLen = 0;
 
 
-  while (1)
-  {
-		
 
-		if(u32CLKLen > u32SendLen)
-		{
-		
-		 _CLKBuff_Send();
-		}
-			
+
+//	 
+
+
+ 
+
+	 while (1)
+ 
+	 {		
     /* USER CODE END WHILE */
+
+		 if(u32CLKLen > u32SendLen)
+			 _CLKBuff_Send();
+#if __USE_FATFS
+		 if (FileStatue == FileIsRead)
+			 Save1LineCLKBuffer();
+#endif
 
     /* USER CODE BEGIN 3 */
   }
@@ -288,9 +233,9 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKDivider  = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.AHBCLKDivider  = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;

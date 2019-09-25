@@ -1,8 +1,12 @@
 #ifndef _OPERATION_H
 #define _OPERATION_H
+
+//#define __Test_FATFS
+
 #include "sys.h"
 #include "var.h"
 #include "lcd.h"
+
 
 #ifndef  Pin_ALL
 #define  Pin_ALL 0xF8
@@ -24,5 +28,15 @@
 	u8   GetPinValue  (void);
 	void _CLKBuff_Send(void);
 	void PrintfSDInformation(void);
+    u8 SDIsReadForSave(void);
+
+
+#ifdef __Test_FATFS
+
+
+  void Test_FATFS1(void);
+	void Test_FATFS(void);
+
+#endif
 
 #endif

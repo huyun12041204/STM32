@@ -60,8 +60,7 @@
 #include "usbd_ctlreq.h"
 
 
-extern uint8_t USBD_RxCnt;
-extern uint8_t USBD_RXBuffer[64];
+
 USBD_CDC_HandleTypeDef _ClassData;
 
 
@@ -585,7 +584,6 @@ static uint8_t  USBD_CDC_Setup (USBD_HandleTypeDef *pdev,
 static uint8_t  USBD_CDC_DataIn (USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
 
-	//extern u8 _Tx_Statue = 0;
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)pdev->pClassData;
   PCD_HandleTypeDef *hpcd = pdev->pData;
 

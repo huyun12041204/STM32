@@ -1,8 +1,7 @@
 #include "operation.h"
 
 
-#include "usb_device.h"
-#include "usbd_cdc_if.h"
+
 extern USBD_HandleTypeDef hUsbDeviceHS;
 extern SD_HandleTypeDef hsd1;
 
@@ -267,6 +266,29 @@ void Test_FATFS1()
 	
 
 	
+	
+	
+//	 u8 _packet_Send(u8* buf, u16 bufLen)
+//	{
+//		u8 u8Ret ; 
+//		u16 u16Send = 0;
+//		u16 u16will = 0;
+//		
+//		while(bufLen > u16Send)
+//		{
+//			
+//			u16will = bufLen - u16Send;
+//			if( u16will > 64) u16will = 64;
+//			
+//			u8Ret = CDC_Transmit_HS(buf+u16Send, u16will);
+
+//			if ( u8Ret == USBD_OK) u16Send += u16will;
+//		//	if (u8Ret == USBD_FAIL) return USBD_FAIL;		
+//		}	
+//		return USBD_OK;
+//	}
+	
+	
 	void _CLKBuff_Send()
 	{
 	
@@ -282,10 +304,15 @@ void Test_FATFS1()
 
 		//此处内部会判断USB是否发送完成.如果没有返回 USBD_BUSY
 		if (CDC_Transmit_HS(TempBufer, __Len) == USBD_OK) u32SendLen += __Len;
+		//if (_packet_Send(TempBufer, __Len) == USBD_OK) u32SendLen += __Len;
 
 	
 		 
 	}
+	
+
+	
+	
 	
 	void PrintfSDInformation()
 	{
@@ -397,3 +424,6 @@ void Test_FATFS1()
 	
 
 #endif
+
+	
+	

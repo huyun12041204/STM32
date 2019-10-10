@@ -108,7 +108,7 @@ uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len);
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
 
 /* USER CODE END EXPORTED_FUNCTIONS */
-
+//static int8_t CDC_Receive_HS(uint8_t* pbuf, uint32_t *Len);
 /**
   * @}
   */

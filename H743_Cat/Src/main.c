@@ -28,6 +28,7 @@
 #include "sdmmc.h"
 #include "tim.h"
 #include "gpio.h"
+#include "command.h"
 //#include "usart_if.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -58,6 +59,8 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 extern UART_HandleTypeDef huart1;
+extern USBD_HandleTypeDef hUsbDeviceHS;
+
 
 /* USER CODE BEGIN PV */
 
@@ -84,7 +87,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-  
+
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -168,21 +171,29 @@ int main(void)
 //	 
 
 
- 
+  
 
 	 while (1)
  
 	 {		
     /* USER CODE END WHILE */
 
-		 if(u32CLKLen > u32SendLen)
-			 _CLKBuff_Send();
+		 
+		 
+
+
+    /* USER CODE BEGIN 3 */
+		 
+		 __GetBits_Send();
+		 
+	
+	//	  hcdc = (USBD_CDC_HandleTypeDef*) hUsbDeviceHS->pClassData;
+//		 if(u32CLKLen > u32SendLen)
+//			 _CLKBuff_Send();
 #if __USE_FATFS
 		 if (FileStatue == FileIsRead)
 			 Save1LineCLKBuffer();
 #endif
-
-    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -268,7 +279,7 @@ void SystemClock_Config(void)
 static void MX_NVIC_Init(void)
 {
   /* OTG_HS_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(OTG_HS_IRQn, 2, 0);
+  HAL_NVIC_SetPriority(OTG_HS_IRQn, 2, 2);
   HAL_NVIC_EnableIRQ(OTG_HS_IRQn);
   /* TIM1_CC_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM1_CC_IRQn, 1, 0);
@@ -281,6 +292,7 @@ static void MX_NVIC_Init(void)
   HAL_NVIC_EnableIRQ(TIM3_IRQn);
   /* TIM4_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
+	
   HAL_NVIC_EnableIRQ(TIM4_IRQn);
 }
 

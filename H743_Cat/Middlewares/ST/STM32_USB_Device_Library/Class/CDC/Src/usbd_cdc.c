@@ -58,7 +58,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc.h"
 #include "usbd_ctlreq.h"
-
+#include "command.h"
 
 
 USBD_CDC_HandleTypeDef _ClassData;
@@ -640,7 +640,9 @@ static uint8_t  USBD_CDC_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum)
   if(pdev->pClassData != NULL)
   {
     ((USBD_CDC_ItfTypeDef *)pdev->pUserData)->Receive(hcdc->RxBuffer, &hcdc->RxLength);
-
+		
+		 if(_GetBitsLen == 0) Excute_Command(hcdc->RxBuffer,hcdc->RxLength);
+	
     return USBD_OK;
   }
   else

@@ -455,6 +455,8 @@ USBD_StatusTypeDef USBD_LL_Reset(USBD_HandleTypeDef  *pdev)
   pdev->ep0_state = USBD_EP0_IDLE;
   pdev->dev_config= 0U;
   pdev->dev_remote_wakeup = 0U;
+ //  USBD_LL_OpenEP(pdev, CDC_CMD_EP, 
+//	 USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
 
   if (pdev->pClassData)
   {

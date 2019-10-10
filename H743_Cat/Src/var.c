@@ -15,9 +15,12 @@ u32 DeltaCLKHigh;
 
 u32 uCLKHigh = 0;
 
-u8 FileStatue= SDNotExist;;
+u8 FileStatue= SDNotExist;
 
 FATFS fs;                 // Work area (file system object) for logical drive 
 FIL fil;                  // file objects 
 uint32_t Bytes; 
 
+u8  _GetBitsOff = 0;
+u16 _GetBitsLen = 0;
+u8  _GetBitsBuf[_Max_Bits_Buff];

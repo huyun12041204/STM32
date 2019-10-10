@@ -11,7 +11,9 @@
 #include "sdmmc.h"
 
 
-#define _Max_CLK_Buff 0x3FFFF
+#define  _Max_CLK_Buff 0x3FFFF
+#define  _Max_Bits_Buff 256
+
 
 //¥Ê¥¢ π”√
 #define FileIsRead        0
@@ -20,6 +22,7 @@
 #define OpenFileFaild     3
 #define WriteFileFaild    4
 #define WriteDirFaild     5
+
 
 extern u8 u8CLKBuff[_Max_CLK_Buff];
 extern u32 u32CLKLen;
@@ -38,4 +41,7 @@ extern FIL fil;                  // file objects
 extern uint32_t Bytes; 
 
 
+extern u8  _GetBitsOff;
+extern u16 _GetBitsLen;
+extern u8  _GetBitsBuf[_Max_Bits_Buff];
 #endif

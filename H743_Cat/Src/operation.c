@@ -145,15 +145,31 @@ void Test_FATFS1()
 	void GetCLKNumber (u8 bReset)
 	{
 		
-		DeltaCLKLow  = TIM4->CNT;
-		DeltaCLKHigh = uCLKHigh;
+
 		
-		if(bReset)
+//		if(bReset)
+//		{
+//			//此处是1的原因是 尝试很多次,发现初始化过程基本都差1
+//			//由于初始化过程需要时间,此处使用400MHZ 所以此处设置为1 可能不需要1 
+//			TIM4->CNT = 1;
+//			uCLKHigh  = 0;
+//		}
+		
+		if(iExtCLK != Pin_CLK)
 		{
-			//此处是1的原因是 尝试很多次,发现初始化过程基本都差1
-			//由于初始化过程需要时间,此处使用400MHZ 所以此处设置为1 可能不需要1 
+					DeltaCLKLow  = TIM5->CNT&0xFFFF;
+		      DeltaCLKHigh = (TIM5->CNT>>16) +uInterHigh*0x10000;
+					TIM5->CNT   = 0;
+			    uInterHigh  = 0;
+		}
+		else
+		{
+			
+			DeltaCLKLow  = TIM4->CNT;
+	   	DeltaCLKHigh = uCLKHigh;
 			TIM4->CNT = 1;
 			uCLKHigh  = 0;
+			
 		}
 		
 		
@@ -260,8 +276,9 @@ void Test_FATFS1()
 		 if((GPIOE->IDR & GPIO_PIN_9) != 0x00)__Pin |= Pin_IO ;
 		 if((GPIOA->IDR & GPIO_PIN_15) != 0x00)__Pin|= Pin_VCC;
 		 if((GPIOB->IDR & GPIO_PIN_4) != 0x00)__Pin |= Pin_RST;
-		
-		return __Pin;		
+		// if((GPIOE->IDR & GPIO_PIN_0) != 0x00)__Pin |= Pin_CLK;
+
+		return __Pin |= iExtCLK;		
 	}
 	
 

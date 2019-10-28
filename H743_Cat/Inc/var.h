@@ -44,4 +44,7 @@ extern uint32_t Bytes;
 extern u8  _GetBitsOff;
 extern u16 _GetBitsLen;
 extern u8  _GetBitsBuf[_Max_Bits_Buff];
+
+extern u8 iExtCLK;
+extern u32 uInterHigh;
 #endif

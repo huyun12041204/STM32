@@ -24,3 +24,6 @@ uint32_t Bytes;
 u8  _GetBitsOff = 0;
 u16 _GetBitsLen = 0;
 u8  _GetBitsBuf[_Max_Bits_Buff];
+
+u8 iExtCLK      = 0;
+u32 uInterHigh  = 0;

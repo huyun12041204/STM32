@@ -1,50 +1,29 @@
 @echo off ?
 echo ---------------------------------------------------- ?
-echo By Kaidy
 echo Press any key to delete all files with ending: ?
 echo ?*.aps *.idb *.ncp *.obj *.pch *.tmp *.sbr ?
 echo ?*.tmp *.pdb *.bsc *.ilk *.res *.ncb *.opt ??
-echo ?*.suo *.manifest ?*.dep ? ..
+echo ?*.suo *.manifest *.dep ? ..
+echo ?Buildlog.htm *Build_log.htm?
+echo ?*.obj *.pch *.idb *.pdb *.res *.dep *.manifest ?
+echo ?*.bsc *.ilk *.SBR *.lst *.ncb *.sdf *.tlog ?
+echo ?*.exp *.lastbuildstate *.log *.suo *.psess?
+echo ? *.ipch *.db *.svn-base ?
 echo There are Visual C++ and Visual Studio junk ?
 echo ---------------------------------------------------- ?
 pause ?
 del /F /S /Q *.aps *.idb *.ncp *.obj *.pch *.sbr *.tmp *.pdb *.bsc *.ilk *.res *.ncb *.opt *.suo *.manifest *.dep *.lastbuildstate *.tlog?
+del /F /S /Q Buildlog.htm *Build_log.htm *.manifest *.lst *.ncb *.sdf *.tlog *.exp *.db *.suo *.sdf
 
-del Buildlog.htm /s
-del *Build_log.htm /s
-del *.obj /s
-del *.pch /s
-del *.idb /s
-del *.pdb /s
-del *.res /s
-del *.dep /s
-del *.manifest /s
-del *.bsc /s
-del *.ilk /s
-del *.SBR /s
-del *.lst /s
-del *.ncb /s
-del *.sdf /s
-del *.tlog /s
-del *.exp /s
-
-
-del /s *.obj
-del /s *.ilk
-del /s *.pdb
-del /s *.tlog
-del /s *.lastbuildstate
-del /s *.idb
-del /s *.log
-del /s *.sdf
-del /s *.suo
-del /s *.bsc
-del /s *.psess
-del /s *.pch
-del /s *.ipch
-del /s *.sbr
-del /s *.suo
-del /s *.db
-del /s *.svn-base
-
-Pause ?
+echo ---------------------------------------------------- ?
+echo Press any key to delete all files with ending: ?
+echo ?*.bak *.ddk  *.edk *.lst *.lnp *.mpf *.mpj *.obj *.omf   ?
+echo ?*.plg *.rpt *.tmp  *.__i *.crf *.o *.d *.axf *.tra ?
+echo ? *.dep JLinkLog.txt *.iex *.htm *.sct *.map ?
+echo There are Keil junk ?
+echo ---------------------------------------------------- ?
+pause ?
+del /F /S /Q *.bak *.ddk  *.edk *.lst *.lnp *.mpf *.mpj *.obj *.omf
+del /F /S /Q *.plg *.rpt *.tmp  *.__i *.crf *.o *.d *.axf *.tra 
+del /F /S /Q  *.dep JLinkLog.txt *.iex *.htm *.sct *.map 
+pause ?

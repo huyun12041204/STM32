@@ -242,6 +242,7 @@ void TIM1_CC_IRQHandler(void)
 	SaveCLkNumber( GetPinValue());
 	__TIM_CC_Handler(&htim1);
 
+	
 }
 
 /**
@@ -256,6 +257,8 @@ void TIM2_IRQHandler(void)
 	GetCLKNumber(1);
 	SaveCLkNumber( GetPinValue());
 	__TIM_CC_Handler(&htim2);
+	
+	
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
   /* USER CODE END TIM2_IRQn 1 */
@@ -273,7 +276,6 @@ void TIM3_IRQHandler(void)
 	GetCLKNumber(1);
 	SaveCLkNumber( GetPinValue());
 	__TIM_CC_Handler(&htim3);
-
   /* USER CODE BEGIN TIM3_IRQn 1 */
 
   /* USER CODE END TIM3_IRQn 1 */
@@ -305,7 +307,7 @@ void TIM5_IRQHandler(void)
   /* USER CODE END TIM5_IRQn 0 */
 
   /* USER CODE BEGIN TIM5_IRQn 1 */
-		uInterHigh++;
+	//	uInterHigh++;
 	__HAL_TIM_CLEAR_IT(&htim5, TIM_IT_UPDATE);	
 
   /* USER CODE END TIM5_IRQn 1 */

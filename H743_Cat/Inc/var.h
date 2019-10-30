@@ -3,7 +3,7 @@
 #ifndef _VAR_H
 #define _VAR_H
 
-
+#define TIM5_CLK 1
 
 #include "sys.h"
 #include "stdio.h"	
@@ -47,4 +47,9 @@ extern u8  _GetBitsBuf[_Max_Bits_Buff];
 
 extern u8 iExtCLK;
 extern u32 uInterHigh;
+
+#if TIM5_CLK
+extern u32 uPreCLk ;
+extern u32 uDeltaCLk ;
+#endif
 #endif

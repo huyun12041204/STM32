@@ -145,6 +145,11 @@ void Test_FATFS1()
 	void GetCLKNumber (u8 bReset)
 	{
 		
+			#if TIM5_CLK 
+			
+			u32 CurrentCLK; 
+			
+			#endif 
 
 		
 //		if(bReset)
@@ -164,11 +169,32 @@ void Test_FATFS1()
 		}
 		else
 		{
+			#if TIM5_CLK 
+			CurrentCLK = TIM5->CNT;
+			if(CurrentCLK < uPreCLk)
+			{
+				uDeltaCLk = 0xFFFFFFFF - uPreCLk;
+				uDeltaCLk += CurrentCLK;
+			}
+			else
+			{
+				uDeltaCLk = CurrentCLK - uPreCLk;
+			}
 			
+			uPreCLk = CurrentCLK;
+			DeltaCLKLow  = uDeltaCLk&0xFFFF;
+			DeltaCLKHigh = uDeltaCLk>>16;
+			
+			
+			
+			
+			#else 
 			DeltaCLKLow  = TIM4->CNT;
 	   	DeltaCLKHigh = uCLKHigh;
 			TIM4->CNT = 1;
 			uCLKHigh  = 0;
+			
+			#endif
 			
 		}
 		
@@ -216,16 +242,7 @@ void Test_FATFS1()
 
 	void SaveCLkNumber(u8 __Pin)
 	{
-	  //   u8 __ClkLen  = 0;
 
-		 //if(DeltaCLKHigh == 0)
-		 //{ 
-			//  if(DeltaCLKLow<0x100)      __ClkLen =1;
-			//  else                       __ClkLen =2; 
-		 //}	
-		 //else if(DeltaCLKHigh<0x100 )  __ClkLen =3;
-		 //else if(DeltaCLKHigh<0x10000 )__ClkLen =4;
-		 //else                          __ClkLen =5;
 		u32 __CurOffset;
 		u8  __ClkLen   = __GetDeltaCLKBufferLen(DeltaCLKHigh,DeltaCLKLow);
 		
@@ -443,4 +460,5 @@ void Test_FATFS1()
 #endif
 
 	
+
 	

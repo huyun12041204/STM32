@@ -27,3 +27,10 @@ u8  _GetBitsBuf[_Max_Bits_Buff];
 
 u8 iExtCLK      = 0;
 u32 uInterHigh  = 0;
+
+
+#if TIM5_CLK
+u32 uPreCLk   = 0;
+u32 uDeltaCLk = 0;
+
+#endif

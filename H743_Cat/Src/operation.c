@@ -157,9 +157,9 @@ void Test_FATFS1()
 		
 		if(iExtCLK != Pin_CLK)
 		{
-					DeltaCLKLow  = TIM5->CNT&0xFFFF;
-		      DeltaCLKHigh = (TIM5->CNT>>16) +uInterHigh*0x10000;
-					TIM5->CNT   = 0;
+					DeltaCLKLow  = TIM7->CNT;
+		      DeltaCLKHigh = uInterHigh;
+					TIM7->CNT   = 0;
 			    uInterHigh  = 0;
 		}
 		else

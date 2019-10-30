@@ -63,6 +63,7 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim5;
+extern TIM_HandleTypeDef htim7;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -306,6 +307,19 @@ void TIM5_IRQHandler(void)
   /* USER CODE BEGIN TIM5_IRQn 1 */
 		uInterHigh++;
 	__HAL_TIM_CLEAR_IT(&htim5, TIM_IT_UPDATE);	
+
+  /* USER CODE END TIM5_IRQn 1 */
+}
+
+void TIM7_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM5_IRQn 0 */
+
+  /* USER CODE END TIM5_IRQn 0 */
+
+  /* USER CODE BEGIN TIM5_IRQn 1 */
+		uInterHigh++;
+	__HAL_TIM_CLEAR_IT(&htim7, TIM_IT_UPDATE);	
 
   /* USER CODE END TIM5_IRQn 1 */
 }

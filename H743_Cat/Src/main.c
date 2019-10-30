@@ -58,6 +58,7 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim7;
 extern UART_HandleTypeDef huart1;
 extern USBD_HandleTypeDef hUsbDeviceHS;
 
@@ -113,7 +114,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
-	MX_TIM5_Init();
+	MX_TIM7_Init();
 	
   MX_USB_DEVICE_Init();
   MX_USART1_UART_Init();
@@ -163,7 +164,7 @@ int main(void)
 	
 	HAL_TIM_Base_Start_IT(&htim4); //使能定时器3和定时器4更新中断：TIM_IT_UPDATE    
 	
-	HAL_TIM_Base_Start_IT(&htim5); //使能定时器3和定时器4更新中断：TIM_IT_UPDATE    
+	HAL_TIM_Base_Start_IT(&htim7); //使能定时器3和定时器4更新中断：TIM_IT_UPDATE    
 	 u32CLKLen  = 0;
 //   u32SendLen = 0;
 
@@ -187,16 +188,16 @@ int main(void)
     /* USER CODE BEGIN 3 */
 		 
 		 //此处进行切换CLK的使用,
-		 //当使用内部CLK 时, PE0 为1时, 停用 TIM5;
+		 //当使用内部CLK 时, PE0 为1时, 停用 TIM7;
 		 if((iExtCLK == 0)&&((GPIOA->IDR & GPIO_PIN_15) != 00))
 		 {
 			 if((GPIOE->IDR & GPIO_PIN_0)!= 0)
 			 { 
 				 GetCLKNumber(1);
 				 SaveCLkNumber( GetPinValue());	 
-				 TIM5->CNT   = 0;
+				 TIM7->CNT   = 0;
 				 uInterHigh  = 0;
-				 HAL_TIM_Base_Stop_IT(&htim5);
+				 HAL_TIM_Base_Stop_IT(&htim7);
 				 iExtCLK = Pin_CLK;
 				 
 			 }
@@ -204,7 +205,7 @@ int main(void)
 			 
 
 		 }
-		 //当不是用内部CLK 时, 但PE0 为0 时,开启TIM5;
+		 //当不是用内部CLK 时, 但PE0 为0 时,开启TIM7;
 		 else if ((iExtCLK == Pin_CLK)&&((GPIOA->IDR & GPIO_PIN_15) == 00))
 		 {
 			 
@@ -213,9 +214,9 @@ int main(void)
 			 { 
 			   GetCLKNumber(1);
          SaveCLkNumber( GetPinValue());	 
-			   TIM5->CNT   = 0;
+			   TIM7->CNT   = 0;
 			   uInterHigh  = 0;
-			   HAL_TIM_Base_Start_IT(&htim5);
+			   HAL_TIM_Base_Start_IT(&htim7);
 			   iExtCLK = 0;
 			 
 			 }
@@ -335,8 +336,8 @@ static void MX_NVIC_Init(void)
   HAL_NVIC_EnableIRQ(TIM4_IRQn);
 	
 	/* TIM4_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(TIM5_IRQn,2, 0);
-	HAL_NVIC_EnableIRQ(TIM5_IRQn);
+  HAL_NVIC_SetPriority(TIM7_IRQn,2, 0);
+	HAL_NVIC_EnableIRQ(TIM7_IRQn);
 	
 }
 

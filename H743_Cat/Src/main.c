@@ -29,6 +29,8 @@
 #include "tim.h"
 #include "gpio.h"
 #include "command.h"
+#include "dma.h"
+#include "adc.h"
 //#include "usart_if.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -63,6 +65,10 @@ extern TIM_HandleTypeDef htim7;
 extern UART_HandleTypeDef huart1;
 extern USBD_HandleTypeDef hUsbDeviceHS;
 
+extern ADC_HandleTypeDef hadc1;
+extern DMA_HandleTypeDef hdma_adc1;
+u32    VCC;
+float  _VCC;
 
 /* USER CODE BEGIN PV */
 
@@ -70,6 +76,8 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+
+
 
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
@@ -120,6 +128,8 @@ int main(void)
 	
   MX_USB_DEVICE_Init();
   MX_USART1_UART_Init();
+	
+	MY_ADC_Init();
 	//MX_RTC_Init();
 	
 //  
@@ -150,6 +160,8 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
+	
+	
 
 
   HAL_TIM_Base_Start(&htim1); //使能定时器1
@@ -175,8 +187,6 @@ int main(void)
 
 
 
-//	 
-
 
   
 
@@ -187,8 +197,11 @@ int main(void)
 
 		
 		 
-
-
+   //  VCC=Get_Adc_Average(1,20);//获取通道19的转换值，20次取平均
+		  VCC=Get_Adc_Average(2,20);//获取通道19的转换值，20次取平均
+		 _VCC=(float)VCC*(3.3/65536);//获取计算后的带小数的实际电压值，比如3.1111
+   // VCC=Get_Adc_Average(3,20);//获取通道19的转换值，20次取平均
+ // VCC=Get_Adc_Average(4,20);//获取通道19的转换值，20次取平均
     /* USER CODE BEGIN 3 */
 		 
 		 //此处进行切换CLK的使用,

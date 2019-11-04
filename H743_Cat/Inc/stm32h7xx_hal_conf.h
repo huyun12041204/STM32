@@ -34,7 +34,7 @@
   */
 #define HAL_MODULE_ENABLED  
 
-  /* #define HAL_ADC_MODULE_ENABLED   */
+  #define HAL_ADC_MODULE_ENABLED   
 /* #define HAL_FDCAN_MODULE_ENABLED   */
 /* #define HAL_CEC_MODULE_ENABLED   */
 /* #define HAL_COMP_MODULE_ENABLED   */
@@ -153,7 +153,7 @@
 #define  USE_RTOS                     0U
 #define  USE_SD_TRANSCEIVER           1U               /*!< use uSD Transceiver */
 
-#define  USE_HAL_ADC_REGISTER_CALLBACKS     0U /* ADC register callback disabled     */
+#define  USE_HAL_ADC_REGISTER_CALLBACKS     1U /* ADC register callback disabled     */
 #define  USE_HAL_CEC_REGISTER_CALLBACKS     0U /* CEC register callback disabled     */
 #define  USE_HAL_COMP_REGISTER_CALLBACKS    0U /* COMP register callback disabled    */
 #define  USE_HAL_CRYP_REGISTER_CALLBACKS    0U /* CRYP register callback disabled    */

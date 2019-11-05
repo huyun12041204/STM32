@@ -67,8 +67,7 @@ extern USBD_HandleTypeDef hUsbDeviceHS;
 
 extern ADC_HandleTypeDef hadc1;
 extern DMA_HandleTypeDef hdma_adc1;
-u32    VCC;
-float  _VCC;
+
 
 /* USER CODE BEGIN PV */
 
@@ -93,16 +92,17 @@ static void MX_NVIC_Init(void);
   * @retval int
   */
 int main(void)
-{
+ {
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
 
+	u16 TEMP;
 
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  Cache_Enable();                 //打开L1-Cache
+    Cache_Enable();                 //打开L1-Cache
   HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -128,8 +128,12 @@ int main(void)
 	
   MX_USB_DEVICE_Init();
   MX_USART1_UART_Init();
+
+	MX_DMA_Init();
 	
-	MY_ADC_Init();
+  MX_ADC1_Init();
+	
+
 	//MX_RTC_Init();
 	
 //  
@@ -185,27 +189,35 @@ int main(void)
 //   u32SendLen = 0;
 
 
+  // HAL_ADC_Stop_DMA(&hadc1);
 
-
-
+ //HAL_ADCEx_Calibration_Start(&hadc1,ADC_CALIB_OFFSET,ADC_SINGLE_ENDED); //ADC校准
   
-
+ HAL_NVIC_DisableIRQ(DMA1_Stream0_IRQn);
+//	TEMP = 0;
+//  HAL_ADC_Start_DMA(&hadc1,&TEMP,1);
+	
+	HAL_ADC_Start_DMA(&hadc1,ADC_DATA,1);
+	
+	
 	 while (1)
  
 	 {		
     /* USER CODE END WHILE */
 
+		 
 		
 		 
    //  VCC=Get_Adc_Average(1,20);//获取通道19的转换值，20次取平均
-		  VCC=Get_Adc_Average(2,20);//获取通道19的转换值，20次取平均
-		 _VCC=(float)VCC*(3.3/65536);//获取计算后的带小数的实际电压值，比如3.1111
+		//  VCC=Get_Adc_Average(ADC_CHANNEL_3,20);//获取通道19的转换值，20次取平均
+	//	 _VCC=(float)VCC*(3.3/65536);//获取计算后的带小数的实际电压值，比如3.1111
    // VCC=Get_Adc_Average(3,20);//获取通道19的转换值，20次取平均
  // VCC=Get_Adc_Average(4,20);//获取通道19的转换值，20次取平均
     /* USER CODE BEGIN 3 */
 		 
 		 //此处进行切换CLK的使用,
 		 //当使用内部CLK 时, PE0 为1时, 停用 TIM7;
+
 		 if((iExtCLK == 0)&&((GPIOA->IDR & GPIO_PIN_15) != 00))
 		 {
 			 if((GPIOA->IDR & GPIO_PIN_4)!= 0)
@@ -223,6 +235,7 @@ int main(void)
 
 		 }
 		 //当不是用内部CLK 时, 但PE0 为0 时,开启TIM7;
+		 
 		 else if ((iExtCLK == Pin_CLK)&&((GPIOA->IDR & GPIO_PIN_15) == 00))
 		 {
 			 
@@ -240,8 +253,10 @@ int main(void)
 			 
 
 		 }
-		 
-		 
+		
+
+	//	 printf("%d mv \n", (ADC_DATA[50]*3300 / 0xFFFF));
+	
 		 __GetBits_Send();
 		 
 	

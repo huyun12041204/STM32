@@ -34,3 +34,10 @@ u32 uPreCLk   = 0;
 u32 uDeltaCLk = 0;
 
 #endif
+  
+ u32    ADC_DATA[100];
+ 
+ //__attribute__((section(".ARM.__at_0x24000500")));
+ 
+
+//uint32_t ADC_DATA[ADC_CONVERTED_DATA_BUFFER_SIZE] __attribute__((section(".ARM.__at_0x24000000")));

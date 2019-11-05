@@ -48,8 +48,13 @@ extern u8  _GetBitsBuf[_Max_Bits_Buff];
 extern u8 iExtCLK;
 extern u32 uInterHigh;
 
+
+extern u32    ADC_DATA[100];
+
 #if TIM5_CLK
 extern u32 uPreCLk ;
 extern u32 uDeltaCLk ;
 #endif
 #endif
+
+

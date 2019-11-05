@@ -64,6 +64,9 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim7;
+
+extern DMA_HandleTypeDef hdma_adc1;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -255,7 +258,7 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 0 */
   //HAL_TIM_IRQHandler(&htim2);
 	GetCLKNumber(1);
-	SaveCLkNumber( GetPinValue());
+	SaveCLkNumber( GetPinValue()|0x8);
 	__TIM_CC_Handler(&htim2);
 	
 	
@@ -338,6 +341,32 @@ void OTG_HS_IRQHandler(void)
 
   /* USER CODE END OTG_HS_IRQn 1 */
 }
+
+void DMA1_Stream0_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream0_IRQn 0 */
+//		u8 i;
+//	u32 temp =0;
+
+//	
+//	for(i = 0 ; i <5 ;i++)
+//	{
+//		  temp += __VCC[i];
+//	}
+//	
+//	temp = temp/5;
+//	 printf("%d mv \n", (temp*3300 / 0xFFFF));
+//	
+	 printf("%d mv \n", (ADC_DATA[0]*3300 / 0xFFFF));
+//	
+  HAL_DMA_IRQHandler(&hdma_adc1);
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream0_IRQn 1 */
+}
+
 
 /* USER CODE BEGIN 1 */
 

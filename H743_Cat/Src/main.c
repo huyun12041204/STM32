@@ -102,7 +102,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-    Cache_Enable();                 //打开L1-Cache
+     Cache_Enable();                 //打开L1-Cache
   HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -129,9 +129,15 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_USART1_UART_Init();
 
+#ifdef  NODMAADC
+//MY_ADC_Init();
+#else
 	MX_DMA_Init();
 	
   MX_ADC1_Init();
+#endif
+
+
 	
 
 	//MX_RTC_Init();
@@ -191,13 +197,13 @@ int main(void)
 
   // HAL_ADC_Stop_DMA(&hadc1);
 
- //HAL_ADCEx_Calibration_Start(&hadc1,ADC_CALIB_OFFSET,ADC_SINGLE_ENDED); //ADC校准
+// HAL_ADCEx_Calibration_Start(&hadc1,ADC_CALIB_OFFSET,ADC_SINGLE_ENDED); //ADC校准
   
- HAL_NVIC_DisableIRQ(DMA1_Stream0_IRQn);
+ //HAL_NVIC_DisableIRQ(DMA1_Stream0_IRQn);
 //	TEMP = 0;
 //  HAL_ADC_Start_DMA(&hadc1,&TEMP,1);
 	
-	HAL_ADC_Start_DMA(&hadc1,ADC_DATA,1);
+	//HAL_ADC_Start_DMA(&hadc1,ADC_DATA,100);
 	
 	
 	 while (1)

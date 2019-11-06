@@ -26,6 +26,7 @@ u16 __GetBits(u8 u8P3)
 {
 	
 	
+	
 	u16 i ;
 	u32 __Delta = u32CLKLen - u32SendLen;
 
@@ -48,7 +49,8 @@ u16 __GetBits(u8 u8P3)
 
 void __GetBits_Send()
 {
-	
+	//此时表示VCC 没有存满
+
 
   u8 __SendLen;
 	if(_GetBitsLen == 0) return;

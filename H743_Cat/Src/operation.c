@@ -238,6 +238,16 @@ void Test_FATFS1()
 
 	}
 	
+	void SaveVccEvent(u16 ___vcc)
+	{
+			
+		SetCLKBuff(0xFA       ,VCCEvent); 
+		SetCLKBuff(___vcc>>8,VCCEvent+1); 
+		SetCLKBuff(___vcc&0xFF  ,VCCEvent+2); 
+		
+		VCCSaved = 1;
+		
+	}
 
 
 	void SaveCLkNumber(u8 __Pin)
@@ -247,21 +257,25 @@ void Test_FATFS1()
 		u32 __CurOffset;
 		u8  __ClkLen   = __GetDeltaCLKBufferLen(DeltaCLKHigh,DeltaCLKLow);
 		u8 AddLe = 1; 
+		
+		
+		
 		__CurOffset    = u32CLKLen;
 
 		
-		if((__Pin&0x8) != 0)
-			AddLe =3;
+//		if((__Pin&0x8) != 0)
+//			AddLe =3;
 
 		//此处需要预先流出 但前计算出的长度,避免 不同中断里面的冲突
 		u32CLKLen     += (__ClkLen+AddLe);	 
 		
 		//保存当前各个PIN 的状态,和后续CLK buffer 长度
+		//SetCLKBuff(__Pin|(__ClkLen+AddLe-1),__CurOffset); 
 		SetCLKBuff(__Pin|__ClkLen,__CurOffset); 
 
-		//保存当前第一位最低位长度;
-		if(AddLe == 1)
-		{
+//		//保存当前第一位最低位长度;
+//		if(AddLe == 1)
+//		{
 		
 		SetCLKBuff(DeltaCLKLow&0xFF,__CurOffset+1);
 		if(__ClkLen > 1) SetCLKBuff(DeltaCLKLow>>8        ,__CurOffset+2); 
@@ -273,26 +287,26 @@ void Test_FATFS1()
 		if(__ClkLen > 4) SetCLKBuff(DeltaCLKHigh>>16      ,__CurOffset+5);	
 		else return;
 
-		
-		}
-		else
-		{
-			
-		SetCLKBuff(ADC_DATA[0]&0xFF,__CurOffset+1);
-		SetCLKBuff((ADC_DATA[0]>>8)&0xFF,__CurOffset+2);		
-		SetCLKBuff(DeltaCLKLow&0xFF,__CurOffset+AddLe);
-		if(__ClkLen > 1) SetCLKBuff(DeltaCLKLow>>8        ,__CurOffset+AddLe+1); 
-		else return;
-		if(__ClkLen > 2) SetCLKBuff(DeltaCLKHigh&0xFF     ,__CurOffset+AddLe+2);
-		else return;
-		if(__ClkLen > 3) SetCLKBuff((DeltaCLKHigh>>8)&0xFF,__CurOffset+AddLe+3);	 
-		else return;
-		if(__ClkLen > 4) SetCLKBuff(DeltaCLKHigh>>16      ,__CurOffset+AddLe+4);	
-		else return;
+//		
+//		}
+//		else
+//		{
+//			
+//		SetCLKBuff(ADC_DATA[0]&0xFF,__CurOffset+1);
+//		SetCLKBuff((ADC_DATA[0]>>8)&0xFF,__CurOffset+2);		
+//		SetCLKBuff(DeltaCLKLow&0xFF,__CurOffset+3);
+//		if(__ClkLen > 1) SetCLKBuff(DeltaCLKLow>>8        ,__CurOffset+4); 
+//		else return;
+//		if(__ClkLen > 2) SetCLKBuff(DeltaCLKHigh&0xFF     ,__CurOffset+5);
+//		else return;
+//		if(__ClkLen > 3) SetCLKBuff((DeltaCLKHigh>>8)&0xFF,__CurOffset+6);	 
+//		else return;
+//		if(__ClkLen > 4) SetCLKBuff(DeltaCLKHigh>>16      ,__CurOffset+7);	
+//		else return;
 
-			
-		}
-			
+//			
+//		}
+//			
 	
 
 		

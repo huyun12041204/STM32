@@ -51,6 +51,10 @@ extern u32 uInterHigh;
 
 extern u32    ADC_DATA[100];
 
+extern u32    VCCEvent;
+extern u8     VCCSaved;
+ 
+
 #if TIM5_CLK
 extern u32 uPreCLk ;
 extern u32 uDeltaCLk ;

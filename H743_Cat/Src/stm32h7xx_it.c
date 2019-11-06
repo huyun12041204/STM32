@@ -66,6 +66,7 @@ extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim7;
 
 extern DMA_HandleTypeDef hdma_adc1;
+extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN EV */
 
@@ -254,14 +255,43 @@ void TIM1_CC_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
+	
+	
+//	if ((VCCSaved!=2)&&
+//	  	(__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_CC1) != RESET))
+//	{
+//		//VCCSaved : 2 表示需要存储
+//			VCCSaved = 2;
+//			VCCEvent = u32CLKLen;
+//			u32CLKLen += 3;
+//		
+//			//VCCEvent   = u32CLKLen;
+//			//u32CLKLen  = u32CLKLen+3;
+//			//HAL_ADC_Start_DMA(&hadc1,ADC_DATA,1);
+//			//VCCSaved = 2;
+//	}
 
   /* USER CODE END TIM2_IRQn 0 */
   //HAL_TIM_IRQHandler(&htim2);
+	
+		
+	
+
+
 	GetCLKNumber(1);
-	SaveCLkNumber( GetPinValue()|0x8);
+
+	SaveCLkNumber( GetPinValue());
+	
+//	if(VCCSaved == 2)
+//	{
+//	
+//	   SaveVccEvent( Get_Adc(ADC_CHANNEL_3) );
+//	   VCCSaved =1;
+//	}
+	//printf("%d \n",TIM5->CNT - uPreCLk);
 	__TIM_CC_Handler(&htim2);
 	
-	
+
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
   /* USER CODE END TIM2_IRQn 1 */
@@ -359,9 +389,14 @@ void DMA1_Stream0_IRQHandler(void)
 //	temp = temp/5;
 //	 printf("%d mv \n", (temp*3300 / 0xFFFF));
 //	
-	 printf("%d mv \n", (ADC_DATA[0]*3300 / 0xFFFF));
+	// printf("%d mv \n", (ADC_DATA[0]*3300 / 0xFFFF));
 //	
-  HAL_DMA_IRQHandler(&hdma_adc1);
+	
+
+//	SaveVccEvent(ADC_DATA[0]);
+	
+ // HAL_DMA_IRQHandler(&hdma_adc1);
+	//	VCCSaved = 1;
   /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
 
   /* USER CODE END DMA2_Stream0_IRQn 1 */

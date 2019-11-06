@@ -8,7 +8,7 @@
 #include "lcd.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
-	
+#include "adc.h"
 
 
 #ifndef  Pin_ALL
@@ -29,6 +29,7 @@
 	void GetCLKNumber (u8 bReset);
 	void SaveCLkNumber(u8 __Pin );
 	void SaveEmptyCLK(void);
+	void SaveVccEvent(u16 ___vcc);
 
 	void _CLKBuff_Send(void);
 	void PrintfSDInformation(void);

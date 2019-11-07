@@ -65,8 +65,9 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim7;
 
-extern DMA_HandleTypeDef hdma_adc1;
-extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
+
+extern DMA_HandleTypeDef hdma_adc2;
 
 /* USER CODE BEGIN EV */
 
@@ -256,43 +257,29 @@ void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
 	
-	
-//	if ((VCCSaved!=2)&&
-//	  	(__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_CC1) != RESET))
+	GetCLKNumber(1);
+//	if ((VCCSaved==1)&&
+//	 (__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_CC1) != RESET))
 //	{
 //		//VCCSaved : 2 表示需要存储
 //			VCCSaved = 2;
 //			VCCEvent = u32CLKLen;
-//			u32CLKLen += 3;
+//			u32CLKLen += 3;		
 //		
-//			//VCCEvent   = u32CLKLen;
-//			//u32CLKLen  = u32CLKLen+3;
-//			//HAL_ADC_Start_DMA(&hadc1,ADC_DATA,1);
-//			//VCCSaved = 2;
 //	}
-
   /* USER CODE END TIM2_IRQn 0 */
-  //HAL_TIM_IRQHandler(&htim2);
-	
-		
-	
 
 
-	GetCLKNumber(1);
 
-	SaveCLkNumber( GetPinValue());
+	 SaveCLkNumber( GetPinValue());
 	
-//	if(VCCSaved == 2)
-//	{
-//	
-//	   SaveVccEvent( Get_Adc(ADC_CHANNEL_3) );
-//	   VCCSaved =1;
-//	}
-	//printf("%d \n",TIM5->CNT - uPreCLk);
 	__TIM_CC_Handler(&htim2);
 	
-
   /* USER CODE BEGIN TIM2_IRQn 1 */
+	
+
+	
+	
 
   /* USER CODE END TIM2_IRQn 1 */
 }
@@ -307,6 +294,15 @@ void TIM3_IRQHandler(void)
   /* USER CODE END TIM3_IRQn 0 */
 
 	GetCLKNumber(1);
+	if ((VCCSaved==1)&&
+ (__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC1) != RESET))
+	{
+		//VCCSaved : 2 表示需要存储
+			VCCSaved = 2;
+			VCCEvent = u32CLKLen;
+			u32CLKLen += 3;		
+		
+	}
 	SaveCLkNumber( GetPinValue());
 	__TIM_CC_Handler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
@@ -372,34 +368,26 @@ void OTG_HS_IRQHandler(void)
   /* USER CODE END OTG_HS_IRQn 1 */
 }
 
-void DMA1_Stream0_IRQHandler(void)
+void DMA2_Stream0_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
 
   /* USER CODE END DMA2_Stream0_IRQn 0 */
-//		u8 i;
-//	u32 temp =0;
 
-//	
-//	for(i = 0 ; i <5 ;i++)
-//	{
-//		  temp += __VCC[i];
-//	}
-//	
-//	temp = temp/5;
-//	 printf("%d mv \n", (temp*3300 / 0xFFFF));
-//	
-	// printf("%d mv \n", (ADC_DATA[0]*3300 / 0xFFFF));
-//	
+	SaveVccEvent(Get_ADC_VCC());
+		
+	SCB_InvalidateDCache_by_Addr ((uint32_t*)ADC_DATA, _ADC_BUF_SIZE);
 	
-
-//	SaveVccEvent(ADC_DATA[0]);
+	HAL_NVIC_DisableIRQ(DMA2_Stream0_IRQn);
 	
- // HAL_DMA_IRQHandler(&hdma_adc1);
-	//	VCCSaved = 1;
+	HAL_ADC_Stop_DMA(&hadc2);
+	
+	HAL_DMA_IRQHandler(&hdma_adc2);
   /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
 
   /* USER CODE END DMA2_Stream0_IRQn 1 */
+	
+	// HAL_NVIC_DisableIRQ(DMA1_Stream0_IRQn);	
 }
 
 

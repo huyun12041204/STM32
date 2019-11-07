@@ -1,5 +1,5 @@
 
-#define NODMAADC
+//#define NODMAADC
 
 #ifdef NODMAADC
 
@@ -46,14 +46,20 @@ u16 Get_Adc_Average(u32 ch,u8 times);//得到某个通道给定次数采样的平均值
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
+	 
+#define _ADC_BUF_SIZE 50
 
-extern ADC_HandleTypeDef hadc1;
+	 
+	 
+extern ADC_HandleTypeDef hadc2;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_ADC1_Init(void);
+void MX_ADC2_Init(void);
+	 
+uint16_t Get_ADC_VCC(void);
 
 /* USER CODE BEGIN Prototypes */
 

@@ -242,8 +242,9 @@ void Test_FATFS1()
 	{
 			
 		SetCLKBuff(0xFA       ,VCCEvent); 
-		SetCLKBuff(___vcc>>8,VCCEvent+1); 
 		SetCLKBuff(___vcc&0xFF  ,VCCEvent+2); 
+		SetCLKBuff(___vcc>>8,VCCEvent+1); 
+		
 		
 		VCCSaved = 1;
 		

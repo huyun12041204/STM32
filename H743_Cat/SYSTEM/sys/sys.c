@@ -69,7 +69,7 @@ void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq)
                                 RCC_CLOCKTYPE_PCLK2 |\
                                 RCC_CLOCKTYPE_D3PCLK1);
 
-	RCC_ClkInitStruct.SYSCLKSource=RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.SYSCLKSource =RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.SYSCLKDivider=RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.AHBCLKDivider=RCC_HCLK_DIV2;
 	RCC_ClkInitStruct.APB1CLKDivider=RCC_APB1_DIV2; 

@@ -49,7 +49,7 @@ extern u8 iExtCLK;
 extern u32 uInterHigh;
 
 
-extern u32    ADC_DATA[100];
+extern u16    ADC_DATA[100];
 
 extern u32    VCCEvent;
 extern u8     VCCSaved;

@@ -65,8 +65,8 @@ extern TIM_HandleTypeDef htim7;
 extern UART_HandleTypeDef huart1;
 extern USBD_HandleTypeDef hUsbDeviceHS;
 
-extern ADC_HandleTypeDef hadc1;
-extern DMA_HandleTypeDef hdma_adc1;
+extern ADC_HandleTypeDef hadc2;
+extern DMA_HandleTypeDef hdma_adc2;
 
 
 /* USER CODE BEGIN PV */
@@ -96,8 +96,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-
-	u16 TEMP;
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -130,11 +128,13 @@ int main(void)
   MX_USART1_UART_Init();
 
 #ifdef  NODMAADC
-//MY_ADC_Init();
+  MY_ADC_Init();
 #else
 	MX_DMA_Init();
 	
-  MX_ADC1_Init();
+  MX_ADC2_Init();
+	
+
 #endif
 
 
@@ -195,16 +195,28 @@ int main(void)
 //   u32SendLen = 0;
 
 
-  // HAL_ADC_Stop_DMA(&hadc1);
+  // HAL_ADC_Stop_DMA(&hadc2);
+	
+//	HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
 
-// HAL_ADCEx_Calibration_Start(&hadc1,ADC_CALIB_OFFSET,ADC_SINGLE_ENDED); //ADCУ׼
-  
- //HAL_NVIC_DisableIRQ(DMA1_Stream0_IRQn);
-//	TEMP = 0;
-//  HAL_ADC_Start_DMA(&hadc1,&TEMP,1);
+  HAL_ADCEx_Calibration_Start(&hadc2,ADC_CALIB_OFFSET,ADC_SINGLE_ENDED); //ADCУ׼
+//	
+//	
+//  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+
+// 
+
+	//VCCSaved = 2;
 	
-	//HAL_ADC_Start_DMA(&hadc1,ADC_DATA,100);
 	
+	
+	 HAL_ADC_Start_DMA(&hadc2,(uint32_t*)ADC_DATA,_ADC_BUF_SIZE);
+	 
+	 VCCSaved = 3;
+//   VCCEvent = u32CLKLen;
+//	 u32CLKLen += 3;	
+
+ // VCCSaved = 1;
 	
 	 while (1)
  
@@ -259,11 +271,33 @@ int main(void)
 			 
 
 		 }
-		
+		 
+		 if(VCCSaved == 2)
+		 {
+			 
+			 MX_DMA_Init();
+       MX_ADC2_Init();
+	     HAL_ADC_Start_DMA(&hadc2,(uint32_t *)ADC_DATA,_ADC_BUF_SIZE);
+			 VCCSaved = 3;
+		 }
+		// if(VCCSaved == 1)
+			 __GetBits_Send();
+		 
+//		if(VCCSaved == 2)
+//  	{
+//		 MX_DMA_Init();
+//     MX_ADC2_Init();
+//		 HAL_ADCEx_Calibration_Start(&hadc2,ADC_CALIB_OFFSET,ADC_SINGLE_ENDED); //ADCУ׼
+//	   HAL_ADC_Start_DMA(&hadc2,(uint32_t *)ADC_DATA,_ADC_BUF_SIZE);
+//		 HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+//  	}
+//		else
+			//__GetBits_Send();
 
 	//	 printf("%d mv \n", (ADC_DATA[50]*3300 / 0xFFFF));
 	
-		 __GetBits_Send();
+		// if(VCCSaved != 2)
+		// __GetBits_Send();
 		 
 	
 	//	  hcdc = (USBD_CDC_HandleTypeDef*) hUsbDeviceHS->pClassData;

@@ -35,7 +35,7 @@ u32 uDeltaCLk = 0;
 
 #endif
   
- u32    ADC_DATA[100];
+
  u32    VCCEvent = 0;
  u8     VCCSaved = 0;
  

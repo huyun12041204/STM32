@@ -5,10 +5,10 @@
 u16 __GetSize()
 {
 	
-	_GetBitsBuf[0] = (u32CLKLen/0x1000000)&0xFF;
-	_GetBitsBuf[1] = (u32CLKLen/0x10000)&0xFF;
-	_GetBitsBuf[2] = (u32CLKLen/0x100) &0xFF;	
-	_GetBitsBuf[3] =  u32CLKLen      &0xFF;	
+	_GetBitsBuf[0] = (u32ReadLen/0x1000000)&0xFF;
+	_GetBitsBuf[1] = (u32ReadLen/0x10000)&0xFF;
+	_GetBitsBuf[2] = (u32ReadLen/0x100) &0xFF;	
+	_GetBitsBuf[3] =  u32ReadLen      &0xFF;	
 	
 	_GetBitsBuf[4] = (u32SendLen/0x1000000)&0xFF;
 	_GetBitsBuf[5] = (u32SendLen/0x10000)  &0xFF;
@@ -28,7 +28,7 @@ u16 __GetBits(u8 u8P3)
 	
 	
 	u16 i ;
-	u32 __Delta = u32CLKLen - u32SendLen;
+	u32 __Delta = u32ReadLen - u32SendLen;
 
 	if(u8P3 == 0) _GetBitsLen = _Max_Bits_Buff;
 	else _GetBitsLen = u8P3;
@@ -82,6 +82,7 @@ u16 Excute_Command(u8* u8Command,u16 u16Length)
 		case _GET_DATAS :	u16Ret = __GetBits(u8Command[__P3]); break;
 		case _INIT_BITS : u16Ret = _SUCCESS; 
 		                  u32CLKLen  = 0;
+		                  u32ReadLen = 0;
 		                  u32SendLen = 0; 
 		                  u32SaveLen = 0;break;
 		default: u16Ret =  _Wrong_INS;

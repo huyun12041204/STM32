@@ -100,7 +100,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-     Cache_Enable();                 //打开L1-Cache
+  Cache_Enable();                 //打开L1-Cache
   HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -127,22 +127,11 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_USART1_UART_Init();
 
-#ifdef  NODMAADC
-  MY_ADC_Init();
-#else
 	MX_DMA_Init();
 	
   MX_ADC2_Init();
 	
 
-#endif
-
-
-	
-
-	//MX_RTC_Init();
-	
-//  
   /* Initialize interrupts */
   MX_NVIC_Init();
 	
@@ -191,32 +180,16 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim5);
 	
 	HAL_TIM_Base_Start_IT(&htim7); //使能定时器3和定时器4更新中断：TIM_IT_UPDATE    
-	 u32CLKLen  = 0;
-//   u32SendLen = 0;
-
-
-  // HAL_ADC_Stop_DMA(&hadc2);
 	
-//	HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-
   HAL_ADCEx_Calibration_Start(&hadc2,ADC_CALIB_OFFSET,ADC_SINGLE_ENDED); //ADC校准
-//	
-//	
-//  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
-
-// 
-
-	//VCCSaved = 2;
 	
+	u32CLKLen   = 0;
+	u32ReadLen  = 0;
 	
-	
-	 HAL_ADC_Start_DMA(&hadc2,(uint32_t*)ADC_DATA,_ADC_BUF_SIZE);
+	HAL_ADC_Start_DMA(&hadc2,(uint32_t*)ADC_DATA,_ADC_BUF_SIZE);
 	 
-	 VCCSaved = 3;
-//   VCCEvent = u32CLKLen;
-//	 u32CLKLen += 3;	
-
- // VCCSaved = 1;
+	 
+	VCCSaved = __Start_state;
 	
 	 while (1)
  
@@ -224,85 +197,25 @@ int main(void)
     /* USER CODE END WHILE */
 
 		 
-		
-		 
-   //  VCC=Get_Adc_Average(1,20);//获取通道19的转换值，20次取平均
-		//  VCC=Get_Adc_Average(ADC_CHANNEL_3,20);//获取通道19的转换值，20次取平均
-	//	 _VCC=(float)VCC*(3.3/65536);//获取计算后的带小数的实际电压值，比如3.1111
-   // VCC=Get_Adc_Average(3,20);//获取通道19的转换值，20次取平均
- // VCC=Get_Adc_Average(4,20);//获取通道19的转换值，20次取平均
     /* USER CODE BEGIN 3 */
 		 
 		 //此处进行切换CLK的使用,
 		 //当使用内部CLK 时, PE0 为1时, 停用 TIM7;
 
-		 if((iExtCLK == 0)&&((GPIOA->IDR & GPIO_PIN_15) != 00))
-		 {
-			 if((GPIOA->IDR & GPIO_PIN_4)!= 0)
-			 { 
-				 GetCLKNumber(1);
-				 SaveCLkNumber( GetPinValue());	 
-				 TIM7->CNT   = 0;
-				 uInterHigh  = 0;
-				 HAL_TIM_Base_Stop_IT(&htim7);
-				 iExtCLK = Pin_CLK;
-				 
-			 }
-			 
-			 
 
-		 }
-		 //当不是用内部CLK 时, 但PE0 为0 时,开启TIM7;
-		 
-		 else if ((iExtCLK == Pin_CLK)&&((GPIOA->IDR & GPIO_PIN_15) == 00))
-		 {
-			 
-			 
-			 if((GPIOA->IDR & GPIO_PIN_4)== 0)
-			 { 
-			   GetCLKNumber(1);
-         SaveCLkNumber( GetPinValue());	 
-			   TIM7->CNT   = 0;
-			   uInterHigh  = 0;
-			   HAL_TIM_Base_Start_IT(&htim7);
-			   iExtCLK = 0;
-			 
-			 }
-			 
-
-		 }
-		 
-		 if(VCCSaved == 2)
+		 SwitchTime(); 
+		 if(VCCSaved == __Ready_state)
 		 {
 			 
 			 MX_DMA_Init();
        MX_ADC2_Init();
 	     HAL_ADC_Start_DMA(&hadc2,(uint32_t *)ADC_DATA,_ADC_BUF_SIZE);
-			 VCCSaved = 3;
+			 VCCSaved = __Start_state;
 		 }
-		// if(VCCSaved == 1)
-			 __GetBits_Send();
 		 
-//		if(VCCSaved == 2)
-//  	{
-//		 MX_DMA_Init();
-//     MX_ADC2_Init();
-//		 HAL_ADCEx_Calibration_Start(&hadc2,ADC_CALIB_OFFSET,ADC_SINGLE_ENDED); //ADC校准
-//	   HAL_ADC_Start_DMA(&hadc2,(uint32_t *)ADC_DATA,_ADC_BUF_SIZE);
-//		 HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
-//  	}
-//		else
-			//__GetBits_Send();
+		 __GetBits_Send();
+		 
 
-	//	 printf("%d mv \n", (ADC_DATA[50]*3300 / 0xFFFF));
-	
-		// if(VCCSaved != 2)
-		// __GetBits_Send();
-		 
-	
-	//	  hcdc = (USBD_CDC_HandleTypeDef*) hUsbDeviceHS->pClassData;
-//		 if(u32CLKLen > u32SendLen)
-//			 _CLKBuff_Send();
 #if __USE_FATFS
 		 if (FileStatue == FileIsRead)
 			 Save1LineCLKBuffer();
@@ -404,8 +317,8 @@ static void MX_NVIC_Init(void)
   HAL_NVIC_SetPriority(TIM3_IRQn, 1, 2);
   HAL_NVIC_EnableIRQ(TIM3_IRQn);
   /* TIM4_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(TIM4_IRQn);
+ // HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
+  //HAL_NVIC_EnableIRQ(TIM4_IRQn);
 	
 	
 	HAL_NVIC_SetPriority(TIM5_IRQn, 0, 0);

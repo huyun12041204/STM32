@@ -24,11 +24,18 @@
 #endif
 
 
+#define __Idle_state          00
+#define __Ready_state         01
+#define __Start_state         02
+#define __Completion_state    03
+
+
+
 #define _MAX_Buffer_Send   256
   
-	void GetCLKNumber (u8 bReset);
+	void GetCLKNumber (void);
 	void SaveCLkNumber(u8 __Pin );
-	void SaveEmptyCLK(void);
+	void SaveWaitTime(u8 __Pin );
 	void SaveVccEvent(u16 ___vcc);
 
 	void _CLKBuff_Send(void);
@@ -36,6 +43,7 @@
  	u8   GetPinValue  (void); 
 	u8 SDIsReadForSave(void);
   u8 GetCLKBuff(u32 __offset);
+	void SwitchTime(void);
 
 #ifdef __Test_FATFS
 

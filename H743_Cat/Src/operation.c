@@ -1,6 +1,12 @@
 #include "operation.h"
 
 
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim5;
+extern TIM_HandleTypeDef htim7;
 
 extern USBD_HandleTypeDef hUsbDeviceHS;
 extern SD_HandleTypeDef hsd1;
@@ -142,60 +148,26 @@ void Test_FATFS1()
 #endif
 	
 	
-	void GetCLKNumber (u8 bReset)
+	void GetCLKNumber ()
 	{
 		
-			#if TIM5_CLK 
-			
-			u32 CurrentCLK; 
-			
-			#endif 
 
-		
-//		if(bReset)
-//		{
-//			//此处是1的原因是 尝试很多次,发现初始化过程基本都差1
-//			//由于初始化过程需要时间,此处使用400MHZ 所以此处设置为1 可能不需要1 
-//			TIM4->CNT = 1;
-//			uCLKHigh  = 0;
-//		}
+
 		
 		if(iExtCLK != Pin_CLK)
 		{
-					DeltaCLKLow  = TIM7->CNT;
-		      DeltaCLKHigh = uInterHigh;
+					TIMECNT  = TIM7->CNT + uInterHigh;
+		 
 					TIM7->CNT   = 0;
 			    uInterHigh  = 0;
 		}
 		else
 		{
-			#if TIM5_CLK 
-			CurrentCLK = TIM5->CNT;
-			if(CurrentCLK < uPreCLk)
-			{
-				uDeltaCLk = 0xFFFFFFFF - uPreCLk;
-				uDeltaCLk += CurrentCLK;
-			}
-			else
-			{
-				uDeltaCLk = CurrentCLK - uPreCLk;
-			}
-			
-			uPreCLk = CurrentCLK;
-			DeltaCLKLow  = uDeltaCLk&0xFFFF;
-			DeltaCLKHigh = uDeltaCLk>>16;
-			
-			
-			
-			
-			#else 
-			DeltaCLKLow  = TIM4->CNT;
-	   	DeltaCLKHigh = uCLKHigh;
-			TIM4->CNT = 1;
-			uCLKHigh  = 0;
-			
-			#endif
-			
+
+			TIMECNT =  TIM5->CNT;
+			//此处写成1 是应为此时要包含自己的修改寄存器的时间	
+			TIM5->CNT = 1;
+						
 		}
 		
 		
@@ -212,28 +184,18 @@ void Test_FATFS1()
 
 
 
-	//************************************
-	// Method:    __GetDeltaCLKBufferLen
-	// FullName:  获取当前DeltaCLK 需要占用的BUFFER 长度
-	// Access:    public 
-	// Returns:   u8
-	// Qualifier:
-	// Parameter: u32 _DeltaH
-	// Parameter: u16 _DeltaL
-	//************************************
-	u8 __GetDeltaCLKBufferLen(u32 _DeltaH,u16 _DeltaL)
+	u8 __GetDeltaCLKBufferLen(u32 __TIMCNT)
 	{
 
 		u8 __ClkLen  = 0;
+		
+		if(__TIMCNT < 0x100)
+			__ClkLen =1;
+		else if(__TIMCNT < 0x10000)
+			__ClkLen =2;
+		else 
+			__ClkLen = 3;
 
-		if(_DeltaH == 0)
-		{ 
-			if(_DeltaL<0x100)      __ClkLen =1;
-			else                   __ClkLen =2; 
-		}	
-		else if(_DeltaH<0x100 )  __ClkLen =3;
-		else if(_DeltaH<0x10000 )__ClkLen =4;
-		else                     __ClkLen =5;
 		return __ClkLen;
 
 	}
@@ -246,7 +208,7 @@ void Test_FATFS1()
 		SetCLKBuff(___vcc>>8,VCCEvent+1); 
 		
 		
-		VCCSaved = 1;
+		VCCSaved = __Completion_state;
 		
 	}
 
@@ -256,81 +218,58 @@ void Test_FATFS1()
 
 		
 		u32 __CurOffset;
-		u8  __ClkLen   = __GetDeltaCLKBufferLen(DeltaCLKHigh,DeltaCLKLow);
+		u8  __ClkLen   = __GetDeltaCLKBufferLen(TIMECNT);
 		u8 AddLe = 1; 
 		
-		
-		
+			
 		__CurOffset    = u32CLKLen;
 
 		
-//		if((__Pin&0x8) != 0)
-//			AddLe =3;
-
 		//此处需要预先流出 但前计算出的长度,避免 不同中断里面的冲突
 		u32CLKLen     += (__ClkLen+AddLe);	 
+		if(VCCSaved == __Completion_state)
+			u32ReadLen  = u32CLKLen;
 		
 		//保存当前各个PIN 的状态,和后续CLK buffer 长度
-		//SetCLKBuff(__Pin|(__ClkLen+AddLe-1),__CurOffset); 
 		SetCLKBuff(__Pin|__ClkLen,__CurOffset); 
 
-//		//保存当前第一位最低位长度;
-//		if(AddLe == 1)
-//		{
+		//保存最低位
+		SetCLKBuff(TIMECNT&0xFF,__CurOffset+1);
 		
-		SetCLKBuff(DeltaCLKLow&0xFF,__CurOffset+1);
-		if(__ClkLen > 1) SetCLKBuff(DeltaCLKLow>>8        ,__CurOffset+2); 
+		if(__ClkLen > 1) SetCLKBuff((TIMECNT>>8 )&0xFF       ,__CurOffset+2); 
 		else return;
-		if(__ClkLen > 2) SetCLKBuff(DeltaCLKHigh&0xFF     ,__CurOffset+3);
+		
+		
+		if(__ClkLen > 2) SetCLKBuff((TIMECNT>>16 )&0xFF     ,__CurOffset+3);
 		else return;
-		if(__ClkLen > 3) SetCLKBuff((DeltaCLKHigh>>8)&0xFF,__CurOffset+4);	 
-		else return;
-		if(__ClkLen > 4) SetCLKBuff(DeltaCLKHigh>>16      ,__CurOffset+5);	
-		else return;
-
-//		
-//		}
-//		else
-//		{
-//			
-//		SetCLKBuff(ADC_DATA[0]&0xFF,__CurOffset+1);
-//		SetCLKBuff((ADC_DATA[0]>>8)&0xFF,__CurOffset+2);		
-//		SetCLKBuff(DeltaCLKLow&0xFF,__CurOffset+3);
-//		if(__ClkLen > 1) SetCLKBuff(DeltaCLKLow>>8        ,__CurOffset+4); 
-//		else return;
-//		if(__ClkLen > 2) SetCLKBuff(DeltaCLKHigh&0xFF     ,__CurOffset+5);
-//		else return;
-//		if(__ClkLen > 3) SetCLKBuff((DeltaCLKHigh>>8)&0xFF,__CurOffset+6);	 
-//		else return;
-//		if(__ClkLen > 4) SetCLKBuff(DeltaCLKHigh>>16      ,__CurOffset+7);	
-//		else return;
-
-//			
-//		}
-//			
 	
+	 	 
+			
+	}
+	
+	//保存等待数值
+	void SaveWaitTime(u8 __Pin)
+	{
 
 		
-		 	 
+		u32 __CurOffset;
+		
+			
+		__CurOffset    = u32CLKLen;
+			u32CLKLen   += 4;	 
+		
+		//保存当前各个PIN 的状态,和后续CLK buffer 长度
+		SetCLKBuff(__Pin|3,__CurOffset); 
+
+		//保存最低位
+		SetCLKBuff(0xFF,__CurOffset+1);
+		SetCLKBuff(0xFF,__CurOffset+2);
+		SetCLKBuff(0xFF,__CurOffset+3);
+
+	
 			
 	}
 
-
-
-	
-	void SaveEmptyCLK(void)
-	{
-		u8  __Pin       = GetPinValue();
-		u32 __CurOffset = u32CLKLen;	
-		u32CLKLen += 3;	
-		SetCLKBuff(__Pin|02,__CurOffset);
-		SetCLKBuff(0xFF,__CurOffset+1);
-		SetCLKBuff(0xFF,__CurOffset+2);
-
-	}
-	
-	
-	
 	u8   GetPinValue  (void)
 	{   u8 __Pin = 0;
 		
@@ -343,29 +282,45 @@ void Test_FATFS1()
 		return __Pin |= iExtCLK;		
 	}
 	
+	
+	
+void SwitchTime(void)
+{
+	
+ if((iExtCLK == 0)&&((GPIOA->IDR & GPIO_PIN_15) != 00))
+ {
+	 if((GPIOA->IDR & GPIO_PIN_4)!= 0)
+	 { 
+			GetCLKNumber();
+			SaveCLkNumber( GetPinValue());	 
+		  TIM7->CNT   = 0;
+		  uInterHigh  = 0;
+			HAL_TIM_Base_Stop_IT(&htim7);
+			iExtCLK = Pin_CLK;
+				 
+	}
+			 
+			 
 
+	}
+		 //当不是用内部CLK 时, 但PE0 为0 时,开启TIM7; 
+	else if ((iExtCLK == Pin_CLK)&&((GPIOA->IDR & GPIO_PIN_15) == 00))
+	{
+	 if((GPIOA->IDR & GPIO_PIN_4)== 0)
+		{ 
+			 GetCLKNumber();
+       SaveCLkNumber( GetPinValue());	 
+			 TIM7->CNT   = 0;
+			 uInterHigh  = 0;
+			 HAL_TIM_Base_Start_IT(&htim7);
+			 iExtCLK = 0;
+			 
+		}
+	}
+}
 	
 	
 	
-//	 u8 _packet_Send(u8* buf, u16 bufLen)
-//	{
-//		u8 u8Ret ; 
-//		u16 u16Send = 0;
-//		u16 u16will = 0;
-//		
-//		while(bufLen > u16Send)
-//		{
-//			
-//			u16will = bufLen - u16Send;
-//			if( u16will > 64) u16will = 64;
-//			
-//			u8Ret = CDC_Transmit_HS(buf+u16Send, u16will);
-
-//			if ( u8Ret == USBD_OK) u16Send += u16will;
-//		//	if (u8Ret == USBD_FAIL) return USBD_FAIL;		
-//		}	
-//		return USBD_OK;
-//	}
 	
 	
 	void _CLKBuff_Send()
@@ -375,7 +330,7 @@ void Test_FATFS1()
 		u8 TempBufer[_MAX_Buffer_Send];
 
 
-		u32 __Len = u32CLKLen - u32SendLen;
+		u32 __Len = u32ReadLen - u32SendLen;
 		if(__Len >_MAX_Buffer_Send) __Len = _MAX_Buffer_Send;
 
 		for (i = 0 ; i< __Len ; i++)
@@ -481,7 +436,7 @@ void Test_FATFS1()
 	{
 		u8  Buf[64];
 		u8 i;
-		u32 __Len = u32CLKLen - u32SaveLen;
+		u32 __Len = u32ReadLen - u32SaveLen;
 		if (__Len <= 0)
 			return;
 

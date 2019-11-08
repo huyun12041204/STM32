@@ -243,10 +243,11 @@ void __TIM_CC_Handler(TIM_HandleTypeDef* __TIMHandle)
 void TIM1_CC_IRQHandler(void)
 {
 
-	GetCLKNumber(1);
+	GetCLKNumber();
 	SaveCLkNumber( GetPinValue());
 	__TIM_CC_Handler(&htim1);
-
+//	if (VCCSaved==__Idle_state)
+//			VCCSaved = __Ready_state;
 	
 }
 
@@ -256,23 +257,24 @@ void TIM1_CC_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
+	GetCLKNumber();
 	
-	GetCLKNumber(1);
-//	if ((VCCSaved==1)&&
-//	 (__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_CC1) != RESET))
-//	{
-//		//VCCSaved : 2 表示需要存储
-//			VCCSaved = 2;
-//			VCCEvent = u32CLKLen;
-//			u32CLKLen += 3;		
-//		
-//	}
+	
+	if ((VCCSaved== __Completion_state)&&
+	(__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_CC1) != RESET))
+	{
+		//VCCSaved : 2 表示需要存储
+			VCCSaved = __Idle_state;
+			VCCEvent = u32CLKLen;
+			u32CLKLen += 3;		
+	}
+	
+	SaveCLkNumber( GetPinValue());
   /* USER CODE END TIM2_IRQn 0 */
 
 
 
-	 SaveCLkNumber( GetPinValue());
-	
+
 	__TIM_CC_Handler(&htim2);
 	
   /* USER CODE BEGIN TIM2_IRQn 1 */
@@ -290,20 +292,16 @@ void TIM2_IRQHandler(void)
 void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
+	
+	GetCLKNumber();
 
+	SaveCLkNumber( GetPinValue());
+
+	if (VCCSaved==__Idle_state)
+		  VCCSaved = __Ready_state;
   /* USER CODE END TIM3_IRQn 0 */
 
-	GetCLKNumber(1);
-	if ((VCCSaved==1)&&
- (__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_CC1) != RESET))
-	{
-		//VCCSaved : 2 表示需要存储
-			VCCSaved = 2;
-			VCCEvent = u32CLKLen;
-			u32CLKLen += 3;		
-		
-	}
-	SaveCLkNumber( GetPinValue());
+
 	__TIM_CC_Handler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
 
@@ -320,8 +318,8 @@ void TIM4_IRQHandler(void)
   /* USER CODE END TIM4_IRQn 0 */
 
 	//当如果第一次为0需要保存FFFF 作为停留状态的上发
-	if(uCLKHigh == 0)SaveEmptyCLK();
-	uCLKHigh++;
+//	if(uCLKHigh == 0)SaveEmptyCLK();
+//	uCLKHigh++;
 	__HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);	
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
@@ -337,6 +335,11 @@ void TIM5_IRQHandler(void)
 
   /* USER CODE BEGIN TIM5_IRQn 1 */
 	//	uInterHigh++;
+	
+	TIMECNT = 0xFFFFFF;
+	
+	SaveCLkNumber( GetPinValue());
+	
 	__HAL_TIM_CLEAR_IT(&htim5, TIM_IT_UPDATE);	
 
   /* USER CODE END TIM5_IRQn 1 */
@@ -349,7 +352,14 @@ void TIM7_IRQHandler(void)
   /* USER CODE END TIM5_IRQn 0 */
 
   /* USER CODE BEGIN TIM5_IRQn 1 */
-		uInterHigh++;
+		if(uInterHigh == 0xFF0000)
+	{
+		uInterHigh = 00;
+		SaveWaitTime(GetPinValue());
+	}
+	else
+		uInterHigh += 0x10000;
+	
 	__HAL_TIM_CLEAR_IT(&htim7, TIM_IT_UPDATE);	
 
   /* USER CODE END TIM5_IRQn 1 */
@@ -371,9 +381,7 @@ void OTG_HS_IRQHandler(void)
 void DMA2_Stream0_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
-
-  /* USER CODE END DMA2_Stream0_IRQn 0 */
-
+	
 	SaveVccEvent(Get_ADC_VCC());
 		
 	SCB_InvalidateDCache_by_Addr ((uint32_t*)ADC_DATA, _ADC_BUF_SIZE);
@@ -381,6 +389,9 @@ void DMA2_Stream0_IRQHandler(void)
 	HAL_NVIC_DisableIRQ(DMA2_Stream0_IRQn);
 	
 	HAL_ADC_Stop_DMA(&hadc2);
+
+  /* USER CODE END DMA2_Stream0_IRQn 0 */
+	u32ReadLen  = u32CLKLen;
 	
 	HAL_DMA_IRQHandler(&hdma_adc2);
   /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
